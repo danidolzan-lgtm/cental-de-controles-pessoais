@@ -235,7 +235,7 @@
       }
       var mp = el("a", "site-btn site-mp", "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='7' height='7' rx='2'/><rect x='14' y='3' width='7' height='7' rx='2'/><rect x='3' y='14' width='7' height='7' rx='2'/><rect x='14' y='14' width='7' height='7' rx='2'/></svg><span class='t'>Menu principal</span>");
       mp.href = "index.html#inicio"; mp.setAttribute("aria-label", "Menu principal"); mp.style.textDecoration = "none";
-      mp.addEventListener("click", function (e) { try { sessionStorage.removeItem("index.tab"); } catch (x) {} if (file === "index") { e.preventDefault(); if (window.__mcHome) window.__mcHome(); } });
+      mp.addEventListener("click", function (e) { try { sessionStorage.removeItem("index.tab"); } catch (x) {} if (file === "index") { e.preventDefault(); if (window.__mcGo) window.__mcGo("index.html"); else if (window.__mcHome) window.__mcHome(); } });
       inn.appendChild(mp);
       var btn = el("button", "site-btn", "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M4 7h16M4 12h16M4 17h16'/></svg><span class='t'>Menu</span>");
       btn.type = "button"; btn.setAttribute("aria-expanded", "false"); btn.setAttribute("aria-label", "Abrir menu");
@@ -316,20 +316,23 @@
     if (document.body) ligar(); else document.addEventListener("DOMContentLoaded", ligar);
   })();
 
-  /* ===== Botão voltar do celular (03/11/2026, v2) =====
-     O histórico fica sempre só com 2 posições: [menu] → [página].
-     Do menu para uma página: entra normal. De página para página: a página é substituída (não acumula).
-     Assim, de qualquer página, 1 voltar → menu principal; no menu principal, voltar → sai do app.
-     Não depende de tocar na tela antes. */
+  /* ===== Botão voltar do celular (03/11/2026, v3) =====
+     O histórico é sempre: [menu principal] → [módulo] → [página].
+     De página para página a página é substituída (não acumula), então de qualquer página:
+     voltar → módulo, voltar → menu principal, voltar → sai do app. */
   (function () {
     var file = (decodeURIComponent(location.pathname).split("/").pop() || "index.html").replace(/\.html?$/i, "") || "index";
     var isIndex = file === "index";
     var SS = window.sessionStorage;
     function sg(k) { try { return SS.getItem(k); } catch (e) { return null; } }
     function ss(k, v) { try { if (v == null) SS.removeItem(k); else SS.setItem(k, v); } catch (e) {} }
-    // esta página está logo depois do menu no histórico?
-    var raiz = !isIndex && sg("mc.raiz") === "1";
-    var need = !isIndex && !raiz, armed = false, pend = null;
+    var grp = null;
+    try { (window.__MC.GROUPS || []).forEach(function (g) { g.items.forEach(function (it) { if (it[0] === file) grp = g.k; }); }); } catch (e) {}
+    if (grp) ss("mc.lastGroup", grp);
+    // página aberta a partir de um módulo: [menu] [módulo] [esta página]
+    var depth = !isIndex && sg("mc.depth") === "2";
+    // página aberta direto (sem o menu atrás): uma "trava" leva ao menu no 1º voltar
+    var need = !isIndex && !depth, armed = false, pend = null;
     function ativo() { try { return !navigator.userActivation || navigator.userActivation.isActive; } catch (e) { return true; } }
     function arm() {
       if (armed || !need || !ativo()) return;
@@ -337,48 +340,28 @@
     }
     ["pointerup", "touchend", "mousedown", "keydown"].forEach(function (ev) { document.addEventListener(ev, arm, true); });
     function ehMenu(url) { try { var f = new URL(url, location.href).pathname.split("/").pop(); return f === "" || /^index\.html?$/i.test(f); } catch (e) { return false; } }
-    function nav(url, push) { if (push) location.href = url; else location.replace(url); }
-    function sair(url, push) {
-      if (armed) { // tira a "trava" do histórico antes de trocar de página
-        pend = { u: url, push: push }; armed = false; history.back();
-        setTimeout(function () { if (pend) { var p = pend; pend = null; nav(p.u, p.push); } }, 700);
-      } else nav(url, push);
+    function trocar(url) {
+      if (armed) { pend = url; armed = false; history.back(); setTimeout(function () { if (pend) { var p = pend; pend = null; location.replace(p); } }, 700); }
+      else location.replace(url);
     }
     function go(url, opt) {
       if (isIndex) {
         if (ehMenu(url)) { if (window.__mcHome) window.__mcHome(); return; }
-        ss("mc.raiz", "1"); sair(url, true); return;               // menu → página: entra normal
+        ss("mc.depth", "2"); location.href = url; return;           // módulo → página: entra normal
       }
       if (ehMenu(url)) {
-        if (opt && opt.tab) ss("mc.voltarTab", opt.tab);
-        if (raiz) { history.back(); return; }                     // página → menu: volta para o menu que já está atrás
-        ss("mc.raiz", null); sair(url, false); return;
+        if (depth) { if (opt && opt.tab) history.back(); else history.go(-2); return; } // "Voltar" → módulo; "Menu principal" → menu
+        trocar(url); return;
       }
-      sair(url, false);                                            // página → página: substitui
+      trocar(url);                                                  // página → página: substitui
     }
     window.__mcGo = go;
-    window.__mcNeedGuard = function (v) {
-      need = !!v;
-      if (v) arm(); else if (armed) { armed = false; history.back(); }
-    };
+    window.__mcNeedGuard = function () {};
     window.addEventListener("popstate", function () {
-      if (pend) { var p = pend; pend = null; nav(p.u, p.push); return; }
+      if (pend) { var p = pend; pend = null; location.replace(p); return; }
       if (!armed) return;
-      armed = false;
-      if (isIndex) { if (window.__mcHome) window.__mcHome(); }
-      else { ss("index.tab", null); location.replace("index.html#inicio"); }
+      armed = false; location.replace("index.html");
     });
-    if (isIndex) {
-      // voltou de uma página para o menu: mostra o menu principal (ou o módulo, se veio pelo botão "Voltar")
-      window.addEventListener("pageshow", function (e) {
-        var n = null; try { n = performance.getEntriesByType("navigation")[0]; } catch (x) {}
-        var voltou = e.persisted || (n && n.type === "back_forward");
-        var vt = sg("mc.voltarTab"); ss("mc.voltarTab", null); ss("mc.raiz", "0");
-        armed = false;
-        if (vt && window.__mcAbrir) window.__mcAbrir(vt);
-        else if (voltou && window.__mcHome) window.__mcHome();
-      });
-    }
     document.addEventListener("click", function (e) {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       var a = e.target.closest && e.target.closest("a[href]");
@@ -394,7 +377,9 @@
         return;
       }
       if (!/(\.html?|\/)$/i.test(u.pathname)) return;
-      e.preventDefault(); go(u.href);
+      // o selo do módulo (ex.: "B3") no topo funciona como o "Voltar"
+      var opt = a.classList.contains("tag") ? { tab: a.dataset.k } : null;
+      e.preventDefault(); go(u.href, opt);
     });
   })();
 
