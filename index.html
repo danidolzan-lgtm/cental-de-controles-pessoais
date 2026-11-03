@@ -26,7 +26,8 @@ h1{font-family:var(--f-display);font-weight:800;font-size:1.8rem;margin:0}
 .mod:hover,.mod:focus-visible{transform:translateY(-4px);border-color:color-mix(in srgb,var(--gc) 50%,transparent);box-shadow:0 20px 36px -20px var(--gc);outline:none}
 .mod .gi{position:relative;width:58px;height:58px;border-radius:16px;display:grid;place-items:center;color:#fff;font:800 1.1rem var(--f-display);background:linear-gradient(135deg,var(--gc),color-mix(in srgb,var(--gc) 55%,#7C3AED));box-shadow:0 10px 20px -8px var(--gc)}
 .mod b{position:relative;font:800 1.3rem var(--f-display)}
-.mod small{position:relative;color:var(--muted);font-size:.85rem}
+.mod small{position:relative;color:var(--muted);font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.mod>*{min-width:0}@media (max-width:760px){.mod .pgc{display:none}}.mod b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mod .go{position:relative;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:.88rem;color:var(--gc)}
 .mod .go i{font-style:normal;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--gc) 14%,transparent)}
 @media (max-width:760px){.mod{grid-template-columns:auto minmax(0,1fr);align-items:center;padding:16px;gap:4px 14px}.mod .gi{grid-row:1 / span 2;width:50px;height:50px}.mod .go{grid-column:1/-1;margin-top:8px}}
@@ -35,18 +36,20 @@ h1{font-family:var(--f-display);font-weight:800;font-size:1.8rem;margin:0}
 .btn-home{appearance:none;font:600 .92rem var(--f-body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
 .btn-home:hover{border-color:var(--gc);color:var(--gc)}
 .btn-home svg{width:18px;height:18px}
-.gh{display:flex;align-items:center;gap:14px;animation:up .3s ease both}
+.gh{display:flex;align-items:center;gap:14px;animation:up .3s ease both}.gh>div{min-width:0;flex:1}.gh .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gh .gi{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;color:#fff;font:800 1rem var(--f-display);background:linear-gradient(135deg,var(--gc),color-mix(in srgb,var(--gc) 55%,#7C3AED));box-shadow:0 10px 20px -8px var(--gc);flex:none}
 .gh h1{background:linear-gradient(90deg,var(--gc),color-mix(in srgb,var(--gc) 50%,#7C3AED));-webkit-background-clip:text;background-clip:text;color:transparent!important}
 h2{font-family:var(--f-display);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:4px 0 0}
 .tiles{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr))}
-@media (max-width:560px){.tiles{grid-template-columns:1fr 1fr;gap:10px}}
+@media (max-width:560px){.tiles{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}}
+.tiles>*{min-width:0}#grupo{grid-template-columns:minmax(0,1fr)}#grupo>*{min-width:0}
 a.tile{display:grid;gap:10px;align-content:start;text-decoration:none;color:var(--fg);background:color-mix(in srgb,var(--gc) 6%,var(--surface));border:1px solid color-mix(in srgb,var(--gc) 16%,var(--line));border-radius:16px;padding:16px;box-shadow:0 10px 22px -20px var(--gc);transition:transform .14s ease,box-shadow .14s,border-color .14s;animation:up .3s ease both}
 a.tile:hover,a.tile:focus-visible{transform:translateY(-3px);border-color:color-mix(in srgb,var(--gc) 50%,transparent);box-shadow:0 16px 28px -16px var(--gc);outline:none}
 a.tile .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--gc) 16%,transparent);color:var(--gc)}
 a.tile .ic svg{width:22px;height:22px}
 a.tile b{font:800 1.02rem var(--f-display)}
-a.tile small{color:var(--muted);font-size:.8rem;line-height:1.3}
+a.tile small{color:var(--muted);font-size:.8rem;line-height:1.3;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+a.tile>span:not(.ic):not(.ar):not(.tm){min-width:0;overflow:hidden}a.tile b{display:inline-block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
 a.tile{position:relative}a.tile .ar{position:absolute;top:14px;right:14px;color:var(--gc);font-weight:700}
 @media (max-width:560px){a.tile{padding:12px;gap:8px}a.tile .ic{width:36px;height:36px}}
 .links{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr))}
@@ -55,14 +58,28 @@ a.lnk:hover{border-color:var(--gc)}
 a.lnk b{font-weight:600}a.lnk span{color:var(--muted);font-size:.8rem;display:block}
 a.lnk .ar{margin-left:auto;color:var(--gc);font-weight:700}
 /* organizar os atalhos do módulo (03/11/2026) */
-.orgbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:space-between}
-.oseg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--surface)}
-.oseg button{appearance:none;font:600 .84rem var(--f-body);border:0;background:transparent;color:var(--muted);padding:8px 12px;cursor:pointer}
-.oseg button+button{border-left:1px solid var(--line)}
-.oseg button.on{background:var(--gc);color:#fff}
 .btn-org{appearance:none;font:600 .88rem var(--f-body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
 .btn-org svg{width:17px;height:17px}.btn-org:hover{border-color:var(--gc);color:var(--gc)}
 .btn-org.on{background:var(--gc);border-color:var(--gc);color:#fff}
+.btn-org{flex:none;margin-left:auto;width:44px;height:44px;padding:0;justify-content:center;border-radius:14px;box-shadow:0 8px 18px -14px var(--gc)}
+.btn-org span{display:none}
+.gh h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.osh-v{position:fixed;inset:0;z-index:95;background:rgba(15,23,42,.38);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:of .16s ease}
+.osh{position:fixed;z-index:96;background:var(--surface);border:1px solid var(--line);box-shadow:0 30px 60px -20px rgba(15,23,42,.55);padding:8px;display:grid;gap:2px;width:290px;border-radius:18px;animation:op .2s cubic-bezier(.2,.8,.2,1)}
+.osh h4{margin:6px 10px 6px;font:800 .72rem var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.osh button{appearance:none;font:inherit;color:var(--fg);background:transparent;border:0;border-radius:12px;padding:10px;display:grid;grid-template-columns:36px minmax(0,1fr) 20px;gap:10px;align-items:center;text-align:left;cursor:pointer}
+.osh button:hover{background:color-mix(in srgb,var(--gc) 8%,transparent)}
+.osh button .i{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:color-mix(in srgb,var(--gc) 14%,transparent);color:var(--gc)}
+.osh button .i svg{width:18px;height:18px}
+.osh button b{display:block;font-weight:600;font-size:.94rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.osh button small{display:block;color:var(--muted);font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.osh button .ck{color:var(--gc);font-weight:800;opacity:0}.osh button.on .ck{opacity:1}
+.osh button.on{background:color-mix(in srgb,var(--gc) 10%,transparent)}
+.osh hr{border:0;border-top:1px solid var(--line);margin:4px 8px}
+@keyframes of{from{opacity:0}to{opacity:1}}@keyframes op{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes os{from{transform:translateY(100%)}to{transform:none}}
+@media (max-width:640px){.osh{left:0!important;right:0!important;top:auto!important;bottom:0;width:auto;border-radius:22px 22px 0 0;padding:8px 10px calc(14px + env(safe-area-inset-bottom,0px));animation:os .24s cubic-bezier(.2,.8,.2,1)}
+ .osh::before{content:"";width:40px;height:5px;border-radius:3px;background:var(--line);justify-self:center;margin:2px 0 4px}}
 .orgtip{font-size:.85rem;color:var(--muted);background:color-mix(in srgb,var(--gc) 8%,var(--surface));border:1px dashed color-mix(in srgb,var(--gc) 40%,var(--line));border-radius:12px;padding:10px 12px}
 .tiles.org a.tile{cursor:default;animation:wob .35s ease}
 .tiles.org a.tile:hover{transform:none}
@@ -74,7 +91,7 @@ a.lnk .ar{margin-left:auto;color:var(--gc);font-weight:700}
 .tm .dg{cursor:grab;touch-action:none;color:var(--gc);font-size:1rem}
 .tm button:hover,.tm .dg:hover{border-color:var(--gc);color:var(--gc)}
 a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:0 20px 40px -14px var(--gc);z-index:5;border-color:var(--gc)}
-@media (max-width:560px){.oseg button{padding:7px 9px;font-size:.78rem}.tiles.org .tm{top:6px;right:6px}.tm button,.tm .dg{width:26px;height:26px}}
+@media (max-width:560px){.tiles.org .tm{top:6px;right:6px}.tm button,.tm .dg{width:26px;height:26px}}
 </style></head><body>
 <div class="wrap">
   <section class="home" id="home">
@@ -82,14 +99,9 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
     <div class="mods" id="mods"></div>
   </section>
   <section id="grupo" hidden style="display:grid;gap:16px">
-    <div class="gh"><span class="gi" id="gIc"></span><div><h1 id="gTit"></h1><p class="sub" id="gSub"></p></div></div>
-    <div class="orgbar" id="orgbar">
-      <div class="oseg" id="oseg" role="group" aria-label="Ordem dos atalhos">
-        <button type="button" data-m="padrao">Padrão</button><button type="button" data-m="az">A → Z</button><button type="button" data-m="rec">Usados por último</button><button type="button" data-m="pers">Personalizado</button>
-      </div>
-      <button type="button" class="btn-org" id="bOrg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg><span>Organizar</span></button>
-    </div>
-    <div class="orgtip" id="orgtip" hidden>Arraste os cartões pelo <b>⠿</b> (ou use ◀ ▶) para colocar na ordem que quiser. Toque em <b>Concluir</b> quando terminar.</div>
+    <div class="gh"><span class="gi" id="gIc"></span><div><h1 id="gTit"></h1><p class="sub" id="gSub"></p></div>
+      <button type="button" class="btn-org" id="bOrg" aria-haspopup="menu" aria-label="Ordenar e organizar" title="Ordenar e organizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg><span>Concluir</span></button></div>
+    <div class="orgtip" id="orgtip" hidden>Arraste os cartões pelo <b>⠿</b> (ou use ◀ ▶) para colocar na ordem que quiser. Toque no <b>✓</b> lá em cima quando terminar.</div>
     <div class="tiles" id="tiles"></div>
     <div id="links"></div>
   </section>
@@ -107,14 +119,14 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const sigla=g=>g.s==="Pessoal"?"EU":g.s;
   const $=id=>document.getElementById(id);
-  $("mods").innerHTML=MC.GROUPS.map(g=>"<button type='button' class='mod' data-k='"+g.k+"' style='--gc:"+g.c+"'><span class='gi'>"+esc(sigla(g))+"</span><b>"+esc(g.g)+"</b><small>"+esc(SUB[g.k]||"")+" · "+g.items.length+" páginas</small><span class='go'>Abrir<i>→</i></span></button>").join("");
+  $("mods").innerHTML=MC.GROUPS.map(g=>"<button type='button' class='mod' data-k='"+g.k+"' style='--gc:"+g.c+"'><span class='gi'>"+esc(sigla(g))+"</span><b>"+esc(g.g)+"</b><small>"+esc(SUB[g.k]||"")+"<span class='pgc'> · "+g.items.length+" páginas</span></small><span class='go'>Abrir<i>→</i></span></button>").join("");
   function abrir(k){
     const g=MC.GROUPS.find(x=>x.k===k);if(org){org=false;if(cur)fixarPers()}
     if(!g){document.documentElement.removeAttribute("data-g");document.documentElement.style.removeProperty("--gc");$("home").hidden=false;$("grupo").hidden=true;try{sessionStorage.removeItem("index.tab")}catch(e){}window.__mcNeedGuard&&window.__mcNeedGuard(false);return}
     window.__mcNeedGuard&&window.__mcNeedGuard(true);
     document.documentElement.setAttribute("data-g",k);document.documentElement.style.setProperty("--gc",g.c);
     $("home").hidden=true;$("grupo").hidden=false;
-    $("gIc").textContent=sigla(g);$("gTit").textContent=g.g;$("gSub").textContent=(SUB[k]||"")+" · "+g.items.length+" páginas";
+    $("gIc").textContent=sigla(g);$("gTit").textContent=g.g;$("gSub").textContent=(SUB[k]||"")+(innerWidth>760?" · "+g.items.length+" páginas":"");
     const L=LINKS[k]||[];
     const cardPg=it=>"<a class='tile' href='"+it[0]+".html'><span class='ic'>"+(MC.ICO[it[1]]||"")+"</span><span><b>"+esc(it[1])+"</b><br><small>"+esc(MC.DESC[it[0]]||"")+"</small></span></a>";
     const cardLk=l=>{let u=l[0],ext=/^https?:/.test(u),sp=l[2];
@@ -144,18 +156,38 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
   }
   function desenhar(){
     const m=(ORD[cur]||{}).modo||"padrao";
-    $("oseg").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.m===m));
-    $("bOrg").classList.toggle("on",org);$("bOrg").querySelector("span").textContent=org?"Concluir":"Organizar";
+    $("bOrg").classList.toggle("on",org);$("bOrg").title=org?"Concluir":"Ordenar e organizar";$("bOrg").setAttribute("aria-label",org?"Concluir":"Ordenar e organizar");
+    $("bOrg").querySelector("svg").innerHTML=org?"<path d='M5 12.5l4.5 4.5L19 7.5' stroke-width='2.6'/>":"<path d='M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4'/>";
     $("orgtip").hidden=!org;$("tiles").classList.toggle("org",org);
     const tm="<span class='tm'><button type='button' data-mv='-1' aria-label='Mover para antes'>◀</button><button type='button' data-mv='1' aria-label='Mover para depois'>▶</button><span class='dg' aria-hidden='true'>⠿</span></span>";
     $("tiles").innerHTML=ordenados().map((x,i)=>x.h.replace("<a class='tile","<a data-key='"+esc(x.k)+"' data-u='"+esc(x.u)+"' style='animation-delay:"+(i*.03)+"s' class='tile").replace(/<\/a>$/,tm+"</a>")).join("");
   }
   function fixarPers(){const keys=[...$("tiles").querySelectorAll("a.tile")].map(a=>a.dataset.key);ORD[cur]={modo:"pers",lista:keys};gravar()}
-  $("oseg").addEventListener("click",e=>{const b=e.target.closest("[data-m]");if(!b||!cur)return;
-    const o=ORD[cur]=ORD[cur]||{};o.modo=b.dataset.m;if(o.modo==="pers"&&!o.lista)o.lista=itens.map(x=>x.k);
-    gravar();desenhar();window.ui&&ui.toast("✓ "+b.textContent)});
+  const SI=d=>"<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>"+d+"</svg>";
+  const OPC=[["padrao","Padrão","A ordem original",SI("<rect x='4' y='4' width='6' height='6' rx='1.5'/><rect x='14' y='4' width='6' height='6' rx='1.5'/><rect x='4' y='14' width='6' height='6' rx='1.5'/><rect x='14' y='14' width='6' height='6' rx='1.5'/>")],
+    ["az","A → Z","Ordem alfabética",SI("<path d='M4 18l3.5-10L11 18M5.2 14.5h4.6M14 8h6l-6 10h6'/>")],
+    ["rec","Usados por último","Último aberto vem primeiro",SI("<circle cx='12' cy='12' r='8'/><path d='M12 8v4l3 2'/>")],
+    ["pers","Personalizado","A ordem que você montou",SI("<path d='M12 20s-7-4.5-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.5-7 10-7 10z'/>")]];
+  function fecharOpc(){document.querySelectorAll(".osh,.osh-v").forEach(x=>x.remove());$("bOrg").setAttribute("aria-expanded","false")}
+  function abrirOpc(){
+    fecharOpc();const m=(ORD[cur]||{}).modo||"padrao";
+    const v=document.createElement("div");v.className="osh-v";v.onclick=fecharOpc;
+    const sh=document.createElement("div");sh.className="osh";sh.setAttribute("role","menu");
+    sh.innerHTML="<h4>Ordenar atalhos</h4>"+OPC.map(o=>"<button type='button' role='menuitemradio' aria-checked='"+(o[0]===m)+"' class='"+(o[0]===m?"on":"")+"' data-m='"+o[0]+"'><span class='i'>"+o[3]+"</span><span><b>"+o[1]+"</b><small>"+o[2]+"</small></span><span class='ck'>✓</span></button>").join("")+
+      "<hr><button type='button' role='menuitem' data-org='1'><span class='i'>"+SI("<path d='M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01'/>")+"</span><span><b>Organizar do meu jeito</b><small>Arrastar e mudar de lugar</small></span><span></span></button>";
+    sh.style.setProperty("--gc",getComputedStyle(document.documentElement).getPropertyValue("--gc"));
+    document.body.appendChild(v);document.body.appendChild(sh);
+    if(innerWidth>640){const r=$("bOrg").getBoundingClientRect();sh.style.top=(r.bottom+8)+"px";sh.style.left=Math.max(12,Math.min(innerWidth-302,r.right-290))+"px"}
+    $("bOrg").setAttribute("aria-expanded","true");
+    sh.onclick=e=>{const b=e.target.closest("button");if(!b)return;
+      if(b.dataset.org){fecharOpc();fixarPers();org=true;desenhar();return}
+      const o=ORD[cur]=ORD[cur]||{};o.modo=b.dataset.m;if(o.modo==="pers"&&!o.lista)o.lista=itens.map(x=>x.k);
+      gravar();desenhar();fecharOpc();window.ui&&ui.toast("✓ "+b.querySelector("b").textContent)};
+  }
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")fecharOpc()});
+  addEventListener("resize",fecharOpc);
   $("bOrg").addEventListener("click",()=>{if(!cur)return;
-    if(!org){fixarPers();org=true;desenhar();}else{org=false;fixarPers();desenhar();window.ui&&ui.toast("✓ Ordem salva")}});
+    if(org){org=false;fixarPers();desenhar();window.ui&&ui.toast("✓ Ordem salva")}else abrirOpc()});
   // marca uso ao tocar num link externo (páginas marcam sozinhas ao abrir)
   $("tiles").addEventListener("click",e=>{
     const a=e.target.closest("a.tile");if(!a)return;
