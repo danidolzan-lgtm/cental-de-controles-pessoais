@@ -344,7 +344,37 @@
       if (armed) { pend = url; armed = false; history.back(); setTimeout(function () { if (pend) { var p = pend; pend = null; location.replace(p); } }, 700); }
       else location.replace(url);
     }
+    /* janelas e itens abertos dentro da página (nota aberta, dia do diário, menu ☰, receita aberta…)
+       também viram um passo do voltar: o 1º voltar fecha o que está aberto */
+    var sub = null, ignorar = 0, pendGo = null;
+    function subOpen(close, auto) {
+      if (sub) { sub.close = close; return; }
+      try { history.pushState({ mcSub: 1 }, "", location.href); } catch (e) { return; }
+      sub = { close: close, auto: !!auto };
+    }
+    function subDone() { if (!sub) return; sub = null; ignorar++; history.back(); }
+    window.mcSub = { open: function (fn) { subOpen(fn, false); }, done: subDone, aberto: function () { return !!sub; } };
+    function overlay() { return document.querySelector("#ov:not([hidden]), .veil, .osh, .site-drop:not([hidden])"); }
+    function fecharOverlay() {
+      var ov = document.getElementById("ov");
+      if (ov && !ov.hidden) { if (typeof window.closeModal === "function") window.closeModal(); else ov.hidden = true; return; }
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    }
+    var obsPend = false;
+    function checar() {
+      obsPend = false;
+      var o = overlay();
+      if (o && !sub) subOpen(fecharOverlay, true);
+      else if (!o && sub && sub.auto) subDone();
+    }
+    function ligarObs() { new MutationObserver(function () { if (!obsPend) { obsPend = true; setTimeout(checar, 0); } }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden"] }); }
+    if (document.body) ligarObs(); else document.addEventListener("DOMContentLoaded", ligarObs);
     function go(url, opt) {
+      if (sub) { // fecha o que estiver aberto antes de sair da página
+        sub = null; ignorar++; pendGo = [url, opt]; history.back();
+        setTimeout(function () { if (pendGo) { var g = pendGo; pendGo = null; go(g[0], g[1]); } }, 600);
+        return;
+      }
       if (isIndex) {
         if (ehMenu(url)) { if (window.__mcHome) window.__mcHome(); return; }
         ss("mc.depth", "2"); location.href = url; return;           // módulo → página: entra normal
@@ -358,6 +388,8 @@
     window.__mcGo = go;
     window.__mcNeedGuard = function () {};
     window.addEventListener("popstate", function () {
+      if (ignorar) { ignorar--; if (pendGo) { var g = pendGo; pendGo = null; go(g[0], g[1]); } return; }
+      if (sub) { var c = sub.close; sub = null; try { c(); } catch (e) {} return; }
       if (pend) { var p = pend; pend = null; location.replace(p); return; }
       if (!armed) return;
       armed = false; location.replace("index.html");

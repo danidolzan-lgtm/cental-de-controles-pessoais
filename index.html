@@ -213,18 +213,19 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
      Abrir um módulo cria a posição do módulo; o voltar do celular desce um nível por vez. */
   const est=()=>{try{return history.state||{}}catch(e){return {}}};
   $("mods").addEventListener("click",e=>{const b=e.target.closest(".mod");if(!b)return;
-    try{history.pushState({mcMod:b.dataset.k},"",location.pathname)}catch(x){}abrir(b.dataset.k)});
+    try{history.pushState({mcMod:b.dataset.k},"",location.pathname)}catch(x){}mostrado=b.dataset.k;abrir(b.dataset.k)});
   if(location.hash){try{history.replaceState(history.state,"",location.pathname)}catch(e){}}
-  function mostrar(){let st=est();
+  let mostrado;
+  function mostrar(){let st=est();if(st.mcSub)return;
     if(st.mcMod){let lg=null;try{lg=sessionStorage.getItem("mc.lastGroup")}catch(e){}
       if(lg&&lg!==st.mcMod&&MC.GROUPS.some(g=>g.k===lg)){try{history.replaceState({mcMod:lg},"",location.pathname)}catch(e){}st={mcMod:lg}}
-      abrir(st.mcMod)}
-    else abrir(null);
+      if(mostrado!==st.mcMod){mostrado=st.mcMod;abrir(st.mcMod)}}
+    else if(mostrado!==null){mostrado=null;abrir(null)}
     try{sessionStorage.removeItem("mc.depth")}catch(e){}}
-  window.__mcHome=()=>{if(est().mcMod)history.back();else{abrir(null);window.scrollTo({top:0})}};
+  window.__mcHome=()=>{if(est().mcMod)history.back();else{mostrado=null;abrir(null);window.scrollTo({top:0})}};
   window.__mcAbrir=k=>abrir(k);
   mostrar();
-  addEventListener("pageshow",e=>{if(e.persisted)mostrar()});
+  addEventListener("pageshow",e=>{if(e.persisted){mostrado=undefined;mostrar()}});
   addEventListener("popstate",mostrar);
 })();
 </script>

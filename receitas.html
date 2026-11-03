@@ -212,10 +212,11 @@ function recipeHTML(nome,ing,prep,fonte,rend){
 }
 function showFound(){
   $("fRead").innerHTML=recipeHTML(found.nome,found.ing,found.prep,found.fonte,found.rend);
-  $("found").hidden=false; $("fSave").disabled=false; $("fSave").textContent="Salvar no caderno";
+  $("found").hidden=false; $("fSave").disabled=false;
+  window.mcSub&&mcSub.open(()=>{$("found").hidden=true;found=null}); $("fSave").textContent="Salvar no caderno";
   $("found").scrollIntoView({behavior:"smooth",block:"start"});
 }
-$("fClose").onclick=()=>{$("found").hidden=true;found=null};
+$("fClose").onclick=()=>{$("found").hidden=true;found=null;window.mcSub&&mcSub.done()};
 $("fSave").onclick=async()=>{
   if(!found)return;
   const ok=await saveRecipe({nome:found.nome,ing:found.ing.join("\n"),prep:found.prep.map((p,i)=>(i+1)+". "+p).join("\n"),fonte:found.fonte});
@@ -252,7 +253,8 @@ function draw(){
 }
 $("list").addEventListener("click",async e=>{
   const o=e.target.closest("[data-open]");
-  if(o){openId=openId===o.dataset.open?null:o.dataset.open;pendingDel=null;draw();return}
+  if(o){openId=openId===o.dataset.open?null:o.dataset.open;pendingDel=null;draw();
+    if(window.mcSub){if(openId)mcSub.open(()=>{openId=null;pendingDel=null;draw()});else mcSub.done()}return}
   const ed=e.target.closest("[data-edit]");
   if(ed){const r=items.find(x=>x.id===ed.dataset.edit);if(!r)return;editId=r.id;editFonte=r.fonte||"";$("nome").value=r.nome;$("ing").value=r.ing;$("prep").value=r.prep;$("formTitle").textContent="Editando receita";$("manual").open=true;$("manual").scrollIntoView({behavior:"smooth",block:"start"});return}
   const d=e.target.closest("[data-del]");if(!d)return;
