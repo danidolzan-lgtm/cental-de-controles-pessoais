@@ -66,7 +66,8 @@ h3{font-family:var(--f-display);font-size:.95rem;margin:0}
 table{width:100%;border-collapse:collapse;font-size:.85rem;min-width:560px}
 th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 th{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
-tr.cur td{background:var(--accent-soft)}
+tr.cur td{background:var(--accent-soft)}tr.hj td{font-weight:600}
+#tLv td .num{font-size:.78rem;color:var(--muted)}.tag-at{display:inline-block;margin-top:3px;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#fff;background:var(--accent);border-radius:999px;padding:1px 7px}
 td b{font-family:var(--f-display)}
 .note{font-size:.82rem;color:var(--muted)}
 details summary{cursor:pointer;font-weight:600}
@@ -110,7 +111,7 @@ details summary{cursor:pointer;font-weight:600}
 
   <div class="panel">
     <h2>Como fazer cada exercício</h2>
-    <div class="hint">O boneco mostra o movimento (perna e braço mais claros são os do outro lado). Embaixo, o passo a passo e o que evitar.</div>
+    <div class="hint">Os mesmos exercícios do treino de cima, do degrau escolhido (abre no seu degrau atual). O boneco mostra o movimento (perna e braço mais claros são os do outro lado); ao lado, o passo a passo e o que evitar.</div>
     <div class="chips" id="cfTabs"></div>
     <div class="cf-lib" id="cfLib"></div>
   </div>
@@ -216,7 +217,7 @@ function renderDia(){
     h+="<div class='exb'><span class='tag' style='font-size:.68rem'>Minuto "+(i+1)+" · "+SLOT[i]+"</span><div class='ex'>"+esc(ex)+"</div><div class='rx'>"+esc(rx)+"</div><div class='hint'>"+esc(dica)+"</div>"+
       "<div class='row'><button type='button' class='btn' data-como='"+id+"'>👁 Como fazer</button></div><div data-cbox='"+id+"' data-ex='"+esc(ex)+"' hidden></div></div>"});
   h+="<ol><li><b>2 min aquecimento:</b> "+esc(AQ2)+"</li><li><b>12 min EMOM (4 rodadas):</b> no começo de cada minuto faz as repetições e descansa o resto. Minuto 1 "+esc(exs[0][0].toLowerCase())+", minuto 2 "+esc(exs[1][0].toLowerCase())+", minuto 3 "+esc(exs[2][0].toLowerCase())+", e repete 4 vezes.</li><li><b>1 min alongamento:</b> "+esc(AL2)+"</li></ol>"+
-    "<details class='como-treino' open><summary>📖 Entenda o treino de hoje</summary>"+
+    "<details class='como-treino'><summary>📖 Entenda o treino de hoje</summary>"+
       "<p class='hint' style='margin:6px 0'>São <b>4 rodadas</b>. Em cada rodada você faz os <b>3 exercícios uma vez</b>, um em cada minuto. O número de repetições de cada exercício é para <b>uma vez só</b> (não é o total do treino).</p>"+
       "<p class='hint' style='margin:6px 0'><b>Como funciona o minuto (EMOM):</b> quando o minuto começa, faz as repetições. O que sobrar até virar o minuto é <b>descanso</b>. Virou o minuto, começa o próximo exercício.</p>"+
       "<div class='tw'><table class='tl'><thead><tr><th>Tempo</th><th>O que fazer</th></tr></thead><tbody>"+
@@ -268,9 +269,16 @@ function renderCal(){
   }
 }
 function renderTab(){
-  let h="<thead><tr><th>Degrau</th><th>Sessão 1 · pernas</th><th>Sessão 2 · superior</th><th>Sessão 3 · core</th></tr></thead><tbody>";
-  L.forEach((lv,i)=>{h+="<tr class='"+(i===cfg.nivel?"cur":"")+"'><td><b>"+(i+1)+"</b><br>"+lv.nome+"</td>"+SESS.map(s=>"<td><b>A</b> "+esc(lv[s.id].A[0])+" · "+esc(lv[s.id].A[1])+"<br><b>B</b> "+esc(lv[s.id].B[0])+" · "+esc(lv[s.id].B[1])+"</td>").join("")+"</tr>"});
+  // 03/11/2026: mesma estrutura do treino de cima (Minuto 1 pernas, 2 superior, 3 core; Dia A e Dia B)
+  const hoje=today(), tpH=isWE(hoje)?null:tipo(hoje);
+  let h="<thead><tr><th>Degrau</th><th>Dia</th>"+SLOT.map((s,i)=>"<th>Minuto "+(i+1)+" · "+s.toLowerCase()+"</th>").join("")+"</tr></thead><tbody>";
+  L.forEach((lv,i)=>{["A","B"].forEach((tp,j)=>{
+    const cur=i===cfg.nivel, hj=cur&&tp===tpH;
+    h+="<tr class='"+(cur?"cur":"")+(hj?" hj":"")+"'>"+(j===0?"<td rowspan='2'><b>"+(i+1)+"</b><br>"+esc(lv.nome)+(cur?"<br><span class='tag-at'>atual</span>":"")+"</td>":"")+
+      "<td><b>Dia "+tp+"</b><br><span class='hint'>"+(tp==="A"?"seg, qua, sex":"ter, qui")+"</span>"+(hj?"<br><span class='tag-at'>hoje</span>":"")+"</td>"+
+      SESS.map(s=>"<td>"+esc(lv[s.id][tp][0])+"<br><span class='num'>"+esc(lv[s.id][tp][1])+"</span></td>").join("")+"</tr>"})});
   $("tLv").innerHTML=h+"</tbody>";
+  window.__cfShow&&window.__cfShow();
   $("lvPick").innerHTML=L.map((lv,i)=>"<button type='button' data-n='"+i+"' class='"+(i===cfg.nivel?"on":"")+"'>"+(i+1)+"</button>").join("");
 }
 $("lvPick").addEventListener("click",e=>{const b=e.target.closest("[data-n]");if(!b)return;const n=+b.dataset.n;if(n!==cfg.nivel)mudarNivel(n)});
@@ -476,6 +484,7 @@ const st=document.createElement("style");st.textContent=
  ".cf-fig{display:flex;gap:6px;background:linear-gradient(180deg,var(--accent-soft),transparent);border-radius:10px;padding:6px}.cf-svg{width:100%;height:auto;display:block}"+
  ".cf-tx{display:grid;gap:8px;font-size:.88rem}.cf-tx h3{margin:0}.cf-p{margin:0;padding-left:20px;display:grid;gap:4px}.cf-p li::marker{font-weight:700;color:var(--accent)}"+
  ".cf-e{font-size:.8rem;color:var(--muted);background:var(--loss-soft);border-radius:8px;padding:8px 10px}.cf-e b{color:var(--loss)}.cf-e ul{margin:4px 0 0;padding-left:18px}"+
+ ".cf-dia{font-size:.9rem;padding:6px 2px 0;border-top:1px solid var(--line);margin-top:4px}.cf-dia:first-child{border-top:0;margin-top:0;padding-top:0}.cf-dia b{font-family:var(--f-display);color:var(--accent)}"+
  ".cf-lib{display:grid;gap:12px}.cf-lib .cf-tag{font-size:.72rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}";
 document.head.appendChild(st);
 /* botão "Como fazer" nas sessões do dia */
@@ -483,15 +492,24 @@ const abertos=new Set();
 window.__como=function(){document.querySelectorAll("[data-cbox]").forEach(b=>{const id=b.dataset.cbox;b.hidden=!abertos.has(id);if(!b.hidden&&!b.firstChild)b.appendChild(card(b.dataset.ex));const bt=document.querySelector("[data-como='"+id+"']");if(bt)bt.textContent=b.hidden?"👁 Como fazer":"Fechar explicação"})};
 document.getElementById("sessoes").addEventListener("click",e=>{const b=e.target.closest("[data-como]");if(!b)return;const id=b.dataset.como;abertos.has(id)?abertos.delete(id):abertos.add(id);window.__como()});
 window.__como();
-/* biblioteca com todos os exercícios, por sessão */
+/* biblioteca: por degrau, os mesmos exercícios do treino de cima (Dia A e Dia B, minuto 1 a 3). Abre no degrau atual. */
 const lib=document.getElementById("cfLib"),tabs=document.getElementById("cfTabs");
 if(lib&&tabs){
-  const por={};SESS.forEach(s=>{por[s.id]=[];L.forEach((lv,i)=>["A","B"].forEach(t=>{const n=lv[s.id][t][0];if(!por[s.id].some(x=>x.n===n))por[s.id].push({n,lv:i})}))});
-  let cur="s1";
-  const show=()=>{tabs.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.s===cur));lib.innerHTML="";
-    por[cur].forEach(x=>lib.appendChild(card(x.n,"<span class='cf-tag'>Degrau "+(x.lv+1)+" · "+esc(L[x.lv].nome)+"</span><h3>"+esc(x.n)+"</h3>")))};
-  tabs.innerHTML=SESS.map(s=>"<button type='button' data-s='"+s.id+"'>"+esc(s.foco)+"</button>").join("");
-  tabs.onclick=e=>{const b=e.target.closest("button");if(!b)return;cur=b.dataset.s;show()};show();
+  let cur=null, feito="", ultNivel=cfg.nivel;
+  const show=()=>{if(cfg.nivel!==ultNivel){ultNivel=cfg.nivel;cur=null}
+    const n=cur==null?cfg.nivel:cur, hoje=today(), tpH=isWE(hoje)?null:tipo(hoje);
+    const chave=n+"|"+cfg.nivel+"|"+tpH; if(chave===feito)return; feito=chave;
+    tabs.innerHTML=L.map((lv,i)=>"<button type='button' data-n='"+i+"' class='"+(i===n?"on":"")+"'>"+(i+1)+" · "+esc(lv.nome)+(i===cfg.nivel?" (atual)":"")+"</button>").join("");
+    lib.innerHTML="";
+    ["A","B"].forEach(tp=>{
+      const hd=document.createElement("div");hd.className="cf-dia";
+      hd.innerHTML="<b>Dia "+tp+"</b> · "+(tp==="A"?"segunda, quarta e sexta":"terça e quinta")+(n===cfg.nivel&&tp===tpH?" <span class='tag-at'>hoje</span>":"");
+      lib.appendChild(hd);
+      SESS.forEach((s,i)=>{const [ex,rx]=L[n][s.id][tp];
+        lib.appendChild(card(ex,"<span class='cf-tag'>Minuto "+(i+1)+" · "+SLOT[i]+" · "+esc(rx)+"</span><h3>"+esc(ex)+"</h3>"))});
+    })};
+  window.__cfShow=show;
+  tabs.onclick=e=>{const b=e.target.closest("button[data-n]");if(!b)return;cur=+b.dataset.n;feito="";show()};show();
 }
 })();
 </script>

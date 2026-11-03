@@ -68,17 +68,17 @@
     var GROUPS = [
       { g: "Opções binárias", s: "OB", k: "ob", c: "#2563EB", items: [["checklist-ob", "Check-list"], ["diario-ob", "Diário"], ["manual-ob", "Manual"], ["progresso-ob", "Progresso"], ["dopamina", "Dopamina"], ["ir-ob", "IR"], ["analise-ob", "Análise"], ["lucro-ob", "Lucro"]] },
       { g: "B3", s: "B3", k: "b3", c: "#0F766E", items: [["checklist-b3", "Check-list"], ["diario-b3", "Diário"], ["manual-b3", "Manual"], ["progresso-b3", "Progresso"], ["dopamina-b3", "Dopamina"], ["ir-b3", "IR"], ["analise-b3", "Análise"], ["lucro-b3", "Lucro"]] },
-      { g: "Pessoal", s: "Pessoal", k: "pes", c: "#7C3AED", items: [["salario", "Salário"], ["oracao", "Oração"], ["receitas", "Receitas"], ["limpeza", "Limpeza de peças"], ["compras", "Compras"], ["consorcio", "Consórcios"], ["exercicios", "Exercícios"]] }
+      { g: "Pessoal", s: "Pessoal", k: "pes", c: "#7C3AED", items: [["salario", "Salário"], ["oracao", "Oração"], ["receitas", "Receitas"], ["limpeza", "Limpeza de peças"], ["compras", "Compras"], ["consorcio", "Consórcios"], ["exercicios", "Exercícios"], ["notas", "Notas"]] }
     ];
     var DESC = { "checklist-ob": "Uma vez por dia", "diario-ob": "5 sessões por dia", "manual-ob": "Os 5 operacionais", "progresso-ob": "Escada e simulador", "dopamina": "Acertei ou errei", "ir-ob": "Resultado mensal", "analise-ob": "Print e seta na vela", "lucro-ob": "Excel da Quotex",
       "checklist-b3": "Uma vez por dia", "diario-b3": "Operações em R$", "manual-b3": "M2 · stop e alvo 2x", "progresso-b3": "Contratos e simulador", "dopamina-b3": "Acertei ou errei", "ir-b3": "Day trade · DARF", "analise-b3": "Print e seta na vela", "lucro-b3": "Extrato · com taxas",
-      "salario": "Danrlei e Cristiane", "oracao": "Noite e consagração", "receitas": "Caderno de receitas", "limpeza": "Lotes e valor", "consorcio": "Simular e acompanhar", "exercicios": "5 degraus", "compras": "Marcar o que pegou" };
+      "salario": "Danrlei e Cristiane", "oracao": "Noite e consagração", "receitas": "Caderno de receitas", "limpeza": "Lotes e valor", "consorcio": "Simular e acompanhar", "exercicios": "5 degraus", "compras": "Marcar o que pegou", "notas": "Bloco de anotações" };
     var P = function (d) { return "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>" + d + "</svg>"; };
     var ICO = { "Check-list": P("<rect x='4' y='3' width='16' height='18' rx='3'/><path d='M8.5 12l2.5 2.5 4.5-5'/>"), "Diário": P("<path d='M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z'/><path d='M5 17a3 3 0 013-3h11M9 8h6'/>"),
       "Manual": P("<path d='M12 6c-2-1.5-5-2-8-1.5V19c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V4.5C17 4 14 4.5 12 6z'/><path d='M12 6v14.5'/>"), "Progresso": P("<path d='M4 20h4v-5h4v-5h4V5h4'/><path d='M4 20V16'/>"),
       "Dopamina": P("<path d='M13 2L4 14h7l-1 8 9-12h-7z'/>"), "IR": P("<path d='M6 2h12v20l-3-2-3 2-3-2-3 2z'/><path d='M9 8h6M9 12h6M9 16h3'/>"), "Análise": P("<circle cx='12' cy='12' r='8'/><circle cx='12' cy='12' r='3.5'/><path d='M12 2v3M12 19v3M2 12h3M19 12h3'/>"),
       "Lucro": P("<path d='M3 20h18'/><path d='M4 16l5-5 4 3 7-8'/><path d='M15 6h5v5'/>"), "Salário": P("<rect x='3' y='6' width='18' height='13' rx='3'/><path d='M16 12.5h2M3 10h18'/>"), "Oração": P("<path d='M12 3v18M7 8h10'/>"),
-      "Receitas": P("<path d='M6 13a6 6 0 1112 0v6H6z'/><path d='M6 16h12'/>"), "Limpeza de peças": P("<path d='M14 3l7 7-9 9H5v-7z'/><path d='M10 7l7 7'/>"), "Consórcios": P("<circle cx='9' cy='9' r='5'/><circle cx='15' cy='15' r='5'/>"), "Exercícios": P("<path d='M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12'/>"), "Compras": P("<path d='M3 4h2l2.4 11h10.2L20 8H6.2'/><circle cx='9' cy='19.5' r='1.5'/><circle cx='17' cy='19.5' r='1.5'/>") };
+      "Receitas": P("<path d='M6 13a6 6 0 1112 0v6H6z'/><path d='M6 16h12'/>"), "Limpeza de peças": P("<path d='M14 3l7 7-9 9H5v-7z'/><path d='M10 7l7 7'/>"), "Consórcios": P("<circle cx='9' cy='9' r='5'/><circle cx='15' cy='15' r='5'/>"), "Exercícios": P("<path d='M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12'/>"), "Compras": P("<path d='M3 4h2l2.4 11h10.2L20 8H6.2'/><circle cx='9' cy='19.5' r='1.5'/><circle cx='17' cy='19.5' r='1.5'/>"), "Notas": P("<path d='M6 3h9l4 4v14H6z'/><path d='M14 3v5h5M9 12h7M9 16h5'/>") };
     window.__MC = { GROUPS: GROUPS, ICO: ICO, DESC: DESC };
     var cur = null;
     GROUPS.forEach(function (g) { g.items.forEach(function (it) { if (it[0] === file) cur = { g: g, it: it }; }); });
@@ -211,11 +211,7 @@
       if (file !== "index") {
         var back = el("button", "site-btn site-back", "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M15 18l-6-6 6-6'/></svg><span class='t'>Voltar</span>");
         back.type = "button"; back.setAttribute("aria-label", "Voltar");
-        back.addEventListener("click", function () {
-          var ref = document.referrer, same = false;
-          try { same = !!ref && new URL(ref).origin === location.origin && ref.split("#")[0] !== location.href.split("#")[0]; } catch (e) {}
-          if (same && history.length > 1) history.back(); else location.href = "index.html";
-        });
+        back.addEventListener("click", function () { window.__mcGo ? window.__mcGo("index.html") : location.replace("index.html"); });
         inn.appendChild(back);
       }
       inn.appendChild(el("a", "site-brand", "<span class='site-logo'>MC</span><span class='t'>Meus Controles</span>")).href = "index.html";
@@ -229,7 +225,7 @@
       }
       var mp = el("a", "site-btn site-mp", "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='7' height='7' rx='2'/><rect x='14' y='3' width='7' height='7' rx='2'/><rect x='3' y='14' width='7' height='7' rx='2'/><rect x='14' y='14' width='7' height='7' rx='2'/></svg><span class='t'>Menu principal</span>");
       mp.href = "index.html#inicio"; mp.setAttribute("aria-label", "Menu principal"); mp.style.textDecoration = "none";
-      mp.addEventListener("click", function (e) { try { sessionStorage.removeItem("index.tab"); } catch (x) {} if (file === "index") { e.preventDefault(); location.hash = "inicio"; } });
+      mp.addEventListener("click", function (e) { try { sessionStorage.removeItem("index.tab"); } catch (x) {} if (file === "index") { e.preventDefault(); if (window.__mcHome) window.__mcHome(); } });
       inn.appendChild(mp);
       var btn = el("button", "site-btn", "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M4 7h16M4 12h16M4 17h16'/></svg><span class='t'>Menu</span>");
       btn.type = "button"; btn.setAttribute("aria-expanded", "false"); btn.setAttribute("aria-label", "Abrir menu");
@@ -265,6 +261,57 @@
       document.querySelectorAll(".voltar").forEach(function (v) { v.remove(); });
     }
     if (document.body) build(); else document.addEventListener("DOMContentLoaded", build);
+  })();
+
+  /* ===== Botão voltar do celular (03/11/2026) =====
+     Trocar de página não acumula histórico (a página é substituída).
+     Em qualquer página: 1 voltar → menu principal. No menu principal: voltar → sai do app. */
+  (function () {
+    var file = (decodeURIComponent(location.pathname).split("/").pop() || "index.html").replace(/\.html?$/i, "") || "index";
+    var isIndex = file === "index";
+    var need = !isIndex, armed = false, pend = null;
+    function ativo() { try { return !navigator.userActivation || navigator.userActivation.isActive; } catch (e) { return true; } }
+    function arm() {
+      if (armed || !need || !ativo()) return;
+      try { history.pushState({ mcGuard: 1 }, "", location.href); armed = true; } catch (e) {}
+    }
+    ["pointerup", "touchend", "mousedown", "keydown"].forEach(function (ev) { document.addEventListener(ev, arm, true); });
+    function go(url) {
+      if (armed) {
+        // tira a "trava" do histórico antes de trocar de página, para não sobrar entrada
+        pend = url; armed = false; history.back();
+        setTimeout(function () { if (pend) { var p = pend; pend = null; location.replace(p); } }, 700);
+      } else location.replace(url);
+    }
+    window.__mcGo = go;
+    window.__mcNeedGuard = function (v) {
+      need = !!v;
+      if (v) arm(); else if (armed) { armed = false; history.back(); }
+    };
+    window.addEventListener("popstate", function () {
+      if (pend) { var p = pend; pend = null; location.replace(p); return; }
+      if (!armed) return;
+      armed = false;
+      if (isIndex) { if (window.__mcHome) window.__mcHome(); }
+      else { try { sessionStorage.removeItem("index.tab"); } catch (e) {} location.replace("index.html#inicio"); }
+    });
+    document.addEventListener("click", function (e) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var a = e.target.closest && e.target.closest("a[href]");
+      if (!a || (a.target && a.target !== "_self") || a.hasAttribute("download")) return;
+      var u; try { u = new URL(a.getAttribute("href"), location.href); } catch (x) { return; }
+      if (u.origin !== location.origin || !/^https?:$/.test(u.protocol)) return;
+      if (u.pathname === location.pathname) {
+        // link para uma parte da mesma página: rola sem criar histórico
+        if (u.hash && u.hash.length > 1) {
+          var alvo = document.getElementById(decodeURIComponent(u.hash.slice(1)));
+          if (alvo) { e.preventDefault(); try { history.replaceState(history.state, "", u.hash); } catch (x) {} alvo.scrollIntoView({ behavior: "smooth", block: "start" }); }
+        }
+        return;
+      }
+      if (!/(\.html?|\/)$/i.test(u.pathname)) return;
+      e.preventDefault(); go(u.href);
+    });
   })();
 
   /* ===== App instalável (PWA): manifest, ícone e atualização automática ===== */

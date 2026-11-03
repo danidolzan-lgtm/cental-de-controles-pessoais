@@ -101,7 +101,19 @@ function lsLoad(){try{items=JSON.parse(localStorage.getItem(LS)||"[]")}catch(e){
 function lsSave(){try{localStorage.setItem(LS,JSON.stringify(items))}catch(e){}}
 function setStatus(t){$("status").textContent=t}
 const norm=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
-function txt(s){const d=document.createElement("div");d.innerHTML=String(s??"");return (d.textContent||"").replace(/\s+/g," ").trim()}
+/* 03/11/2026: conserta palavras com acento que vinham "quebradas" (ex.: "a&#231;&#250;car", "açúcar", "aÃ§Ãºcar", "a%C3%A7") */
+const _ta=document.createElement("textarea");
+function deEnt(s){let o=String(s??"");for(let i=0;i<4&&/&(#\d+|#x[0-9a-f]+|[a-z][a-z0-9]{1,8});/i.test(o);i++){_ta.innerHTML=o;const n=_ta.value;if(n===o)break;o=n}return o}
+function fixAcento(s){
+  let o=deEnt(s);
+  o=o.replace(/\\u([0-9a-fA-F]{4})/g,(_,h)=>String.fromCharCode(parseInt(h,16)));
+  o=o.replace(/(?:%[0-9A-Fa-f]{2})+/g,m=>{try{return decodeURIComponent(m)}catch(e){return m}});
+  if(/[ÃÂ][\u0080-¿]|Ã./.test(o)){try{const b=new Uint8Array([...o].map(c=>c.charCodeAt(0)));if([...o].every(c=>c.charCodeAt(0)<256)){const u=new TextDecoder("utf-8",{fatal:true}).decode(b);o=u}}catch(e){
+    o=o.replace(/Ã([\u0080-¿])/g,(_,c)=>String.fromCharCode(0xC0+c.charCodeAt(0)-0x80)).replace(/Â([ -¿])/g,"$1")}}
+  return o.replace(/ /g," ");
+}
+function txt(s){let t="";try{t=new DOMParser().parseFromString(fixAcento(s),"text/html").body.textContent||""}catch(e){t=String(s??"")}return fixAcento(t).replace(/\s+/g," ").trim()}
+const fixRec=r=>{let mud=false;["nome","ing","prep"].forEach(k=>{if(typeof r[k]==="string"){const n=fixAcento(r[k]);if(n!==r[k]){r[k]=n;mud=true}}});return mud};
 
 /* ---------- busca na internet ---------- */
 async function getPage(url,html){
@@ -115,7 +127,7 @@ async function getPage(url,html){
 function parseResults(md,q){
   const seen=new Set(), out=[];
   for(const m of md.matchAll(/\[((?:!\[[^\]]*\]\([^)]*\)\s*)*[^\[\]]{3,160})\]\((https:\/\/www\.tudogostoso\.com\.br\/receita\/[^)\s]+\.html)/g)){
-    const nome=m[1].replace(/!\[[^\]]*\]\([^)]*\)/g,"").replace(/[*_#]/g,"").trim(), url=m[2];
+    const nome=fixAcento(m[1].replace(/!\[[^\]]*\]\([^)]*\)/g,"").replace(/[*_#]/g,"")).trim(), url=m[2];
     if(!nome||seen.has(url))continue; seen.add(url); out.push({nome,url});
   }
   const words=norm(q).split(/[^a-z0-9]+/).filter(w=>w.length>=3&&!["com","para","sem","que","das","dos"].includes(w));
@@ -147,7 +159,7 @@ function fromJsonLd(html){
   }
   return null;
 }
-function cleanMd(l){return l.replace(/!\[[^\]]*\]\([^)]*\)/g,"").replace(/\[([^\]]*)\]\([^)]*\)/g,"$1").replace(/^\s*(?:[-*+]|\d+[.)])\s+/,"").replace(/[*_`#>]/g,"").replace(/\s+/g," ").trim()}
+function cleanMd(l){return fixAcento(l).replace(/!\[[^\]]*\]\([^)]*\)/g,"").replace(/\[([^\]]*)\]\([^)]*\)/g,"$1").replace(/^\s*(?:[-*+]|\d+[.)])\s+/,"").replace(/[*_`#>]/g,"").replace(/\s+/g," ").trim()}
 function fromMarkdown(md){
   const L=md.split(/\r?\n/);
   const isHead=l=>/^\s*(#{1,6}\s|[A-ZÁÉÍÓÚÂÊÔÃÕÇ][^.!?]{2,40}\n?$)/.test(l)&&!/^\s*[-*+]\s/.test(l);
@@ -260,7 +272,7 @@ $("form").addEventListener("submit",async e=>{
   await saveRecipe({nome,ing:$("ing").value,prep:$("prep").value,fonte:editFonte},id||undefined);
   resetForm();$("manual").open=false;window.ui&&ui.toast("✓ Receita salva");
 });
-lsLoad();draw();
+lsLoad();if(items.some(fixRec))lsSave();draw();
 (async()=>{
   try{db=window.claude?await window.claude.use("db"):null}catch(e){db=null}
   if(!db)return;
@@ -273,7 +285,10 @@ lsLoad();draw();
       pend=items.filter(r=>r.local&&!ids.has(r.id));
       pend.forEach(r=>{const c={id:r.id,nome:r.nome,ing:r.ing,prep:r.prep,fonte:r.fonte||"",criada:r.criada||new Date().toISOString()};db.doc("receitas/"+r.id).set(c).catch(()=>{})});
     }
-    items=remote.concat(pend.map(r=>{const c={...r};delete c.local;return c}));lsSave();draw();
+    items=remote.concat(pend.map(r=>{const c={...r};delete c.local;return c}));
+    // receitas antigas que ficaram com acento quebrado: conserta e regrava uma vez
+    items.forEach(r=>{if(fixRec(r))db.doc("receitas/"+r.id).set(r).catch(()=>{})});
+    lsSave();draw();
   },()=>setStatus("Sem conexão com o salvamento"));
 })();
 window.__rec={parseResults,fromJsonLd,fromMarkdown};
