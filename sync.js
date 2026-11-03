@@ -221,7 +221,7 @@
       if (file !== "index") {
         var back = el("button", "site-btn site-back", "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M15 18l-6-6 6-6'/></svg><span class='t'>Voltar</span>");
         back.type = "button"; back.setAttribute("aria-label", "Voltar");
-        back.addEventListener("click", function () { window.__mcGo ? window.__mcGo("index.html") : location.replace("index.html"); });
+        back.addEventListener("click", function () { var tb = cur ? cur.g.k : null; if (tb) goTab(tb); window.__mcGo ? window.__mcGo("index.html", { tab: tb }) : location.replace("index.html"); });
         inn.appendChild(back);
       }
       inn.appendChild(el("a", "site-brand", "<span class='site-logo'>MC</span><span class='t'>Meus Controles</span>")).href = "index.html";
@@ -316,25 +316,45 @@
     if (document.body) ligar(); else document.addEventListener("DOMContentLoaded", ligar);
   })();
 
-  /* ===== Botão voltar do celular (03/11/2026) =====
-     Trocar de página não acumula histórico (a página é substituída).
-     Em qualquer página: 1 voltar → menu principal. No menu principal: voltar → sai do app. */
+  /* ===== Botão voltar do celular (03/11/2026, v2) =====
+     O histórico fica sempre só com 2 posições: [menu] → [página].
+     Do menu para uma página: entra normal. De página para página: a página é substituída (não acumula).
+     Assim, de qualquer página, 1 voltar → menu principal; no menu principal, voltar → sai do app.
+     Não depende de tocar na tela antes. */
   (function () {
     var file = (decodeURIComponent(location.pathname).split("/").pop() || "index.html").replace(/\.html?$/i, "") || "index";
     var isIndex = file === "index";
-    var need = !isIndex, armed = false, pend = null;
+    var SS = window.sessionStorage;
+    function sg(k) { try { return SS.getItem(k); } catch (e) { return null; } }
+    function ss(k, v) { try { if (v == null) SS.removeItem(k); else SS.setItem(k, v); } catch (e) {} }
+    // esta página está logo depois do menu no histórico?
+    var raiz = !isIndex && sg("mc.raiz") === "1";
+    var need = !isIndex && !raiz, armed = false, pend = null;
     function ativo() { try { return !navigator.userActivation || navigator.userActivation.isActive; } catch (e) { return true; } }
     function arm() {
       if (armed || !need || !ativo()) return;
       try { history.pushState({ mcGuard: 1 }, "", location.href); armed = true; } catch (e) {}
     }
     ["pointerup", "touchend", "mousedown", "keydown"].forEach(function (ev) { document.addEventListener(ev, arm, true); });
-    function go(url) {
-      if (armed) {
-        // tira a "trava" do histórico antes de trocar de página, para não sobrar entrada
-        pend = url; armed = false; history.back();
-        setTimeout(function () { if (pend) { var p = pend; pend = null; location.replace(p); } }, 700);
-      } else location.replace(url);
+    function ehMenu(url) { try { var f = new URL(url, location.href).pathname.split("/").pop(); return f === "" || /^index\.html?$/i.test(f); } catch (e) { return false; } }
+    function nav(url, push) { if (push) location.href = url; else location.replace(url); }
+    function sair(url, push) {
+      if (armed) { // tira a "trava" do histórico antes de trocar de página
+        pend = { u: url, push: push }; armed = false; history.back();
+        setTimeout(function () { if (pend) { var p = pend; pend = null; nav(p.u, p.push); } }, 700);
+      } else nav(url, push);
+    }
+    function go(url, opt) {
+      if (isIndex) {
+        if (ehMenu(url)) { if (window.__mcHome) window.__mcHome(); return; }
+        ss("mc.raiz", "1"); sair(url, true); return;               // menu → página: entra normal
+      }
+      if (ehMenu(url)) {
+        if (opt && opt.tab) ss("mc.voltarTab", opt.tab);
+        if (raiz) { history.back(); return; }                     // página → menu: volta para o menu que já está atrás
+        ss("mc.raiz", null); sair(url, false); return;
+      }
+      sair(url, false);                                            // página → página: substitui
     }
     window.__mcGo = go;
     window.__mcNeedGuard = function (v) {
@@ -342,12 +362,23 @@
       if (v) arm(); else if (armed) { armed = false; history.back(); }
     };
     window.addEventListener("popstate", function () {
-      if (pend) { var p = pend; pend = null; location.replace(p); return; }
+      if (pend) { var p = pend; pend = null; nav(p.u, p.push); return; }
       if (!armed) return;
       armed = false;
       if (isIndex) { if (window.__mcHome) window.__mcHome(); }
-      else { try { sessionStorage.removeItem("index.tab"); } catch (e) {} location.replace("index.html#inicio"); }
+      else { ss("index.tab", null); location.replace("index.html#inicio"); }
     });
+    if (isIndex) {
+      // voltou de uma página para o menu: mostra o menu principal (ou o módulo, se veio pelo botão "Voltar")
+      window.addEventListener("pageshow", function (e) {
+        var n = null; try { n = performance.getEntriesByType("navigation")[0]; } catch (x) {}
+        var voltou = e.persisted || (n && n.type === "back_forward");
+        var vt = sg("mc.voltarTab"); ss("mc.voltarTab", null); ss("mc.raiz", "0");
+        armed = false;
+        if (vt && window.__mcAbrir) window.__mcAbrir(vt);
+        else if (voltou && window.__mcHome) window.__mcHome();
+      });
+    }
     document.addEventListener("click", function (e) {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       var a = e.target.closest && e.target.closest("a[href]");

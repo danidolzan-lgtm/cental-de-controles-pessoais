@@ -214,6 +214,7 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
   let t=null;try{t=sessionStorage.getItem("index.tab")}catch(e){}
   if(location.hash==="#inicio"){t=null;history.replaceState(null,"",location.pathname)}
   window.__mcHome=()=>{abrir(null);window.scrollTo({top:0})};
+  window.__mcAbrir=k=>abrir(k);
   abrir(t);
   window.addEventListener("hashchange",()=>{if(location.hash==="#inicio"){history.replaceState(history.state,"",location.pathname);abrir(null)}});
 })();
