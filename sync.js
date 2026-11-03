@@ -244,7 +244,7 @@
       var home = el("div", "site-top"); di.appendChild(home);
       GROUPS.forEach(function (g) {
         var col = el("section", "site-g"); col.style.setProperty("--gc", g.c);
-        col.appendChild(el("div", "site-gh", "<span class='gi'>" + esc(g.s === "Pessoal" ? "EU" : g.s) + "</span><span><b>" + esc(g.g) + "</b><small>" + g.items.length + " páginas</small></span>"));
+        col.appendChild(el("div", "site-gh", "<span class='gi'>" + esc(g.s === "Pessoal" ? "EU" : g.s) + "</span><span><b>" + esc(g.g) + "</b></span>"));
         var its = el("div", "site-its");
         ordemItens(g).forEach(function (it) { var a = el("a", "site-it" + (it[0] === file ? " on" : ""), "<span class='ic'>" + (ICO[it[1]] || "") + "</span><span class='tx'><b>" + esc(it[1]) + "</b><small>" + esc(DESC[it[0]] || "") + "</small></span>"); a.href = it[0] + ".html"; if (it[0] === file) a.setAttribute("aria-current", "page"); a.addEventListener("click", function () { goTab(g.k); }); its.appendChild(a); });
         col.appendChild(its); di.appendChild(col);
@@ -271,6 +271,49 @@
       document.querySelectorAll(".voltar").forEach(function (v) { v.remove(); });
     }
     if (document.body) build(); else document.addEventListener("DOMContentLoaded", build);
+  })();
+
+  /* ===== Dia sem nada marcado = não operou (03/11/2026) =====
+     Nos controles de todo dia (dopamina, diário, check-list, exercícios), um dia útil que já passou
+     e ficou sem registro aparece marcado como "não operou" (ou "não treinou" / "não fez") no calendário. */
+  (function () {
+    var file = (decodeURIComponent(location.pathname).split("/").pop() || "").replace(/\.html?$/i, "");
+    if (!/^(dopamina|diario|checklist|exercicios)/.test(file)) return;
+    var txt = /^exercicios/.test(file) ? "não treinou" : /^checklist/.test(file) ? "não fez" : "não operou";
+    var curto = /^exercicios/.test(file) ? "não fez" : /^checklist/.test(file) ? "não fez" : "não op.";
+    var st = document.createElement("style");
+    st.textContent = ".day.nop{position:relative;background:color-mix(in srgb,var(--muted,#58668A) 16%,var(--surface,#fff))!important;border:1px dashed color-mix(in srgb,var(--muted,#58668A) 55%,transparent)!important;color:var(--muted,#58668A)!important;opacity:1!important}" +
+      ".day.nop::after{content:'" + txt + "';position:absolute;left:2px;right:2px;bottom:2px;font:600 .54rem/1 'IBM Plex Sans',system-ui,sans-serif;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0;text-transform:none;color:var(--muted,#58668A)}" +
+      "@media (max-width:640px){.day.nop::after{content:'" + curto + "';font-size:.5rem}}" +
+      ".legend .nop-l i{background:color-mix(in srgb,var(--muted,#58668A) 16%,var(--surface,#fff))!important;border:1px dashed var(--muted,#58668A)!important}" +
+      ".nop-nota{font-size:.82rem;color:var(--muted,#58668A);margin:2px 0 0}";
+    (document.head || document.documentElement).appendChild(st);
+    var pend = false;
+    function atualizar() {
+      pend = false;
+      var n = document.querySelectorAll(".day.nop").length;
+      document.querySelectorAll(".legend").forEach(function (lg) {
+        var s = lg.querySelector(".nop-l");
+        if (!s) { s = document.createElement("span"); s.className = "nop-l"; lg.appendChild(s); }
+        var t = "<i></i>" + txt + (n ? " · " + n + " dia" + (n > 1 ? "s" : "") : "");
+        if (s.innerHTML !== t) s.innerHTML = t;
+      });
+      // calendário sem legenda (diário): mostra a contagem embaixo dele
+      var cal = document.getElementById("cal");
+      if (cal && !document.querySelector(".legend")) {
+        var p = document.getElementById("nopNota");
+        if (!p) { p = document.createElement("p"); p.id = "nopNota"; p.className = "nop-nota"; cal.parentNode.insertBefore(p, cal.nextSibling); }
+        var t2 = n ? "Dias úteis sem nada lançado contam como " + txt + ": " + n + " dia" + (n > 1 ? "s" : "") + "." : "";
+        if (p.textContent !== t2) p.textContent = t2;
+      }
+      document.querySelectorAll(".day.nop").forEach(function (d) {
+        var a = d.getAttribute("aria-label") || ""; if (a.indexOf(txt) < 0) d.setAttribute("aria-label", (a ? a + ", " : "") + txt);
+        d.title = "Nada marcado neste dia: " + txt;
+      });
+    }
+    function agendar() { if (!pend) { pend = true; requestAnimationFrame(atualizar); } }
+    function ligar() { new MutationObserver(agendar).observe(document.body, { childList: true, subtree: true }); agendar(); }
+    if (document.body) ligar(); else document.addEventListener("DOMContentLoaded", ligar);
   })();
 
   /* ===== Botão voltar do celular (03/11/2026) =====

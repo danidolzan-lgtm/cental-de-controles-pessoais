@@ -119,14 +119,14 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const sigla=g=>g.s==="Pessoal"?"EU":g.s;
   const $=id=>document.getElementById(id);
-  $("mods").innerHTML=MC.GROUPS.map(g=>"<button type='button' class='mod' data-k='"+g.k+"' style='--gc:"+g.c+"'><span class='gi'>"+esc(sigla(g))+"</span><b>"+esc(g.g)+"</b><small>"+esc(SUB[g.k]||"")+"<span class='pgc'> · "+g.items.length+" páginas</span></small><span class='go'>Abrir<i>→</i></span></button>").join("");
+  $("mods").innerHTML=MC.GROUPS.map(g=>"<button type='button' class='mod' data-k='"+g.k+"' style='--gc:"+g.c+"'><span class='gi'>"+esc(sigla(g))+"</span><b>"+esc(g.g)+"</b><small>"+esc(SUB[g.k]||"")+"</small><span class='go'>Abrir<i>→</i></span></button>").join("");
   function abrir(k){
     const g=MC.GROUPS.find(x=>x.k===k);if(org){org=false;if(cur)fixarPers()}
     if(!g){document.documentElement.removeAttribute("data-g");document.documentElement.style.removeProperty("--gc");$("home").hidden=false;$("grupo").hidden=true;try{sessionStorage.removeItem("index.tab")}catch(e){}window.__mcNeedGuard&&window.__mcNeedGuard(false);return}
     window.__mcNeedGuard&&window.__mcNeedGuard(true);
     document.documentElement.setAttribute("data-g",k);document.documentElement.style.setProperty("--gc",g.c);
     $("home").hidden=true;$("grupo").hidden=false;
-    $("gIc").textContent=sigla(g);$("gTit").textContent=g.g;$("gSub").textContent=(SUB[k]||"")+(innerWidth>760?" · "+g.items.length+" páginas":"");
+    $("gIc").textContent=sigla(g);$("gTit").textContent=g.g;$("gSub").textContent=SUB[k]||"";
     const L=LINKS[k]||[];
     const cardPg=it=>"<a class='tile' href='"+it[0]+".html'><span class='ic'>"+(MC.ICO[it[1]]||"")+"</span><span><b>"+esc(it[1])+"</b><br><small>"+esc(MC.DESC[it[0]]||"")+"</small></span></a>";
     const cardLk=l=>{let u=l[0],ext=/^https?:/.test(u),sp=l[2];

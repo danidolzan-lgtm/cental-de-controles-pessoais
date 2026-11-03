@@ -209,7 +209,7 @@ function renderCal(){
       if(first){for(let i=0;i<wd;i++){const b=document.createElement("div");b.className="day blank";g.appendChild(b)}first=false}
       if(wd===0||wd===6){const b=document.createElement("button");b.type="button";b.className="day we";b.disabled=true;b.title="Fim de semana: travado";b.innerHTML="<span class='d'>"+d+"</span>";g.appendChild(b);continue}
       const doc=days[ds], ops=doc?doc.ops||[]:[], net=doc?dayNet(doc):0;
-      const b=document.createElement("button");b.type="button";b.className="day"+(ds===t?" today":"")+(ops.length?(net>0?" pos":net<0?" neg":""):"");
+      const b=document.createElement("button");b.type="button";b.className="day"+(ds===t?" today":"")+(ops.length?(net>0?" pos":net<0?" neg":""):"")+(!ops.length&&ds<t&&!(doc&&Object.keys(doc).some(k=>k!=="date"&&doc[k]&&typeof doc[k]==="object"&&Object.keys(doc[k]).length))?" nop":"");
       let h="<span class='d'>"+d+"</span><span class='dots'>"+ops.map(o=>"<i class='dot "+(opVal(o)>0?"w":opVal(o)<0?"l":"")+"'></i>").join("")+(doc&&doc.status==="nao"?"<i class='dot'></i>":"")+"</span>";
       if(ops.length)h+="<span class='v "+(net>0?"pos":net<0?"neg":"")+"' title='"+n2(net)+"'>"+nCal(net)+"</span>";
       b.innerHTML=h;b.setAttribute("aria-label",dt.toLocaleDateString("pt-BR")+(ops.length?", resultado "+n2(net):""));

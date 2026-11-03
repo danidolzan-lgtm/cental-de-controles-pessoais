@@ -194,7 +194,7 @@ function drawCal(){
       if(!lead){for(let i=0;i<wd;i++){const bk=document.createElement("div");bk.className="day blank";g.appendChild(bk)}lead=true}
       if(wd===0||wd===6){b.className="day we";b.disabled=true;b.title="Fim de semana: travado";g.appendChild(b);continue}
       if(ds<START){b.className="day blank";g.appendChild(b);continue}
-      b.className="day"+(marks[ds]==="w"?" w":marks[ds]==="l"?" l":"")+(ds===t?" today":"")+(ds===sel?" sel":"")+(ds<t&&!marks[ds]?" past":"");
+      b.className="day"+(marks[ds]==="w"?" w":marks[ds]==="l"?" l":"")+(ds===t?" today":"")+(ds===sel?" sel":"")+(ds<t&&!marks[ds]?" past nop":"");
       if(ds>t) b.disabled=true;
       b.setAttribute("aria-label",fmt(ds)+(marks[ds]?(marks[ds]==="w"?", acertei":", errei"):""));
       b.addEventListener("click",()=>pick(ds));

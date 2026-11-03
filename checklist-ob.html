@@ -279,6 +279,7 @@ function drawCal(){
       let cls="day";
       if(isWE(ds)){cls+=" we";b.disabled=true}
       else if(respondido(rec)) cls+= ok(rec)?" full":" none";
+      else if(ds<t) cls+=" nop";
       if(ds===t)cls+=" today"; if(ds===sel)cls+=" sel";
       b.className=cls; b.setAttribute("aria-label",fmt(ds));
       if(!isWE(ds)) b.onclick=()=>pick(ds);

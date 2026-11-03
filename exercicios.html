@@ -98,7 +98,7 @@ details summary{cursor:pointer;font-weight:600}
   <div class="panel">
     <div class="row" style="justify-content:space-between"><h2>Calendário</h2><div class="chips" id="per"></div></div>
     <div id="cal" style="display:grid;gap:18px"></div>
-    <div class="legend"><span><i style="background:var(--win)"></i>treino feito</span><span><i style="background:var(--loss-soft);border-color:var(--loss)"></i>não treinou</span></div>
+    <div class="legend"><span><i style="background:var(--win)"></i>treino feito</span></div>
   </div>
 
   <div class="panel">
@@ -261,7 +261,7 @@ function renderCal(){
       if(ds>END)break;
       if(ds<START){cls+=" past";b.disabled=true}
       else if(isWE(ds)){cls+=" we";b.disabled=true}
-      else{const f=feitas(data[ds]);if(f===1)cls+=" full";else if(parcial(data[ds]))cls+=" part";else if(ds<t)cls+=" miss";b.onclick=()=>{sel=ds;renderDia();renderCal();$("dTitle").scrollIntoView({behavior:"smooth",block:"start"})}}
+      else{const f=feitas(data[ds]);if(f===1)cls+=" full";else if(parcial(data[ds]))cls+=" part";else if(ds<t)cls+=" miss nop";b.onclick=()=>{sel=ds;renderDia();renderCal();$("dTitle").scrollIntoView({behavior:"smooth",block:"start"})}}
       if(ds===t)cls+=" today";if(ds===sel)cls+=" sel";
       b.className=cls;b.setAttribute("aria-label",fmt(ds));g.appendChild(b);
     }
