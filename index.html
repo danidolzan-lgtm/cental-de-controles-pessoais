@@ -54,6 +54,27 @@ a.lnk{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--
 a.lnk:hover{border-color:var(--gc)}
 a.lnk b{font-weight:600}a.lnk span{color:var(--muted);font-size:.8rem;display:block}
 a.lnk .ar{margin-left:auto;color:var(--gc);font-weight:700}
+/* organizar os atalhos do módulo (03/11/2026) */
+.orgbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.oseg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--surface)}
+.oseg button{appearance:none;font:600 .84rem var(--f-body);border:0;background:transparent;color:var(--muted);padding:8px 12px;cursor:pointer}
+.oseg button+button{border-left:1px solid var(--line)}
+.oseg button.on{background:var(--gc);color:#fff}
+.btn-org{appearance:none;font:600 .88rem var(--f-body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.btn-org svg{width:17px;height:17px}.btn-org:hover{border-color:var(--gc);color:var(--gc)}
+.btn-org.on{background:var(--gc);border-color:var(--gc);color:#fff}
+.orgtip{font-size:.85rem;color:var(--muted);background:color-mix(in srgb,var(--gc) 8%,var(--surface));border:1px dashed color-mix(in srgb,var(--gc) 40%,var(--line));border-radius:12px;padding:10px 12px}
+.tiles.org a.tile{cursor:default;animation:wob .35s ease}
+.tiles.org a.tile:hover{transform:none}
+.tiles.org a.tile .ar{display:none}
+@keyframes wob{0%{transform:rotate(0)}30%{transform:rotate(-1deg)}60%{transform:rotate(1deg)}100%{transform:rotate(0)}}
+.tm{display:none}
+.tiles.org .tm{display:flex;position:absolute;top:8px;right:8px;gap:4px;align-items:center}
+.tm button,.tm .dg{appearance:none;width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer;font:700 .8rem var(--f-body);padding:0}
+.tm .dg{cursor:grab;touch-action:none;color:var(--gc);font-size:1rem}
+.tm button:hover,.tm .dg:hover{border-color:var(--gc);color:var(--gc)}
+a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:0 20px 40px -14px var(--gc);z-index:5;border-color:var(--gc)}
+@media (max-width:560px){.oseg button{padding:7px 9px;font-size:.78rem}.tiles.org .tm{top:6px;right:6px}.tm button,.tm .dg{width:26px;height:26px}}
 </style></head><body>
 <div class="wrap">
   <section class="home" id="home">
@@ -62,6 +83,13 @@ a.lnk .ar{margin-left:auto;color:var(--gc);font-weight:700}
   </section>
   <section id="grupo" hidden style="display:grid;gap:16px">
     <div class="gh"><span class="gi" id="gIc"></span><div><h1 id="gTit"></h1><p class="sub" id="gSub"></p></div></div>
+    <div class="orgbar" id="orgbar">
+      <div class="oseg" id="oseg" role="group" aria-label="Ordem dos atalhos">
+        <button type="button" data-m="padrao">Padrão</button><button type="button" data-m="az">A → Z</button><button type="button" data-m="rec">Usados por último</button><button type="button" data-m="pers">Personalizado</button>
+      </div>
+      <button type="button" class="btn-org" id="bOrg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg><span>Organizar</span></button>
+    </div>
+    <div class="orgtip" id="orgtip" hidden>Arraste os cartões pelo <b>⠿</b> (ou use ◀ ▶) para colocar na ordem que quiser. Toque em <b>Concluir</b> quando terminar.</div>
     <div class="tiles" id="tiles"></div>
     <div id="links"></div>
   </section>
@@ -81,7 +109,7 @@ a.lnk .ar{margin-left:auto;color:var(--gc);font-weight:700}
   const $=id=>document.getElementById(id);
   $("mods").innerHTML=MC.GROUPS.map(g=>"<button type='button' class='mod' data-k='"+g.k+"' style='--gc:"+g.c+"'><span class='gi'>"+esc(sigla(g))+"</span><b>"+esc(g.g)+"</b><small>"+esc(SUB[g.k]||"")+" · "+g.items.length+" páginas</small><span class='go'>Abrir<i>→</i></span></button>").join("");
   function abrir(k){
-    const g=MC.GROUPS.find(x=>x.k===k);
+    const g=MC.GROUPS.find(x=>x.k===k);if(org){org=false;if(cur)fixarPers()}
     if(!g){document.documentElement.removeAttribute("data-g");document.documentElement.style.removeProperty("--gc");$("home").hidden=false;$("grupo").hidden=true;try{sessionStorage.removeItem("index.tab")}catch(e){}window.__mcNeedGuard&&window.__mcNeedGuard(false);return}
     window.__mcNeedGuard&&window.__mcNeedGuard(true);
     document.documentElement.setAttribute("data-g",k);document.documentElement.style.setProperty("--gc",g.c);
@@ -93,13 +121,63 @@ a.lnk .ar{margin-left:auto;color:var(--gc);font-weight:700}
       if(l[3]){let s="";try{s=localStorage.getItem(l[3])||""}catch(e){}if(s){u=s;ext=true}else sp="Configure na Análise de entrada"}
       return "<a class='tile lk' href='"+esc(u)+"'"+(ext?" target='_blank' rel='noopener'":"")+"><span class='ic'>"+(LICO[l[1]]||"")+"</span><span><b>"+esc(l[1])+"</b><br><small>"+esc(sp)+"</small></span><span class='ar'>"+(ext?"↗":"→")+"</span></a>"};
     let h=[];
-    g.items.forEach(it=>{h.push(cardPg(it));L.filter(l=>l[4]===it[0]).forEach(l=>h.push(cardLk(l)))});
-    L.filter(l=>!l[4]).forEach(l=>h.push(cardLk(l)));
-    $("tiles").innerHTML=h.map((x,i)=>x.replace("<a class='tile","<a style='animation-delay:"+(i*.03)+"s' class='tile")).join("");
+    g.items.forEach(it=>{h.push({k:"p:"+it[0],n:it[1],u:it[0],h:cardPg(it)});L.filter(l=>l[4]===it[0]).forEach(l=>h.push({k:"l:"+l[1],n:l[1],u:"l:"+l[1],h:cardLk(l)}))});
+    L.filter(l=>!l[4]).forEach(l=>h.push({k:"l:"+l[1],n:l[1],u:"l:"+l[1],h:cardLk(l)}));
+    cur=k;itens=h;desenhar();
     $("links").innerHTML="";
     try{sessionStorage.setItem("index.tab",k)}catch(e){}
     window.scrollTo({top:0});
   }
+  /* ---------- organizar os atalhos de cada módulo ---------- */
+  let cur=null,itens=[],org=false;
+  const LSO="mc.ordem";
+  let ORD={};try{ORD=JSON.parse(localStorage.getItem(LSO)||"{}")}catch(e){}
+  const usados=()=>{try{return JSON.parse(localStorage.getItem("mc.usados")||"{}")}catch(e){return {}}};
+  let dbO=null;
+  function gravar(){try{localStorage.setItem(LSO,JSON.stringify(ORD))}catch(e){}if(dbO)dbO.doc("config/ordem").set({ord:JSON.stringify(ORD),em:new Date().toISOString()}).catch(()=>{})}
+  function ordenados(){
+    const o=ORD[cur]||{}, m=o.modo||"padrao";
+    if(m==="az")return itens.slice().sort((a,b)=>a.n.localeCompare(b.n,"pt-BR"));
+    if(m==="rec"){const u=usados();return itens.map((x,i)=>({x,i})).sort((a,b)=>(u[b.x.u]||0)-(u[a.x.u]||0)||a.i-b.i).map(y=>y.x)}
+    if(m==="pers"&&o.lista){const pos=k=>{const i=o.lista.indexOf(k);return i<0?999:i};return itens.map((x,i)=>({x,i})).sort((a,b)=>pos(a.x.k)-pos(b.x.k)||a.i-b.i).map(y=>y.x)}
+    return itens.slice();
+  }
+  function desenhar(){
+    const m=(ORD[cur]||{}).modo||"padrao";
+    $("oseg").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.m===m));
+    $("bOrg").classList.toggle("on",org);$("bOrg").querySelector("span").textContent=org?"Concluir":"Organizar";
+    $("orgtip").hidden=!org;$("tiles").classList.toggle("org",org);
+    const tm="<span class='tm'><button type='button' data-mv='-1' aria-label='Mover para antes'>◀</button><button type='button' data-mv='1' aria-label='Mover para depois'>▶</button><span class='dg' aria-hidden='true'>⠿</span></span>";
+    $("tiles").innerHTML=ordenados().map((x,i)=>x.h.replace("<a class='tile","<a data-key='"+esc(x.k)+"' data-u='"+esc(x.u)+"' style='animation-delay:"+(i*.03)+"s' class='tile").replace(/<\/a>$/,tm+"</a>")).join("");
+  }
+  function fixarPers(){const keys=[...$("tiles").querySelectorAll("a.tile")].map(a=>a.dataset.key);ORD[cur]={modo:"pers",lista:keys};gravar()}
+  $("oseg").addEventListener("click",e=>{const b=e.target.closest("[data-m]");if(!b||!cur)return;
+    const o=ORD[cur]=ORD[cur]||{};o.modo=b.dataset.m;if(o.modo==="pers"&&!o.lista)o.lista=itens.map(x=>x.k);
+    gravar();desenhar();window.ui&&ui.toast("✓ "+b.textContent)});
+  $("bOrg").addEventListener("click",()=>{if(!cur)return;
+    if(!org){fixarPers();org=true;desenhar();}else{org=false;fixarPers();desenhar();window.ui&&ui.toast("✓ Ordem salva")}});
+  // marca uso ao tocar num link externo (páginas marcam sozinhas ao abrir)
+  $("tiles").addEventListener("click",e=>{
+    const a=e.target.closest("a.tile");if(!a)return;
+    if(org){e.preventDefault();e.stopPropagation();
+      const mv=e.target.closest("[data-mv]");if(mv){const d=+mv.dataset.mv,irmao=d<0?a.previousElementSibling:a.nextElementSibling;if(irmao){a.parentNode.insertBefore(a,d<0?irmao:irmao.nextSibling);fixarPers()}}
+      return}
+    if(a.dataset.u&&a.dataset.u.startsWith("l:")){const u=usados();u[a.dataset.u]=Date.now();try{localStorage.setItem("mc.usados",JSON.stringify(u))}catch(x){}}
+  });
+  let D=null;
+  $("tiles").addEventListener("pointerdown",e=>{if(!org)return;const h=e.target.closest(".dg");if(!h)return;e.preventDefault();const a=h.closest("a.tile");D={a};a.classList.add("arr");try{h.setPointerCapture(e.pointerId)}catch(x){}});
+  document.addEventListener("pointermove",e=>{if(!D)return;e.preventDefault();
+    const el=document.elementFromPoint(e.clientX,e.clientY),o=el&&el.closest("#tiles a.tile");
+    if(o&&o!==D.a){const r=o.getBoundingClientRect(),mesmaLinha=Math.abs(e.clientY-(r.top+r.height/2))<r.height/2;
+      const antes=mesmaLinha?e.clientX<r.left+r.width/2:e.clientY<r.top+r.height/2;o.parentNode.insertBefore(D.a,antes?o:o.nextSibling)}
+    if(e.clientY<80)scrollBy(0,-10);else if(e.clientY>innerHeight-60)scrollBy(0,10)},{passive:false});
+  const fimD=()=>{if(!D)return;D.a.classList.remove("arr");D=null;fixarPers()};
+  document.addEventListener("pointerup",fimD);document.addEventListener("pointercancel",fimD);
+  // a ordem também fica salva na conta (aparece igual no celular e no PC)
+  (async()=>{try{dbO=window.claude?await window.claude.use("db"):null}catch(e){dbO=null}if(!dbO)return;
+    dbO.doc("config/ordem").onSnapshot(s=>{if(!s.exists){if(Object.keys(ORD).length)gravar();return}
+      try{const r=JSON.parse(s.data().ord||"{}");if(JSON.stringify(r)!==JSON.stringify(ORD)){ORD=r;try{localStorage.setItem(LSO,JSON.stringify(ORD))}catch(e){}if(cur&&!org&&!D)desenhar()}}catch(e){}},()=>{})})();
+
   $("mods").addEventListener("click",e=>{const b=e.target.closest(".mod");if(b)abrir(b.dataset.k)});
   let t=null;try{t=sessionStorage.getItem("index.tab")}catch(e){}
   if(location.hash==="#inicio"){t=null;history.replaceState(null,"",location.pathname)}

@@ -80,6 +80,16 @@
       "Lucro": P("<path d='M3 20h18'/><path d='M4 16l5-5 4 3 7-8'/><path d='M15 6h5v5'/>"), "Salário": P("<rect x='3' y='6' width='18' height='13' rx='3'/><path d='M16 12.5h2M3 10h18'/>"), "Oração": P("<path d='M12 3v18M7 8h10'/>"),
       "Receitas": P("<path d='M6 13a6 6 0 1112 0v6H6z'/><path d='M6 16h12'/>"), "Limpeza de peças": P("<path d='M14 3l7 7-9 9H5v-7z'/><path d='M10 7l7 7'/>"), "Consórcios": P("<circle cx='9' cy='9' r='5'/><circle cx='15' cy='15' r='5'/>"), "Exercícios": P("<path d='M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12'/>"), "Compras": P("<path d='M3 4h2l2.4 11h10.2L20 8H6.2'/><circle cx='9' cy='19.5' r='1.5'/><circle cx='17' cy='19.5' r='1.5'/>"), "Notas": P("<path d='M6 3h9l4 4v14H6z'/><path d='M14 3v5h5M9 12h7M9 16h5'/>") };
     window.__MC = { GROUPS: GROUPS, ICO: ICO, DESC: DESC };
+    /* 03/11/2026: guarda quando cada página foi aberta ("Usados por último") e usa a ordem escolhida no módulo também no menu */
+    if (file !== "index") { try { var us = JSON.parse(localStorage.getItem("mc.usados") || "{}"); us[file] = Date.now(); localStorage.setItem("mc.usados", JSON.stringify(us)); } catch (e) {} }
+    function ordemItens(g) {
+      var o = {}, us = {}; try { o = (JSON.parse(localStorage.getItem("mc.ordem") || "{}"))[g.k] || {}; us = JSON.parse(localStorage.getItem("mc.usados") || "{}"); } catch (e) {}
+      var it = g.items.map(function (x, i) { return { x: x, i: i }; }), m = o.modo || "padrao";
+      if (m === "az") it.sort(function (a, b) { return a.x[1].localeCompare(b.x[1], "pt-BR"); });
+      else if (m === "rec") it.sort(function (a, b) { return (us[b.x[0]] || 0) - (us[a.x[0]] || 0) || a.i - b.i; });
+      else if (m === "pers" && o.lista) { var pos = function (k) { var i = o.lista.indexOf("p:" + k); return i < 0 ? 999 : i; }; it.sort(function (a, b) { return pos(a.x[0]) - pos(b.x[0]) || a.i - b.i; }); }
+      return it.map(function (y) { return y.x; });
+    }
     var cur = null;
     GROUPS.forEach(function (g) { g.items.forEach(function (it) { if (it[0] === file) cur = { g: g, it: it }; }); });
     if (cur) { document.documentElement.setAttribute("data-group", cur.g.k); document.documentElement.style.setProperty("--gc", cur.g.c); }
@@ -220,7 +230,7 @@
       inn.appendChild(crumb);
       if (cur) {
         var q = el("nav", "site-quick"); q.setAttribute("aria-label", cur.g.g); q.style.setProperty("--gc", cur.g.c);
-        cur.g.items.forEach(function (it) { var a = el("a", it[0] === file ? "on" : "", esc(it[1])); a.href = it[0] + ".html"; if (it[0] === file) a.setAttribute("aria-current", "page"); q.appendChild(a); });
+        ordemItens(cur.g).forEach(function (it) { var a = el("a", it[0] === file ? "on" : "", esc(it[1])); a.href = it[0] + ".html"; if (it[0] === file) a.setAttribute("aria-current", "page"); q.appendChild(a); });
         inn.appendChild(q);
       }
       var mp = el("a", "site-btn site-mp", "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='7' height='7' rx='2'/><rect x='14' y='3' width='7' height='7' rx='2'/><rect x='3' y='14' width='7' height='7' rx='2'/><rect x='14' y='14' width='7' height='7' rx='2'/></svg><span class='t'>Menu principal</span>");
@@ -236,7 +246,7 @@
         var col = el("section", "site-g"); col.style.setProperty("--gc", g.c);
         col.appendChild(el("div", "site-gh", "<span class='gi'>" + esc(g.s === "Pessoal" ? "EU" : g.s) + "</span><span><b>" + esc(g.g) + "</b><small>" + g.items.length + " páginas</small></span>"));
         var its = el("div", "site-its");
-        g.items.forEach(function (it) { var a = el("a", "site-it" + (it[0] === file ? " on" : ""), "<span class='ic'>" + (ICO[it[1]] || "") + "</span><span class='tx'><b>" + esc(it[1]) + "</b><small>" + esc(DESC[it[0]] || "") + "</small></span>"); a.href = it[0] + ".html"; if (it[0] === file) a.setAttribute("aria-current", "page"); a.addEventListener("click", function () { goTab(g.k); }); its.appendChild(a); });
+        ordemItens(g).forEach(function (it) { var a = el("a", "site-it" + (it[0] === file ? " on" : ""), "<span class='ic'>" + (ICO[it[1]] || "") + "</span><span class='tx'><b>" + esc(it[1]) + "</b><small>" + esc(DESC[it[0]] || "") + "</small></span>"); a.href = it[0] + ".html"; if (it[0] === file) a.setAttribute("aria-current", "page"); a.addEventListener("click", function () { goTab(g.k); }); its.appendChild(a); });
         col.appendChild(its); di.appendChild(col);
       });
       /* conta (e-mail e Sair) dentro do menu */
