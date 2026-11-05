@@ -283,8 +283,8 @@
     var curto = /^exercicios/.test(file) ? "não fez" : /^checklist/.test(file) ? "não fez" : "não op.";
     var st = document.createElement("style");
     st.textContent = ".day.nop{position:relative;background:color-mix(in srgb,var(--muted,#58668A) 16%,var(--surface,#fff))!important;border:1px dashed color-mix(in srgb,var(--muted,#58668A) 55%,transparent)!important;color:var(--muted,#58668A)!important;opacity:1!important}" +
-      ".day.nop::after{content:'" + txt + "';position:absolute;left:2px;right:2px;bottom:2px;font:600 .54rem/1 'IBM Plex Sans',system-ui,sans-serif;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0;text-transform:none;color:var(--muted,#58668A)}" +
-      "@media (max-width:640px){.day.nop::after{content:'" + curto + "';font-size:.5rem}}" +
+      ".day.nop::after{content:attr(data-nop);position:absolute;left:2px;right:2px;bottom:2px;font:600 .54rem/1 'IBM Plex Sans',system-ui,sans-serif;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0;text-transform:none;color:var(--muted,#58668A)}" +
+      ".day.nop[data-nop-s]::after{font-size:.5rem;bottom:3px}" +
       ".legend .nop-l i{background:color-mix(in srgb,var(--muted,#58668A) 16%,var(--surface,#fff))!important;border:1px dashed var(--muted,#58668A)!important}" +
       ".nop-nota{font-size:.82rem;color:var(--muted,#58668A);margin:2px 0 0}";
     (document.head || document.documentElement).appendChild(st);
@@ -309,10 +309,13 @@
       document.querySelectorAll(".day.nop").forEach(function (d) {
         var a = d.getAttribute("aria-label") || ""; if (a.indexOf(txt) < 0) d.setAttribute("aria-label", (a ? a + ", " : "") + txt);
         d.title = "Nada marcado neste dia: " + txt;
+        var wd = d.getBoundingClientRect().width, curta = wd < 74, l = wd < 46 ? "—" : curta ? curto : txt;   // casinha pequena: texto curto; bem pequena: só um traço
+        if (d.getAttribute("data-nop") !== l) d.setAttribute("data-nop", l);
+        if (curta) { if (!d.hasAttribute("data-nop-s")) d.setAttribute("data-nop-s", ""); } else if (d.hasAttribute("data-nop-s")) d.removeAttribute("data-nop-s");
       });
     }
     function agendar() { if (!pend) { pend = true; requestAnimationFrame(atualizar); } }
-    function ligar() { new MutationObserver(agendar).observe(document.body, { childList: true, subtree: true }); agendar(); }
+    function ligar() { new MutationObserver(agendar).observe(document.body, { childList: true, subtree: true }); agendar(); addEventListener("resize", agendar); }
     if (document.body) ligar(); else document.addEventListener("DOMContentLoaded", ligar);
   })();
 
@@ -326,6 +329,15 @@
     var SS = window.sessionStorage;
     function sg(k) { try { return SS.getItem(k); } catch (e) { return null; } }
     function ss(k, v) { try { if (v == null) SS.removeItem(k); else SS.setItem(k, v); } catch (e) {} }
+    /* cada posição do histórico guarda o seu número (0 = onde o app abriu) */
+    function posAtual() { try { var st = history.state; return st && typeof st.mcPos === "number" ? st.mcPos : null; } catch (e) { return null; } }
+    if (posAtual() == null) {
+      var np = sg("mc.navPos"); ss("mc.navPos", null);
+      try { history.replaceState(Object.assign({}, history.state || {}, { mcPos: np != null && !isNaN(+np) ? +np : 0 }), "", location.href); } catch (e) {}
+    }
+    window.__mcPos = function () { return posAtual() || 0; };
+    window.__mcPush = function (st, url) { history.pushState(Object.assign({}, st || {}, { mcPos: (posAtual() || 0) + 1 }), "", url || location.href); };
+    window.__mcReplace = function (st, url) { history.replaceState(Object.assign({}, st || {}, { mcPos: posAtual() || 0 }), "", url || location.href); };
     var grp = null;
     try { (window.__MC.GROUPS || []).forEach(function (g) { g.items.forEach(function (it) { if (it[0] === file) grp = g.k; }); }); } catch (e) {}
     if (grp) ss("mc.lastGroup", grp);
@@ -336,20 +348,20 @@
     function ativo() { try { return !navigator.userActivation || navigator.userActivation.isActive; } catch (e) { return true; } }
     function arm() {
       if (armed || !need || !ativo()) return;
-      try { history.pushState({ mcGuard: 1 }, "", location.href); armed = true; } catch (e) {}
+      try { window.__mcPush({ mcGuard: 1 }); armed = true; } catch (e) {}
     }
     ["pointerup", "touchend", "mousedown", "keydown"].forEach(function (ev) { document.addEventListener(ev, arm, true); });
     function ehMenu(url) { try { var f = new URL(url, location.href).pathname.split("/").pop(); return f === "" || /^index\.html?$/i.test(f); } catch (e) { return false; } }
     function trocar(url) {
-      if (armed) { pend = url; armed = false; history.back(); setTimeout(function () { if (pend) { var p = pend; pend = null; location.replace(p); } }, 700); }
-      else location.replace(url);
+      if (armed) { pend = url; armed = false; history.back(); setTimeout(function () { if (pend) { var p = pend; pend = null; ss("mc.navPos", String(posAtual() || 0)); location.replace(p); } }, 700); }
+      else { ss("mc.navPos", String(posAtual() || 0)); location.replace(url); }
     }
     /* janelas e itens abertos dentro da página (nota aberta, dia do diário, menu ☰, receita aberta…)
        também viram um passo do voltar: o 1º voltar fecha o que está aberto */
     var sub = null, ignorar = 0, pendGo = null;
     function subOpen(close, auto) {
       if (sub) { sub.close = close; return; }
-      try { history.pushState({ mcSub: 1 }, "", location.href); } catch (e) { return; }
+      try { window.__mcPush({ mcSub: 1 }); } catch (e) { return; }
       sub = { close: close, auto: !!auto };
     }
     function subDone() { if (!sub) return; sub = null; ignorar++; history.back(); }
@@ -377,7 +389,7 @@
       }
       if (isIndex) {
         if (ehMenu(url)) { if (window.__mcHome) window.__mcHome(); return; }
-        ss("mc.depth", "2"); location.href = url; return;           // módulo → página: entra normal
+        ss("mc.depth", "2"); ss("mc.navPos", String((posAtual() || 0) + 1)); location.href = url; return;           // módulo → página: entra normal
       }
       if (ehMenu(url)) {
         if (depth) { if (opt && opt.tab) history.back(); else history.go(-2); return; } // "Voltar" → módulo; "Menu principal" → menu
@@ -390,9 +402,9 @@
     window.addEventListener("popstate", function () {
       if (ignorar) { ignorar--; if (pendGo) { var g = pendGo; pendGo = null; go(g[0], g[1]); } return; }
       if (sub) { var c = sub.close; sub = null; try { c(); } catch (e) {} return; }
-      if (pend) { var p = pend; pend = null; location.replace(p); return; }
+      if (pend) { var p = pend; pend = null; ss("mc.navPos", String(posAtual() || 0)); location.replace(p); return; }
       if (!armed) return;
-      armed = false; location.replace("index.html");
+      armed = false; ss("mc.navPos", String(posAtual() || 0)); location.replace("index.html");
     });
     document.addEventListener("click", function (e) {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
