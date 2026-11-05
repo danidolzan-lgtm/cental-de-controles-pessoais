@@ -127,7 +127,7 @@ img,svg{max-width:100%}
         <label>Stops<input id="sStop" type="number" min="0" step="1" inputmode="numeric"></label>
         <label>Parei no 1º win<input id="sParc" type="number" min="0" step="1" inputmode="numeric"></label>
       </div>
-      <div class="hint">Seg a qui: 5 sessões (a 5ª à noite, em OTC). Sexta: 3 (sem a 4 e a 5). Semana cheia = 23 sessões. A meta é 50% de aproveitamento e 66,7% de assertividade: 1 mão completa para cada stop.</div>
+      <div class="hint">Seg a qui: 5 sessões (a 5ª à noite, em OTC). Sexta: 3 (sem a 4 e a 5). Semana cheia = 23 sessões. A meta é 50% de aproveitamento e 75% de assertividade: 1 mão completa para cada stop, com o stop contado sempre na 2ª mão (win na base e loss no Soros).</div>
       <div class="warn" id="oWarn" hidden></div>
       <div class="cards">
         <div class="card" id="cSem"><span class="lbl">Resultado da semana</span><span class="v" id="oSem">–</span><span class="hint" id="oSem1">–</span></div>
@@ -230,7 +230,7 @@ function calcSim(){
   $("oE").textContent=brl2(r2(E)); $("oE1").textContent="win paga "+sg(l1);
   $("oS").textContent=brl2(r2(S)); $("oS1").textContent="win paga "+sg(l2);
   $("oM").textContent=sg(M); $("oM1").textContent=pc(M/banca)+" da banca";
-  $("oL").textContent=sg(-E); $("oL1").textContent="loss na 1ª ou no Soros · "+pc(E/banca)+" da banca";
+  $("oL").textContent=sg(-E); $("oL1").textContent="conta como win na base + loss no Soros · "+pc(E/banca)+" da banca";
   const paga=1/(p*(2+p));
   $("oPaga").textContent="Uma mão completa paga "+(M/E).toLocaleString("pt-BR",{maximumFractionDigits:2})+" stops. Para empatar, a cada stop você precisa de "+paga.toLocaleString("pt-BR",{maximumFractionDigits:2})+" mão completa.";
   // semana
@@ -242,8 +242,9 @@ function calcSim(){
   $("cSem").className="card "+(w.res>0?"g":w.res<0?"r":"");
   const pos=(+sim.meta||0)+(+sim.parc||0);
   $("oApr").textContent=usadas?pc(pos/usadas):"–"; $("oApr1").textContent=pos+" positivas de "+usadas+" sessões";
-  const wins=2*(+sim.meta||0)+(+sim.parc||0), ops=wins+(+sim.stop||0);
-  $("oAss").textContent=ops?pc(wins/ops):"–"; $("oAss1").textContent=wins+" wins em "+ops+" entradas (considerando stop na 1ª)";
+  // 05/11/2026: stop sempre na 2ª mão (win na mão base + loss no Soros): cada stop = 1 win + 1 loss. O valor perdido é o mesmo (−mão base).
+  const wins=2*(+sim.meta||0)+(+sim.parc||0)+(+sim.stop||0), ops=wins+(+sim.stop||0);
+  $("oAss").textContent=ops?pc(wins/ops):"–"; $("oAss1").textContent=wins+" wins em "+ops+" entradas (stop sempre na 2ª mão)";
   // mês
   let b=banca, rows="", tot=0;
   for(let k=1;k<=4;k++){const x=semana(sim.modo==="re"?b:banca); rows+="<tr><td>"+k+"</td><td>"+n2(r2(b))+"</td><td>"+n2(r2(x.E))+"</td><td class='"+(x.res>0?"pos":x.res<0?"neg":"")+"'>"+sgn(x.res)+"</td><td>"+n2(r2(b+x.res))+"</td></tr>"; tot+=x.res; b+=x.res; if(b<=0){rows+="<tr><td colspan='5' class='neg' style='text-align:left'>Banca zerada nesta semana.</td></tr>";break}}

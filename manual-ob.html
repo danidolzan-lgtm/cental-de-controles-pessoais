@@ -399,8 +399,8 @@ input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offs
 
   <!-- VALIDAR -->
   <section class="panel" id="validar">
-    <h2>A meta: 66,7% de assertividade e 50% de aproveitamento</h2>
-    <p>São os dois números juntos: <b>66,7% de assertividade</b> (2 wins a cada 3 entradas) e <b>50% de aproveitamento</b> (metade das sessões fecha no positivo com a mão completa). É o mesmo que <b>1 mão completa para cada stop</b>: 2 wins + 1 loss = 3 entradas, 66,7%; 1 sessão boa + 1 ruim, 50%.</p>
+    <h2>A meta: 75% de assertividade e 50% de aproveitamento</h2>
+    <p>São os dois números juntos: <b>75% de assertividade</b> (3 wins a cada 4 entradas) e <b>50% de aproveitamento</b> (metade das sessões fecha no positivo com a mão completa). É o mesmo que <b>1 mão completa para cada stop</b>, contando o stop <b>sempre na 2ª mão</b> (win na base e loss no Soros, que é o pior caso): mão completa = 2 wins, stop = 1 win + 1 loss; 3 wins em 4 entradas, 75%; 1 sessão boa + 1 ruim, 50%. O valor perdido no stop é o mesmo nos dois casos: a mão base.</p>
     <div class="kpis">
       <div class="kpi"><span class="lbl">1 mão completa + 1 stop</span><b id="vPar" class="pos">—</b></div>
       <div class="kpi"><span class="lbl">Semana cheia na meta (23 sessões)</span><b id="vSem" class="pos">—</b></div>
@@ -411,10 +411,10 @@ input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offs
     <ol>
       <li>Volte no gráfico e anote <b>100 sinais de cada setup</b> nos horários das sessões, sem pular nenhum. Faça o OTC (sessão 5) separado do mercado aberto.</li>
       <li>Simule a sessão inteira: conte a 1ª entrada no fechamento da 5ª vela e, se der win, o próximo sinal como Soros.</li>
-      <li>Fique só com o setup que passar de <b>70% de assertividade e 50% de aproveitamento</b> no papel; ao vivo ele costuma cair alguns pontos.</li>
-      <li>Depois, opere 2 semanas com a mão mínima e confira no Diário OB: <b>assertividade ≥ 66,7%</b> e <b>aproveitamento ≥ 50%</b>. Só então sobe a mão.</li>
+      <li>Fique só com o setup que passar de <b>78% de assertividade e 50% de aproveitamento</b> no papel; ao vivo ele costuma cair alguns pontos.</li>
+      <li>Depois, opere 2 semanas com a mão mínima e confira no Diário OB: <b>assertividade ≥ 75%</b> e <b>aproveitamento ≥ 50%</b>. Só então sobe a mão.</li>
     </ol>
-    <div class="note">Se cada entrada fosse uma moeda de 66,7%, a chance de dois wins seguidos seria <b>44,4%</b>; para fechar 50% das sessões com mão completa, a assertividade fica perto de <b>71%</b>. Por isso a meta pede os dois números: chegar nos 66,7% e, além disso, cortar as sessões que dão win e depois loss no Soros. O Soros não aumenta o acerto, só faz o resultado variar mais.</div>
+    <div class="note">A meta conta o stop sempre na 2ª mão porque é o caso mais exigente: se o stop vier na 1ª, a mesma meta de 50% sai com menos assertividade (66,7%). Mirando 75%, você cobre os dois casos. Se a assertividade bater 75% mas o aproveitamento ficar abaixo de 50%, o problema está nas sessões que dão win e depois loss no Soros. O Soros não aumenta o acerto, só faz o resultado variar mais.</div>
     <p class="hint">As corretoras de opções binárias não são autorizadas pela CVM. Saque com frequência e não deixe a banca toda parada lá.</p>
   </section>
 
@@ -549,7 +549,7 @@ function soros(){
   document.getElementById("sCiclo").textContent="+"+brl(l1+l2);
   document.getElementById("sMeio").textContent="−"+brl(Math.max(0,nxt-l1));
   document.getElementById("sBe").textContent=p>0?(100/(1+p)).toFixed(1).replace(".",",")+"%":"—";
-  // meta 66,7% / 50%: 1 mão completa (+l1+l2) para cada stop (−b)
+  // meta 75% / 50%: 1 mão completa (+l1+l2) para cada stop na 2ª mão (+l1 −(b+l1) = −b)
   const M=l1+l2, par=M-b;
   document.getElementById("vPar").textContent=b>0&&p>0?(par>=0?"+":"−")+brl(Math.abs(par)):"—";
   document.getElementById("vSem").textContent=b>0&&p>0?(par>=0?"+":"−")+brl(Math.abs(par*11.5)):"—";
