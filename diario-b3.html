@@ -29,7 +29,8 @@ h2{font-family:var(--f-display);font-weight:700;font-size:1.05rem;margin:0}
 .kpi .big{font-family:var(--f-num);font-weight:600;font-size:1.6rem;margin-top:2px}
 .kpi .row{display:flex;gap:14px;margin-top:6px;font-size:.85rem;color:var(--muted);flex-wrap:wrap}
 .kpi .row b{color:var(--fg);font-family:var(--f-num);font-weight:600}
-.pos{color:var(--win)} .neg{color:var(--loss)}
+.pos{color:var(--win)} .neg{color:var(--loss)} .mid{color:#D97706}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .mid{color:#FBBF24}} :root[data-theme="dark"] .mid{color:#FBBF24}
 .cfg{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
 .cfg .metas{flex-basis:100%;order:9;font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:6px}
 .cfg .metas::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none}
@@ -111,9 +112,8 @@ td:first-child{font-family:var(--f-body);white-space:normal}
     <div class="panel kpi"><div class="lbl">Resultado</div><div class="big" id="kRes">R$ 0,00</div>
       <div class="row"><span>Hoje <b id="kHoje">0,00</b></span><span>Dias <b id="kDias">0</b></span></div></div>
     <div class="panel kpi"><div class="lbl">Acerto</div><div class="big" id="kAss">–</div>
-      <div class="row"><span>Ops <b id="kTot">0</b></span><span>Meta <b id="kG" class="pos">0</b></span><span>Stop <b id="kL" class="neg">0</b></span></div></div>
-    <div class="panel kpi"><div class="lbl">Aproveitamento</div><div class="big" id="kApr">–</div>
-      <div class="row"><span>Meta <b id="kAM" class="pos">0</b></span><span>Stop <b id="kAS" class="neg">0</b></span><span>Sessões <b id="kASes">0</b></span></div></div>
+      <div class="row"><span>Ops <b id="kTot">0</b></span><span>Meta <b id="kG" class="pos">0</b></span><span>Stop <b id="kL" class="neg">0</b></span></div>
+      <div class="hint" style="margin-top:4px">Empate <b class="num">33,3%</b> (alvo 2x) · meta <b class="num">50%</b></div></div>
     <div class="panel kpi"><div class="lbl">Disciplina</div><div class="big" id="kDisc">–</div>
       <div class="row"><span id="kDiscTxt">dias dentro das regras</span></div></div>
   </div>
@@ -230,12 +230,12 @@ function renderKpis(){
   $("kRes").textContent=brl(tot);$("kRes").className="big "+(tot>0?"pos":tot<0?"neg":"");
   $("kHoje").textContent=n2(hoje);$("kHoje").className=hoje>0?"pos":hoje<0?"neg":"";
   $("kDias").textContent=opDays.length;
-  $("kAss").textContent=pct(g,ops.length);$("kTot").textContent=ops.length;$("kG").textContent=g;$("kL").textContent=l;
+  // 06/11/2026: 3 cores. Vermelho abaixo de 33,3% (empate com alvo 2x o stop), amarelo até 50%, verde de 50% para cima.
+  const ra=ops.length?g/ops.length:null;
+  $("kAss").textContent=pct(g,ops.length);$("kAss").className="big "+(ra==null?"":ra>=.5-1e-9?"pos":ra>=1/3-1e-9?"mid":"neg");$("kTot").textContent=ops.length;$("kG").textContent=g;$("kL").textContent=l;
   const okD=opDays.filter(dayOk).length;
   $("kDisc").textContent=opDays.length?okD+"/"+opDays.length:"–";
   $("kDisc").className="big "+(opDays.length?(okD===opDays.length?"pos":"neg"):"");
-  let ses=0,am=0,as=0;fDays().forEach(d=>SESS.forEach(x=>{const so=sOps(d,x.id);if(!so.length)return;ses++;const v=so.reduce((a,o)=>a+opVal(o),0);if(v>0)am++;else as++}));
-  $("kApr").textContent=pct(am,ses);$("kApr").className="big "+(ses?(am/ses>=.5?"pos":"neg"):"");$("kAM").textContent=am;$("kAS").textContent=as;$("kASes").textContent=ses;
 }
 // valor curto no calendário: até 100 com centavos, acima disso sem centavos, acima de 10 mil em "k"
 const nCal=v=>{const a=Math.abs(v),sg=v<0?"-":v>0?"+":"";if(a>=10000)return sg+(a/1000).toLocaleString("pt-BR",{maximumFractionDigits:1})+"k";if(a>=100)return sg+Math.round(a).toLocaleString("pt-BR");return sg+a.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})};
