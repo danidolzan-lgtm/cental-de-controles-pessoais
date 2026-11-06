@@ -29,7 +29,8 @@ h2{font-family:var(--f-display);font-weight:700;font-size:1.05rem;margin:0}
 .kpi .big{font-family:var(--f-num);font-weight:600;font-size:1.6rem;margin-top:2px}
 .kpi .row{display:flex;gap:14px;margin-top:6px;font-size:.85rem;color:var(--muted);flex-wrap:wrap}
 .kpi .row b{color:var(--fg);font-family:var(--f-num);font-weight:600}
-.pos{color:var(--win)} .neg{color:var(--loss)}
+.pos{color:var(--win)} .neg{color:var(--loss)} .mid{color:#D97706}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .mid{color:#FBBF24}} :root[data-theme="dark"] .mid{color:#FBBF24}
 .cfg{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
 .cfg .metas{flex-basis:100%;order:9;font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:6px}
 .cfg .metas::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none}
@@ -262,15 +263,19 @@ function renderKpis(){
   $("kHoje").textContent=n2(hoje);$("kHoje").className=hoje>0?"pos":hoje<0?"neg":"";
   $("kDias").textContent=fDays().filter(d=>dayOps(d).length).length;
   const be=100/(1+(+cfg.payout||0)/100), rate=ops.length?w/ops.length*100:null;
-  $("kAss").textContent=pct(w,ops.length);$("kAss").className="big "+(rate==null?"":rate>=be?"pos":"neg");
+  // 06/11/2026: 3 cores. Vermelho abaixo do empate do payout, amarelo entre o empate e a meta (71,4%), verde na meta ou acima.
+  const META_ASS=500/7;
+  $("kAss").textContent=pct(w,ops.length);$("kAss").className="big "+(rate==null?"":rate>=META_ASS-1e-9?"pos":rate>=be?"mid":"neg");
   $("kTot").textContent=ops.length;$("kW").textContent=w;$("kL").textContent=l;
-  $("kBe").innerHTML="Empate com payout "+cfg.payout+"%: <b class='num'>"+be.toLocaleString("pt-BR",{maximumFractionDigits:1})+"%</b>";
+  $("kBe").innerHTML="Empate <b class='num'>"+be.toLocaleString("pt-BR",{maximumFractionDigits:1})+"%</b> · meta <b class='num'>71,4%</b> · payout "+cfg.payout+"%";
   const so=ops.filter(o=>o.kind==="soros"), sw=so.filter(o=>o.res==="win").length;
   $("kSor").textContent=pct(sw,so.length);$("kSorN").textContent=so.length;$("kCic").textContent=sw;
   let ses=0,meta=0,stp=0,cheia=0;fDays().forEach(d=>SESS.forEach(s=>{const I=sessInfo(d[s.id]);if(!I.fim)return;ses++;if(I.fim==="stop")stp++;else{meta++;if(I.fim==="cheia")cheia++}}));
-  $("kApr").textContent=pct(meta,ses);$("kApr").className="big "+(ses?(meta/ses>=.5?"pos":"neg"):"");
+  // aproveitamento: empate = 1 mão completa paga quantos stops (payout do degrau); meta 50%
+  const pp=(+cfg.payout||0)/100, beA=1/(1+pp*(2+pp)), ra=ses?meta/ses:null;
+  $("kApr").textContent=pct(meta,ses);$("kApr").className="big "+(ra==null?"":ra>=.5-1e-9?"pos":ra>=beA?"mid":"neg");
   $("kMeta").textContent=meta;$("kStop").textContent=stp;$("kSes").textContent=ses;
-  $("kAprTxt").textContent=ses?"sessões que fecharam no positivo · "+cheia+" com meta cheia (2 wins)":"sessões que fecharam no positivo";
+  $("kAprTxt").innerHTML="Empate <b class='num'>"+(beA*100).toLocaleString("pt-BR",{maximumFractionDigits:1})+"%</b> · meta <b class='num'>50%</b>"+(ses?" · "+cheia+" com meta cheia":"");
 }
 // valor curto no calendário: até 100 com centavos, acima disso sem centavos, acima de 10 mil em "k"
 const nCal=v=>{const a=Math.abs(v),sg=v<0?"-":v>0?"+":"";if(a>=10000)return sg+(a/1000).toLocaleString("pt-BR",{maximumFractionDigits:1})+"k";if(a>=100)return sg+Math.round(a).toLocaleString("pt-BR");return sg+a.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})};
