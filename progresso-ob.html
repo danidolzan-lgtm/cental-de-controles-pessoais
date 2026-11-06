@@ -243,7 +243,7 @@ function calcSim(){
   const pos=(+sim.meta||0)+(+sim.parc||0);
   $("oApr").textContent=usadas?pc(pos/usadas):"–"; $("oApr1").textContent=pos+" positivas de "+usadas+" sessões";
   // 05/11/2026: metade dos stops na 1ª mão (só 1 loss) e metade na 2ª (win na base + loss no Soros). O valor perdido é o mesmo (−mão base).
-  const st=(+sim.stop||0), st2=Math.floor(st/2), st1=st-st2;
+  const st=(+sim.stop||0), st2=Math.ceil(st/2), st1=st-st2; // ímpar: o que sobra vai para o stop na 2ª mão (Soros)
   const wins=2*(+sim.meta||0)+(+sim.parc||0)+st2, ops=wins+st;
   $("oAss").textContent=ops?pc(wins/ops):"–"; $("oAss1").textContent=wins+" wins em "+ops+" entradas ("+st1+" stop"+(st1===1?"":"s")+" na 1ª mão e "+st2+" na 2ª)";
   // mês

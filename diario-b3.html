@@ -100,11 +100,21 @@ td:first-child{font-family:var(--f-body);white-space:normal}
     <div class="status" id="status">Carregando…</div>
   </div>
 
+  <div class="panel filtro">
+    <div class="fhd"><h2>Ver resultados de</h2><span class="hint" id="fTxt"></span></div>
+    <div class="seg" id="fModo"><button type="button" data-m="per">Período todo</button><button type="button" data-m="sem">Semana</button><button type="button" data-m="mes">Mês</button><button type="button" data-m="dat">Escolher datas</button></div>
+    <div class="fnav" id="fNav"><button type="button" class="fbtn" id="fPrev" aria-label="Anterior">‹</button><b id="fLbl"></b><button type="button" class="fbtn" id="fNext" aria-label="Próximo">›</button><button type="button" class="fbtn fhoje" id="fHoje">Hoje</button></div>
+    <div class="fdat" id="fDat"><label for="fA">De<input id="fA" type="date"></label><label for="fB">Até<input id="fB" type="date"></label></div>
+  </div>
+
   <div class="kpis">
     <div class="panel kpi"><div class="lbl">Resultado</div><div class="big" id="kRes">R$ 0,00</div>
       <div class="row"><span>Hoje <b id="kHoje">0,00</b></span><span>Dias <b id="kDias">0</b></span></div></div>
     <div class="panel kpi"><div class="lbl">Acerto</div><div class="big" id="kAss">–</div>
       <div class="row"><span>Ops <b id="kTot">0</b></span><span>Meta <b id="kG" class="pos">0</b></span><span>Stop <b id="kL" class="neg">0</b></span></div></div>
+    <div class="panel kpi"><div class="lbl">Aproveitamento</div><div class="big" id="kApr">–</div>
+      <div class="row"><span>Meta <b id="kAM" class="pos">0</b></span><span>Stop <b id="kAS" class="neg">0</b></span><span>Sessões <b id="kASes">0</b></span></div>
+      <div class="hint" style="margin-top:4px">sessões que fecharam no positivo</div></div>
     <div class="panel kpi"><div class="lbl">Disciplina</div><div class="big" id="kDisc">–</div>
       <div class="row"><span id="kDiscTxt">dias dentro das regras</span></div></div>
   </div>
@@ -130,6 +140,11 @@ td:first-child{font-family:var(--f-body);white-space:normal}
 <div class="ov" id="ov" hidden><div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle"></div></div>
 <datalist id="opsList"></datalist>
 
+<style>.filtro{display:grid;gap:10px}.filtro .fhd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}.filtro h2{white-space:nowrap}
+.fnav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.fnav b{white-space:nowrap;min-width:150px;text-align:center}
+.fbtn{appearance:none;font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;padding:6px 12px;cursor:pointer;line-height:1.2}.fbtn:hover{border-color:var(--accent)}.fhoje{font-size:.82rem}
+.fdat{display:flex;gap:10px;flex-wrap:wrap}.fdat label{width:auto}.fdat input{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;text-transform:none}
+.day.fora{opacity:.35}.fnav[hidden],.fdat[hidden]{display:none!important}</style>
 <style>.per{display:flex;gap:6px;flex-wrap:wrap}.per button{appearance:none;font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap}.per button b{font-weight:700}.per button.on{background:var(--accent);border-color:var(--accent);color:#fff}</style>
 <script>
 // 29/10/2026: tudo zerado. Três períodos: 29/10 a 17/12/2026, 11/01 a 31/03/2027 e 01/04 a 30/06/2027 (botões em cima do calendário).
@@ -140,10 +155,41 @@ let START=PER[PI].a, END=PER[PI].b;
 const inPer=ds=>ds>=START&&ds<=END;
 const usDst=ds=>ds<"2026-11-02"||(ds>="2027-03-14"&&ds<"2027-11-07"); // horário de verão dos EUA
 function perUI(cb){const box=document.getElementById("per");if(box){box.innerHTML=PER.map((p,i)=>"<button type='button' data-i='"+i+"' class='"+(i===PI?"on":"")+"' aria-pressed='"+(i===PI)+"'><b>"+p.y+"</b> · "+p.t.slice(0,13)+"</button>").join("");box.querySelectorAll("button").forEach(b=>b.onclick=()=>{PI=+b.dataset.i;START=PER[PI].a;END=PER[PI].b;perUI(cb);cb()})}const s=document.getElementById("perSub");if(s)s.textContent=PER[PI].t+" · segunda a sexta"}
-perUI(()=>render());
+perUI(()=>{typeof fUI==="function"&&fUI();render()});
 try{}catch(e){} // dados antigos (zerado em 29/10/2026)
 const LS="diarioB3n.v1";
 function pDays(){return Object.keys(days).filter(inPer).map(k=>days[k])} // só o período escolhido
+
+/* 06/11/2026: filtro dos números (cartões e tabelas): período todo, semana (seg–sex), mês ou datas escolhidas. O calendário continua mostrando o período todo; o que fica fora do filtro aparece apagado. */
+const FKEY="filtro_"+LS;
+let FM="per", FREF=_hj, FA="", FB="";
+try{const r=JSON.parse(localStorage.getItem(FKEY)||"null");if(r){FM=r.m||"per";FA=r.a||"";FB=r.b||""}}catch(e){}
+const fD=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d,12)};
+const fS=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const fBR=s=>s?s.slice(8,10)+"/"+s.slice(5,7):"";
+function fRange(){
+  if(FM==="sem"){const d=fD(FREF),seg=new Date(d);seg.setDate(d.getDate()-((d.getDay()+6)%7));const sx=new Date(seg);sx.setDate(seg.getDate()+4);return [fS(seg),fS(sx)]}
+  if(FM==="mes"){const d=fD(FREF);return [fS(new Date(d.getFullYear(),d.getMonth(),1,12)),fS(new Date(d.getFullYear(),d.getMonth()+1,0,12))]}
+  if(FM==="dat"){const a=FA||START,b=FB||END;return a<=b?[a,b]:[b,a]}
+  return [START,END]}
+const inF=ds=>{const [a,b]=fRange();return ds>=a&&ds<=b};
+function fDays(){return Object.keys(days).filter(k=>inPer(k)&&inF(k)).map(k=>days[k])} // período escolhido + filtro
+function fSave(){try{localStorage.setItem(FKEY,JSON.stringify({m:FM,a:FA,b:FB}))}catch(e){}}
+function fUI(){
+  [...document.getElementById("fModo").children].forEach(b=>{const on=b.dataset.m===FM;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)});
+  document.getElementById("fNav").hidden=!(FM==="sem"||FM==="mes");document.getElementById("fDat").hidden=FM!=="dat";
+  const [a,b]=fRange();
+  document.getElementById("fLbl").textContent=FM==="mes"?fD(a).toLocaleDateString("pt-BR",{month:"long",year:"numeric"}):fBR(a)+" a "+fBR(b);
+  if(FM==="dat"){const A=document.getElementById("fA"),B=document.getElementById("fB");if(document.activeElement!==A)A.value=FA||START;if(document.activeElement!==B)B.value=FB||END}
+  document.getElementById("fTxt").textContent=(FM==="per"?PER[PI].t:fBR(a)+" a "+fBR(b))+" · seg a sex";
+}
+function fGo(){fSave();fUI();render()}
+document.getElementById("fModo").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;FM=b.dataset.m;if(FM==="sem"||FM==="mes")FREF=(_hj>=START&&_hj<=END)?_hj:START;fGo()});
+document.getElementById("fPrev").addEventListener("click",()=>{const d=fD(FREF);if(FM==="mes")FREF=fS(new Date(d.getFullYear(),d.getMonth()-1,1,12));else{d.setDate(d.getDate()-7);FREF=fS(d)}fGo()});
+document.getElementById("fNext").addEventListener("click",()=>{const d=fD(FREF);if(FM==="mes")FREF=fS(new Date(d.getFullYear(),d.getMonth()+1,1,12));else{d.setDate(d.getDate()+7);FREF=fS(d)}fGo()});
+document.getElementById("fHoje").addEventListener("click",()=>{FREF=_hj;fGo()});
+["fA","fB"].forEach(id=>document.getElementById(id).addEventListener("change",e=>{if(id==="fA")FA=e.target.value;else FB=e.target.value;fGo()}));
+fUI();
 const OPS=[{id:"respiro",nome:"Respiro"},{id:"virada",nome:"Virada"},{id:"muralha",nome:"Muralha"},{id:"giro",nome:"Giro"},{id:"armadilha",nome:"Armadilha"}];
 const opNome=id=>(OPS.find(o=>o.id===(id==="muralhaEng"?"muralha":id))||{nome:id||"Sem operacional"}).nome;
 const ATIVOS={WIN:{nome:"Mini índice",pt:0.20},WDO:{nome:"Mini dólar",pt:10}};
@@ -176,12 +222,12 @@ let cfgT=null;
 function saveCfg(){lsSave();clearTimeout(cfgT);cfgT=setTimeout(async()=>{if(db){try{await db.doc("config/geral").set(cfg)}catch(e){}}},500)}
 
 /* ---------- tela ---------- */
-function allOps(){const out=[];pDays().forEach(d=>SESS.forEach(x=>sOps(d,x.id).forEach((o,i)=>out.push({...o,idx:i,date:d.date}))));return out}
+function allOps(){const out=[];fDays().forEach(d=>SESS.forEach(x=>sOps(d,x.id).forEach((o,i)=>out.push({...o,idx:i,date:d.date}))));return out}
 function render(){renderKpis();renderCal();renderTables();renderList()}
 function renderKpis(){
   const ops=allOps(), g=ops.filter(o=>opVal(o)>0).length, l=ops.filter(o=>opVal(o)<0).length, tot=ops.reduce((s,o)=>s+opVal(o),0);
   const t=todayStr(), hoje=days[t]?dayNet(days[t]):0;
-  const opDays=pDays().filter(d=>(d.ops||[]).length);
+  const opDays=fDays().filter(d=>(d.ops||[]).length);
   $("kRes").textContent=brl(tot);$("kRes").className="big "+(tot>0?"pos":tot<0?"neg":"");
   $("kHoje").textContent=n2(hoje);$("kHoje").className=hoje>0?"pos":hoje<0?"neg":"";
   $("kDias").textContent=opDays.length;
@@ -189,6 +235,8 @@ function renderKpis(){
   const okD=opDays.filter(dayOk).length;
   $("kDisc").textContent=opDays.length?okD+"/"+opDays.length:"–";
   $("kDisc").className="big "+(opDays.length?(okD===opDays.length?"pos":"neg"):"");
+  let ses=0,am=0,as=0;fDays().forEach(d=>SESS.forEach(x=>{const so=sOps(d,x.id);if(!so.length)return;ses++;const v=so.reduce((a,o)=>a+opVal(o),0);if(v>0)am++;else as++}));
+  $("kApr").textContent=pct(am,ses);$("kApr").className="big "+(ses?(am/ses>=.5?"pos":"neg"):"");$("kAM").textContent=am;$("kAS").textContent=as;$("kASes").textContent=ses;
 }
 // valor curto no calendário: até 100 com centavos, acima disso sem centavos, acima de 10 mil em "k"
 const nCal=v=>{const a=Math.abs(v),sg=v<0?"-":v>0?"+":"";if(a>=10000)return sg+(a/1000).toLocaleString("pt-BR",{maximumFractionDigits:1})+"k";if(a>=100)return sg+Math.round(a).toLocaleString("pt-BR");return sg+a.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})};
@@ -209,7 +257,7 @@ function renderCal(){
       if(first){for(let i=0;i<wd;i++){const b=document.createElement("div");b.className="day blank";g.appendChild(b)}first=false}
       if(wd===0||wd===6){const b=document.createElement("button");b.type="button";b.className="day we";b.disabled=true;b.title="Fim de semana: travado";b.innerHTML="<span class='d'>"+d+"</span>";g.appendChild(b);continue}
       const doc=days[ds], ops=doc?doc.ops||[]:[], net=doc?dayNet(doc):0;
-      const b=document.createElement("button");b.type="button";b.className="day"+(ds===t?" today":"")+(ops.length?(net>0?" pos":net<0?" neg":""):"")+(!ops.length&&ds<t&&!(doc&&Object.keys(doc).some(k=>k!=="date"&&doc[k]&&typeof doc[k]==="object"&&Object.keys(doc[k]).length))?" nop":"");
+      const b=document.createElement("button");b.type="button";b.className="day"+(FM!=="per"&&!inF(ds)?" fora":"")+(ds===t?" today":"")+(ops.length?(net>0?" pos":net<0?" neg":""):"")+(!ops.length&&ds<t&&!(doc&&Object.keys(doc).some(k=>k!=="date"&&doc[k]&&typeof doc[k]==="object"&&Object.keys(doc[k]).length))?" nop":"");
       let h="<span class='d'>"+d+"</span><span class='dots'>"+ops.map(o=>"<i class='dot "+(opVal(o)>0?"w":opVal(o)<0?"l":"")+"'></i>").join("")+(doc&&doc.status==="nao"?"<i class='dot'></i>":"")+"</span>";
       if(ops.length)h+="<span class='v "+(net>0?"pos":net<0?"neg":"")+"' title='"+n2(net)+"'>"+nCal(net)+"</span>";
       b.innerHTML=h;b.setAttribute("aria-label",dt.toLocaleDateString("pt-BR")+(ops.length?", resultado "+n2(net):""));
