@@ -102,7 +102,7 @@ td:first-child{font-family:var(--f-body);white-space:normal}
 
   <div class="panel filtro">
     <div class="fhd"><h2>Ver resultados de</h2><span class="hint" id="fTxt"></span></div>
-    <div class="seg" id="fModo"><button type="button" data-m="per">Período todo</button><button type="button" data-m="sem">Semana</button><button type="button" data-m="mes">Mês</button><button type="button" data-m="dat">Escolher datas</button></div>
+    <div class="seg" id="fModo"><button type="button" data-m="per">Período todo</button><button type="button" data-m="sem">Semana</button><button type="button" data-m="mes">Mês</button><button type="button" data-m="dat">Datas</button></div>
     <div class="fnav" id="fNav"><button type="button" class="fbtn" id="fPrev" aria-label="Anterior">‹</button><b id="fLbl"></b><button type="button" class="fbtn" id="fNext" aria-label="Próximo">›</button><button type="button" class="fbtn fhoje" id="fHoje">Hoje</button></div>
     <div class="fdat" id="fDat"><label for="fA">De<input id="fA" type="date"></label><label for="fB">Até<input id="fB" type="date"></label></div>
   </div>
@@ -113,8 +113,7 @@ td:first-child{font-family:var(--f-body);white-space:normal}
     <div class="panel kpi"><div class="lbl">Acerto</div><div class="big" id="kAss">–</div>
       <div class="row"><span>Ops <b id="kTot">0</b></span><span>Meta <b id="kG" class="pos">0</b></span><span>Stop <b id="kL" class="neg">0</b></span></div></div>
     <div class="panel kpi"><div class="lbl">Aproveitamento</div><div class="big" id="kApr">–</div>
-      <div class="row"><span>Meta <b id="kAM" class="pos">0</b></span><span>Stop <b id="kAS" class="neg">0</b></span><span>Sessões <b id="kASes">0</b></span></div>
-      <div class="hint" style="margin-top:4px">sessões que fecharam no positivo</div></div>
+      <div class="row"><span>Meta <b id="kAM" class="pos">0</b></span><span>Stop <b id="kAS" class="neg">0</b></span><span>Sessões <b id="kASes">0</b></span></div></div>
     <div class="panel kpi"><div class="lbl">Disciplina</div><div class="big" id="kDisc">–</div>
       <div class="row"><span id="kDiscTxt">dias dentro das regras</span></div></div>
   </div>
@@ -140,11 +139,11 @@ td:first-child{font-family:var(--f-body);white-space:normal}
 <div class="ov" id="ov" hidden><div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle"></div></div>
 <datalist id="opsList"></datalist>
 
-<style>.filtro{display:grid;gap:10px}.filtro .fhd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}.filtro h2{white-space:nowrap}
+<style>html .wrap>.panel.filtro{grid-column:1/-1!important}.filtro{display:flex!important;flex-wrap:wrap;align-items:center;gap:10px 14px}.filtro .fhd{display:grid;gap:2px;margin-right:auto}.filtro h2{white-space:nowrap;margin:0}.filtro .hint{white-space:nowrap}
 .fnav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.fnav b{white-space:nowrap;min-width:150px;text-align:center}
 .fbtn{appearance:none;font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;padding:6px 12px;cursor:pointer;line-height:1.2}.fbtn:hover{border-color:var(--accent)}.fhoje{font-size:.82rem}
 .fdat{display:flex;gap:10px;flex-wrap:wrap}.fdat label{width:auto}.fdat input{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;text-transform:none}
-.day.fora{opacity:.35}.fnav[hidden],.fdat[hidden]{display:none!important}</style>
+.day.fora{opacity:.35}@media (max-width:640px){.filtro .fhd{width:100%}#fModo{width:100%;flex-wrap:nowrap}#fModo button{flex:1 1 auto;padding:8px 6px;white-space:nowrap}.fnav{width:100%;justify-content:space-between}.fnav b{min-width:0;flex:1}}.fnav[hidden],.fdat[hidden]{display:none!important}</style>
 <style>.per{display:flex;gap:6px;flex-wrap:wrap}.per button{appearance:none;font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap}.per button b{font-weight:700}.per button.on{background:var(--accent);border-color:var(--accent);color:#fff}</style>
 <script>
 // 29/10/2026: tudo zerado. Três períodos: 29/10 a 17/12/2026, 11/01 a 31/03/2027 e 01/04 a 30/06/2027 (botões em cima do calendário).
