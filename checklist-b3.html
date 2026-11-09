@@ -142,7 +142,7 @@ const pausasTxt=ds=>pausas(ds).map(p=>p.de+"–"+p.ate+" ("+p.n+")").join(" e ")
 const sessTxt=()=>SESS.map(s=>s.nome+" "+JAN[s.id].join("–")).join(" · ");
 const QS=[
   {id:"hor",k:"Horários e notícias",t:ds=>{const pl=pulos(ds),k=Object.keys(pl);return "Vou operar só nas sessões ("+sessTxt()+"), respeitando a pausa das "+pausasTxt(ds)+(k.length?", vou PULAR "+k.map(x=>SESS.find(s=>s.id===x).nome+" ("+pl[x]+")").join(", "):"")+" e, em dia de Payroll ou CPI, só começo 30 min depois da notícia?"}},
-  {id:"op",k:"Operacional",t:"Vou entrar só em Respiro, Virada, Muralha (pavio ou engolfo), Giro ou Armadilha no M2, com médias 9, 21 e 50 espaçadas, volume da vela de sinal acima da média, stop técnico dentro do limite (WIN 150 pts · WDO 5 pts), o outro ativo não indo forte no mesmo sentido (WIN × WDO) e todos os filtros do manual conferidos?"},
+  {id:"op",k:"Operacional",t:"Vou entrar só em Respiro, Virada, Muralha, Giro ou Armadilha no M2, com médias 9, 21 e 50 espaçadas, volume da vela de sinal acima da média, stop técnico dentro do limite (WIN 150 pts · WDO 5 pts), o outro ativo não indo forte no mesmo sentido (WIN × WDO) e todos os filtros do manual conferidos?"},
   {id:"ger",k:"Gerenciamento",t:"Contratos do meu degrau no Progresso, ordem com stop e alvo de 2x o stop junto (OCO), no máximo 2 operações em cada sessão (manhã e tarde), uma aberta por vez (nunca WIN e WDO juntos), e encerro a sessão no 1º loss?"},
   {id:"men",k:"Mentalidade",t:"Estou calmo, sem vontade de recuperar nada, e aceito o stop se ele vier?"}
 ];

@@ -204,7 +204,7 @@ const pausasTxt=ds=>pausas(ds).map(p=>p.de+"–"+p.ate+" ("+p.n+")").join(" e ")
 const sessTxt=()=>SESS.map(s=>s.nome+" "+JAN[s.id].join("–")).join(" · ");
 const QS=[
   {id:"hor",k:"Horários e notícias",t:ds=>{const pl=pulos(ds),k=Object.keys(pl);return "Vou operar só nas sessões ("+sessTxt()+")"+(k.length?", vou PULAR "+k.map(x=>SESS.find(s=>s.id===x).nome+" ("+pl[x]+")").join(", "):"")+" e, se aparecer notícia forte fora da lista, paro de 5 min antes até 15 min depois dela?"}},
-  {id:"op",k:"Operacional",t:"Vou entrar só em Respiro, Virada, Muralha (pavio ou engolfo), Giro ou Armadilha, com médias 9, 21 e 50 espaçadas, mercado aberto nas sessões 1 a 4 e OTC só na sessão 5 (noite), e todos os filtros do manual conferidos?"},
+  {id:"op",k:"Operacional",t:"Vou entrar só em Respiro, Virada, Muralha, Giro ou Armadilha, com médias 9, 21 e 50 espaçadas, mercado aberto nas sessões 1 a 4 e OTC só na sessão 5 (noite), e todos os filtros do manual conferidos?"},
   {id:"ger",k:"Gerenciamento",t:"Mão base definida, Soros nível 1, no máximo 2 entradas em cada sessão, e encerro a sessão se a 1ª der loss?"},
   {id:"men",k:"Mentalidade",t:"Estou calmo, sem vontade de recuperar nada, e aceito o stop se ele vier? (sessão em stop não se recupera na seguinte com mão maior)"}
 ];
