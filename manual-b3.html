@@ -151,10 +151,10 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
         <span><span class="tag call">COMPRA</span></span>
         <ol>
           <li>Médias alinhadas: 9 acima da 21, 21 acima da 50, com a 50 subindo.</li>
-          <li>O preço recua até a zona entre a 9 e a 21 e encosta ou fura um pouco a 21.</li>
-          <li>Gatilho: uma vela fecha <b>acima da 9</b>, com pavio inferior.</li>
-          <li>Entrada na abertura da vela seguinte.</li>
-          <li><b>Stop:</b> 1–2 ticks abaixo da mínima da vela de sinal ou da 21, o que estiver mais baixo.</li>
+          <li>O preço recua até a zona entre a 9 e a 21 e encosta ou fura um pouco a 21. O toque pode ser na própria vela de gatilho ou em <b>até 2 velas antes</b> dela.</li>
+          <li>Gatilho, um dos dois:<br><b>1 vela:</b> a vela fecha <b>acima da 9</b>, com pavio inferior.<br><b>2 velas:</b> a vela toca ou fura a 21 e deixa pavio inferior; a vela <b>imediatamente seguinte</b> fecha <b>acima da 9</b>, mesmo sem pavio.</li>
+          <li>Entrada na abertura da vela seguinte à que fechou acima da 9.</li>
+          <li><b>Stop:</b> 1–2 ticks abaixo da mínima da vela de sinal ou da 21, o que estiver mais baixo. No gatilho de 2 velas, abaixo da menor mínima das duas.</li>
           <li><b>Alvo:</b> 2x a distância do stop.</li>
         </ol>
       </div>
@@ -162,10 +162,10 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
         <span><span class="tag put">VENDA</span></span>
         <ol>
           <li>Médias alinhadas: 9 abaixo da 21, 21 abaixo da 50, com a 50 caindo.</li>
-          <li>O preço sobe até a zona entre a 9 e a 21 e encosta ou fura um pouco a 21.</li>
-          <li>Gatilho: uma vela fecha <b>abaixo da 9</b>, com pavio superior.</li>
-          <li>Entrada na abertura da vela seguinte.</li>
-          <li><b>Stop:</b> 1–2 ticks acima da máxima da vela de sinal ou da 21, o que estiver mais alto.</li>
+          <li>O preço sobe até a zona entre a 9 e a 21 e encosta ou fura um pouco a 21. O toque pode ser na própria vela de gatilho ou em <b>até 2 velas antes</b> dela.</li>
+          <li>Gatilho, um dos dois:<br><b>1 vela:</b> a vela fecha <b>abaixo da 9</b>, com pavio superior.<br><b>2 velas:</b> a vela toca ou fura a 21 e deixa pavio superior; a vela <b>imediatamente seguinte</b> fecha <b>abaixo da 9</b>, mesmo sem pavio.</li>
+          <li>Entrada na abertura da vela seguinte à que fechou abaixo da 9.</li>
+          <li><b>Stop:</b> 1–2 ticks acima da máxima da vela de sinal ou da 21, o que estiver mais alto. No gatilho de 2 velas, acima da maior máxima das duas.</li>
           <li><b>Alvo:</b> 2x a distância do stop.</li>
         </ol>
       </div>
@@ -183,6 +183,9 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
         <li>No recuo, o preço furou a média de 50.</li>
         <li>A 50 está deitada (sem inclinação).</li>
         <li>Já é o 3º recuo seguido na mesma tendência (ela está cansando).</li>
+        <li>O toque na 21 foi mais de 2 velas antes do gatilho.</li>
+        <li>Entre o toque e o gatilho, alguma vela fechou do lado errado da 21 (abaixo dela na compra, acima dela na venda).</li>
+        <li>No gatilho de 2 velas: o pavio não está na vela imediatamente anterior (está 2 ou 3 velas atrás), ou a vela do pavio fechou do lado errado da 21.</li>
       </ul>
     </div>
     <div class="two">
