@@ -241,7 +241,7 @@
         ordemItens(cur.g).forEach(function (it) { var a = el("a", it[0] === file ? "on" : "", esc(it[1])); a.href = it[0] + ".html"; if (it[0] === file) a.setAttribute("aria-current", "page"); q.appendChild(a); });
         inn.appendChild(q);
       }
-      var mp = el("a", "site-btn site-mp", "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='7' height='7' rx='2'/><rect x='14' y='3' width='7' height='7' rx='2'/><rect x='3' y='14' width='7' height='7' rx='2'/><rect x='14' y='14' width='7' height='7' rx='2'/></svg><span class='t'>Menu principal</span>");
+      var mp = el("a", "site-btn site-mp", "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 10.5 12 3l9 7.5'/><path d='M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5'/></svg><span class='t'>Menu principal</span>");
       mp.href = "index.html#inicio"; mp.setAttribute("aria-label", "Menu principal"); mp.style.textDecoration = "none";
       mp.addEventListener("click", function (e) { try { sessionStorage.removeItem("index.tab"); } catch (x) {} if (file === "index") { e.preventDefault(); if (window.__mcGo) window.__mcGo("index.html"); else if (window.__mcHome) window.__mcHome(); } });
       inn.appendChild(mp);
