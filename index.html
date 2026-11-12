@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Meus Controles</title>
+<title>Central de Controles Pessoais</title>
 <meta name="theme-color" content="#2563EB"><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="firebase-config.js"></script><script src="sync.js" data-app="geral" data-show-user="1"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
@@ -64,6 +64,7 @@ a.lnk .ar{margin-left:auto;color:var(--gc);font-weight:700}
 .btn-org{flex:none;margin-left:auto;width:44px;height:44px;padding:0;justify-content:center;border-radius:14px;box-shadow:0 8px 18px -14px var(--gc)}
 .btn-org span{display:none}
 .gh h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(1.05rem,5vw,1.8rem)}
 .osh-v{position:fixed;inset:0;z-index:95;background:rgba(15,23,42,.38);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:of .16s ease}
 .osh{position:fixed;z-index:96;background:var(--surface);border:1px solid var(--line);box-shadow:0 30px 60px -20px rgba(15,23,42,.55);padding:8px;display:grid;gap:2px;width:290px;border-radius:18px;animation:op .2s cubic-bezier(.2,.8,.2,1)}
 .osh h4{margin:6px 10px 6px;font:800 .72rem var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
@@ -95,7 +96,7 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
 </style></head><body>
 <div class="wrap">
   <section class="home" id="home">
-    <div><h1>Meus Controles</h1><p class="sub">Escolha o módulo. Seus dados ficam salvos na sua conta e aparecem iguais no celular e no PC.</p></div>
+    <div><h1>Central de Controles Pessoais</h1><p class="sub">Escolha o módulo. Seus dados ficam salvos na sua conta e aparecem iguais no celular e no PC.</p></div>
     <div class="mods" id="mods"></div>
   </section>
   <section id="grupo" hidden style="display:grid;gap:16px">

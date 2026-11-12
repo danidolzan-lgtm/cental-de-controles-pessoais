@@ -130,6 +130,12 @@
       ".site-acct{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;border:1px solid var(--line,#DDE4F2);border-radius:10px;padding:10px 12px;background:var(--bg,#EEF3FC)}.site-acct .who{flex:1}" +
       ".site-acct .who{display:flex;align-items:center;gap:10px;min-width:0}.site-acct .who i{width:10px;height:10px;border-radius:50%;background:#22C55E;flex:none}" +
       ".site-acct .who>span{display:grid;min-width:0}.site-acct small{font-size:.72rem;color:var(--muted,#58668A);text-transform:uppercase;letter-spacing:.06em}.site-acct b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg,#13203B)}" +
+      ".site-inst{display:flex;align-items:center;gap:10px;flex:1 1 280px;min-width:0;border:1px solid var(--line,#DDE4F2);border-radius:10px;padding:8px 10px 8px 12px;background:var(--bg,#EEF3FC)}.site-inst[hidden]{display:none!important}" +
+      ".site-inst img{width:32px;height:32px;border-radius:8px;flex:none}.site-inst .tx{display:grid;flex:1;min-width:0}" +
+      ".site-inst small{font-size:.72rem;color:var(--muted,#58668A);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}.site-inst b{font-weight:600;color:var(--fg,#13203B);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
+      ".site-inst b.ios{white-space:normal;font-size:.86rem;line-height:1.3}.site-inst-b{appearance:none;flex:none;display:inline-flex;align-items:center;gap:6px;font:600 .9rem 'IBM Plex Sans',system-ui,sans-serif;color:#fff;background:#2563EB;border:1px solid #2563EB;border-radius:9px;padding:8px 14px;cursor:pointer;white-space:nowrap}.site-inst-b:hover{background:#1D4ED8;border-color:#1D4ED8}.site-inst-b svg{width:16px;height:16px}" +
+      ".site-h .site-brand .t{overflow:hidden;text-overflow:ellipsis;min-width:0}" +
+      "@media (max-width:999px){html[data-group] .site-brand .t{display:none}}" +
       ".site-out{appearance:none;font:600 .9rem 'IBM Plex Sans',system-ui,sans-serif;color:#E11D48;background:transparent;border:1px solid #E11D48;border-radius:9px;padding:8px 16px;cursor:pointer}.site-out:hover{background:#E11D48;color:#fff}" +
       /* menu: cartões por área, ícone e descrição em cada página */
       ".site-veil{position:fixed;inset:0;top:calc(var(--site-h) + env(safe-area-inset-top,0px));background:rgba(15,23,42,.34);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);z-index:79;animation:mcFade .18s ease}" +
@@ -224,7 +230,7 @@
         back.addEventListener("click", function () { var tb = cur ? cur.g.k : null; if (tb) goTab(tb); window.__mcGo ? window.__mcGo("index.html", { tab: tb }) : location.replace("index.html"); });
         inn.appendChild(back);
       }
-      inn.appendChild(el("a", "site-brand", "<span class='site-logo'>MC</span><span class='t'>Meus Controles</span>")).href = "index.html";
+      inn.appendChild(el("a", "site-brand", "<span class='site-logo'>MC</span><span class='t'>Central de Controles Pessoais</span>")).href = "index.html";
       var crumb = el("div", "site-crumb");
       if (cur) crumb.innerHTML = "<span class='sep'>/</span><a class='tag' href='index.html' data-k='" + cur.g.k + "' style='color:inherit;text-decoration:none'><i style='background:" + cur.g.c + "'></i>" + esc(cur.g.s) + "</a><span class='sep'>/</span><b>" + esc(cur.it[1]) + "</b>";
       inn.appendChild(crumb);
@@ -251,6 +257,21 @@
       });
       /* conta (e-mail e Sair) dentro do menu */
       var acct = el("div", "site-acct"); acct.hidden = true; home.appendChild(acct);
+      /* 12/11/2026: "Instalar app" fica dentro do menu (PC e celular), não mais solto na página inicial */
+      var inst = el("div", "site-inst"); inst.hidden = true; home.appendChild(inst);
+      window.__siteInst = function (modo, acao) {
+        if (!modo) { inst.hidden = true; inst.innerHTML = ""; return; }
+        inst.hidden = false;
+        var ic = "<img src='icon-192.png' alt='' width='32' height='32'>";
+        if (modo === "ios") {
+          inst.innerHTML = ic + "<span class='tx'><small>Instalar app</small><b class='ios'>Safari → Compartilhar ⬆️ → Adicionar à Tela de Início</b></span>";
+        } else {
+          inst.innerHTML = ic + "<span class='tx'><small>Instalar app</small><b>Abre como app</b></span>";
+          var bi = el("button", "site-inst-b", "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 4v11M7 10l5 5 5-5M5 20h14'/></svg>Instalar");
+          bi.type = "button"; bi.onclick = function () { setOpen(false); acao(); }; inst.appendChild(bi);
+        }
+      };
+      if (window.__siteInstPend) window.__siteInst.apply(null, window.__siteInstPend);
       window.__siteAcct = function (u, sair) {
         if (!u) { acct.hidden = true; btn.classList.remove("on-line"); return; }
         acct.hidden = false; btn.classList.add("on-line");
@@ -447,32 +468,16 @@
         }).catch(function () {});
       });
     }
-    /* botão "Instalar no celular" na página inicial */
+    /* "Instalar app" dentro do menu ☰ (todas as páginas, PC e celular) */
     var standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
-    var file0 = (decodeURIComponent(location.pathname).split("/").pop() || "index.html").replace(/\.html?$/i, "") || "index";
-    var celular = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (window.matchMedia && matchMedia("(pointer:coarse)").matches && !matchMedia("(pointer:fine)").matches);
-    if (standalone || file0 !== "index" || !celular) return;
+    if (standalone) return;
     var deferred = null;
-    var ios = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    function box() {
-      var b = document.getElementById("pwaInstall"); if (b) return b;
-      b = document.createElement("div"); b.id = "pwaInstall";
-      b.style.cssText = "display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px auto 0;padding:10px 12px;border-radius:10px;border:1px solid var(--line,#DDE4F2);background:var(--surface,#fff);font:14px/1.4 'IBM Plex Sans',system-ui,sans-serif;width:calc(100% - 32px);max-width:640px;box-sizing:border-box";
-      var w = document.querySelector(".wrap"); if (w) w.parentNode.insertBefore(b, w); else document.body.appendChild(b);
-      return b;
-    }
-    function mostrar() {
-      var b = box();
-      if (deferred) {
-        b.innerHTML = "<img src='icon-192.png' alt='' width='32' height='32' style='border-radius:8px'><span style='flex:1;min-width:160px'>Instale o Meus Controles no celular: abre como app e atualiza sozinho.</span><button type='button' style='font:600 14px system-ui,sans-serif;padding:8px 14px;border-radius:8px;border:0;background:#2563EB;color:#fff;cursor:pointer'>Instalar</button>";
-        b.querySelector("button").onclick = function () { deferred.prompt(); deferred.userChoice.finally(function () { deferred = null; b.remove(); }); };
-      } else if (ios) {
-        b.innerHTML = "<img src='icon-192.png' alt='' width='32' height='32' style='border-radius:8px'><span style='flex:1;min-width:160px'>Para instalar no iPhone: abra no <b>Safari</b>, toque em <b>Compartilhar</b> ⬆️ e depois em <b>Adicionar à Tela de Início</b>.</span>";
-      }
-    }
-    window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferred = e; if (document.body) mostrar(); else document.addEventListener("DOMContentLoaded", mostrar); });
-    window.addEventListener("appinstalled", function () { var b = document.getElementById("pwaInstall"); if (b) b.remove(); });
-    if (ios) { if (document.body) mostrar(); else document.addEventListener("DOMContentLoaded", mostrar); }
+    var ios = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+    function setInst() { var a = [].slice.call(arguments); if (window.__siteInst) window.__siteInst.apply(null, a); else window.__siteInstPend = a; }
+    function instalar() { if (!deferred) return; var d = deferred; d.prompt(); d.userChoice.finally(function () { deferred = null; setInst(null); }); }
+    window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferred = e; setInst("btn", instalar); });
+    window.addEventListener("appinstalled", function () { deferred = null; setInst(null); });
+    if (ios && !window.MSStream) setInst("ios");
   })();
 
   /* Quotex no Android: abre no Chrome (no app instalado ele abria dentro do próprio app). PC fica igual. */
