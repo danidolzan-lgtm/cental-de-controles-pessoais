@@ -31,6 +31,7 @@ h1{font-family:var(--f-display);font-weight:800;font-size:1.8rem;margin:0}
 .mod .go{position:relative;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:.88rem;color:var(--gc)}
 .mod .go i{font-style:normal;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--gc) 14%,transparent)}
 @media (max-width:760px){.mod{grid-template-columns:auto minmax(0,1fr);align-items:center;padding:16px;gap:4px 14px}.mod .gi{grid-row:1 / span 2;width:50px;height:50px}.mod .go{grid-column:1/-1;margin-top:8px}}
+@media (max-width:760px){.mod .gi{grid-row:auto}.mod b{align-self:center}.mod small{grid-column:1/-1;margin-top:6px}}
 /* dentro de um módulo */
 .bar{position:sticky;top:calc(var(--site-h,58px) + env(safe-area-inset-top,0px));z-index:5;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:6px 0}
 .btn-home{appearance:none;font:600 .92rem var(--f-body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
@@ -93,10 +94,11 @@ a.lnk .ar{margin-left:auto;color:var(--gc);font-weight:700}
 .tm button:hover,.tm .dg:hover{border-color:var(--gc);color:var(--gc)}
 a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:0 20px 40px -14px var(--gc);z-index:5;border-color:var(--gc)}
 @media (max-width:560px){.tiles.org .tm{top:6px;right:6px}.tm button,.tm .dg{width:26px;height:26px}}
+@media (max-width:560px){.gh,html .gh{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:6px 12px}.gh>div{display:contents}.gh h1{grid-column:2;grid-row:1;font-size:clamp(1.15rem,6vw,1.6rem)}.gh .gi{grid-column:1;grid-row:1}.gh .btn-org{grid-column:3;grid-row:1}.gh .sub{grid-column:1/-1;grid-row:2;margin:2px 0 0}}
 </style></head><body>
 <div class="wrap">
   <section class="home" id="home">
-    <div><h1>Central de Controles Pessoais</h1><p class="sub">Escolha o módulo. Seus dados ficam salvos na sua conta e aparecem iguais no celular e no PC.</p></div>
+    <div><h1>Central de Controles Pessoais</h1><p class="sub">Escolha o módulo. Seus dados ficam salvos na sua conta.</p></div>
     <div class="mods" id="mods"></div>
   </section>
   <section id="grupo" hidden style="display:grid;gap:16px">
@@ -110,7 +112,7 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
 <script>
 (function(){
   const MC=window.__MC||{GROUPS:[],ICO:{},DESC:{}};
-  const SUB={ob:"Quotex · M1 · os 5 operacionais",b3:"Mini índice e mini dólar",pes:"Rotina, casa e finanças"};
+  const SUB={ob:"Operacional, gerenciamento e mentalidade",b3:"Mini índice e mini dólar",pes:"Rotina, casa e finanças"};
   /* links viram cards junto com as páginas: [url, título, descrição, chave do link salvo, posição] — posição = depois de qual página ("" = no fim) */
   const IL=(d)=>"<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>"+d+"</svg>";
   const LICO={"Quotex":IL("<path d='M4 19l5-6 4 3 7-9'/><path d='M15 7h5v5'/>"),"Notícias":IL("<rect x='3' y='4' width='18' height='16' rx='3'/><path d='M7 9h10M7 13h10M7 17h6'/>"),"Claude":IL("<path d='M4 5h16v11H9l-5 4z'/>")};

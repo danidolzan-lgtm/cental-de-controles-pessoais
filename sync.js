@@ -137,6 +137,7 @@
       ".site-inst b.ios{white-space:normal;font-size:.86rem;line-height:1.3}.site-inst-b{appearance:none;flex:none;display:inline-flex;align-items:center;gap:6px;font:600 .9rem 'IBM Plex Sans',system-ui,sans-serif;color:#fff;background:#2563EB;border:1px solid #2563EB;border-radius:9px;padding:8px 14px;cursor:pointer;white-space:nowrap}.site-inst-b:hover{background:#1D4ED8;border-color:#1D4ED8}.site-inst-b svg{width:16px;height:16px}" +
       ".site-h .site-brand .t{overflow:hidden;text-overflow:ellipsis;min-width:0}" +
       "@media (max-width:999px){html[data-group] .site-brand .t{display:none}}" +
+      "html[data-page=index]:not([data-g]) .site-h a.site-mp{display:none!important}html[data-page=index]:not([data-g]) .site-mp+.site-btn{margin-left:auto}" +
       ".site-out{appearance:none;font:600 .9rem 'IBM Plex Sans',system-ui,sans-serif;color:#E11D48;background:transparent;border:1px solid #E11D48;border-radius:9px;padding:8px 16px;cursor:pointer}.site-out:hover{background:#E11D48;color:#fff}" +
       /* menu: cartões por área, ícone e descrição em cada página */
       ".site-veil{position:fixed;inset:0;top:calc(var(--site-h) + env(safe-area-inset-top,0px));background:rgba(15,23,42,.34);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);z-index:79;animation:mcFade .18s ease}" +
@@ -286,7 +287,13 @@
       veil.addEventListener("click", function () { setOpen(false); });
       function setOpen(o) { drop.hidden = !o; veil.hidden = !o; btn.setAttribute("aria-expanded", o ? "true" : "false"); document.documentElement.style.overflow = o ? "hidden" : ""; }
       btn.addEventListener("click", function (e) { e.stopPropagation(); setOpen(drop.hidden); });
-      document.addEventListener("click", function (e) { if (!drop.hidden && !h.contains(e.target)) setOpen(false); });
+      /* 12/11/2026: clicar em qualquer lugar fora dos cartões e botões fecha o menu (barra do topo, espaços do painel, fundo) */
+      document.addEventListener("click", function (e) {
+        if (drop.hidden) return;
+        var t = e.target;
+        if (t.closest && t.closest(".site-g, .site-acct, .site-inst, a, button, input, select, textarea, label")) return;
+        setOpen(false);
+      });
       document.addEventListener("keydown", function (e) { if (e.key === "Escape") setOpen(false); });
       var tag = crumb.querySelector("[data-k]"); if (tag) tag.addEventListener("click", function () { goTab(tag.dataset.k); });
       document.body.insertBefore(h, document.body.firstChild);
