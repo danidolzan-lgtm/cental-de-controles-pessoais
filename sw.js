@@ -1,7 +1,7 @@
 /* Service worker da Central de Controles Pessoais.
    Sempre busca a versão nova no servidor (GitHub) primeiro; o cache só é usado sem internet.
    Assim, cada vez que você atualiza o git, o app no celular já abre com a versão nova. */
-const CACHE = "meus-controles-v2";
+const CACHE = "meus-controles-v3";
 
 self.addEventListener("install", e => { self.skipWaiting(); });
 self.addEventListener("activate", e => {

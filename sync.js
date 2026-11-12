@@ -113,6 +113,7 @@
       ".site-h .site-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--fg,#13203B);font:800 1.05rem 'Archivo',system-ui,sans-serif;white-space:nowrap;flex:none}" +
       ".site-logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;display:grid;place-items:center;font-size:.78rem;letter-spacing:.02em;box-shadow:0 4px 12px -4px rgba(37,99,235,.6)}" +
       ".site-h .site-logo{color:#fff!important}" +
+      ".site-logo svg{width:24px;height:24px;display:block}" +
       ".site-logo{transition:transform .18s ease,box-shadow .18s ease}.site-h .site-brand .t{transition:color .18s ease}" +
       ".site-h .site-brand:hover .site-logo{transform:translateY(-2px) rotate(-6deg) scale(1.06);box-shadow:0 8px 18px -6px rgba(37,99,235,.7)}.site-h .site-brand:hover .t{color:var(--accent,#2563EB)}" +
       ".site-crumb{display:flex;gap:7px;align-items:center;color:var(--muted,#58668A);font-size:.92rem;min-width:0;white-space:nowrap;overflow:hidden}" +
@@ -230,7 +231,7 @@
         back.addEventListener("click", function () { var tb = cur ? cur.g.k : null; if (tb) goTab(tb); window.__mcGo ? window.__mcGo("index.html", { tab: tb }) : location.replace("index.html"); });
         inn.appendChild(back);
       }
-      inn.appendChild(el("a", "site-brand", "<span class='site-logo'>MC</span><span class='t'>Central de Controles Pessoais</span>")).href = "index.html";
+      inn.appendChild(el("a", "site-brand", "<span class='site-logo' aria-hidden='true'><svg viewBox='0 0 32 32' fill='none' stroke='#fff' stroke-linecap='round' stroke-linejoin='round'><circle cx='16' cy='16' r='10' stroke-opacity='.3' stroke-width='2.6'/><circle cx='16' cy='16' r='10' stroke-width='2.6' stroke-dasharray='46 63' transform='rotate(-90 16 16)'/><path d='M11.6 16.4l3 2.9 5.8-6.3' stroke-width='2.8'/><circle cx='25.6' cy='6.6' r='1.3' fill='#fff' stroke='none'/></svg></span><span class='t'>Central de Controles Pessoais</span>")).href = "index.html";
       var crumb = el("div", "site-crumb");
       if (cur) crumb.innerHTML = "<span class='sep'>/</span><a class='tag' href='index.html' data-k='" + cur.g.k + "' style='color:inherit;text-decoration:none'><i style='background:" + cur.g.c + "'></i>" + esc(cur.g.s) + "</a><span class='sep'>/</span><b>" + esc(cur.it[1]) + "</b>";
       inn.appendChild(crumb);
@@ -453,8 +454,8 @@
     var hd = document.head || document.documentElement;
     function tag(t, at) { var e = document.createElement(t); for (var k in at) e.setAttribute(k, at[k]); hd.appendChild(e); return e; }
     if (!document.querySelector("link[rel=manifest]")) tag("link", { rel: "manifest", href: "manifest.webmanifest" });
-    if (!document.querySelector("link[rel=apple-touch-icon]")) tag("link", { rel: "apple-touch-icon", href: "apple-touch-icon.png" });
-    if (!document.querySelector("link[rel=icon]")) tag("link", { rel: "icon", type: "image/png", href: "icon-192.png" });
+    if (!document.querySelector("link[rel=apple-touch-icon]")) tag("link", { rel: "apple-touch-icon", href: "apple-touch-icon.png?v=2" });
+    if (!document.querySelector("link[rel=icon]")) tag("link", { rel: "icon", type: "image/png", href: "icon-192.png?v=2" });
     if (!document.querySelector("meta[name=theme-color]")) tag("meta", { name: "theme-color", content: "#2563EB" });
     tag("meta", { name: "apple-mobile-web-app-capable", content: "yes" });
     tag("meta", { name: "mobile-web-app-capable", content: "yes" });
