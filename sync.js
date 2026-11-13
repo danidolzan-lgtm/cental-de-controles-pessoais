@@ -276,7 +276,7 @@
       if (window.__siteInstPend) window.__siteInst.apply(null, window.__siteInstPend);
       window.__siteAcct = function (u, sair) {
         if (!u) { acct.hidden = true; btn.classList.remove("on-line"); return; }
-        acct.hidden = false; btn.classList.add("on-line");
+        acct.hidden = false;
         acct.innerHTML = "<span class='who'><i></i><span><small>Conectado</small><b></b></span></span>";
         acct.querySelector("b").textContent = u.email || "sua conta";
         var out = el("button", "site-out", "Sair"); out.type = "button"; out.onclick = sair; acct.appendChild(out);
