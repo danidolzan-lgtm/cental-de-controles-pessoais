@@ -28,6 +28,8 @@ h2::first-letter{text-transform:uppercase}
 .tabs .h{display:block;font-family:var(--f-num);font-weight:400;font-size:.75rem;opacity:.8}
 .q{display:grid;gap:8px;padding-block:10px;border-bottom:1px solid var(--line)}
 .q:last-of-type{border-bottom:0}
+/* 16/11/2026: no PC o Sim/Não fica ao lado da pergunta (coluna mais curta, alinhada com o calendário) */
+@media (min-width:900px){.q{grid-template-columns:minmax(0,1fr) auto;column-gap:18px;align-items:center}.q .k{grid-column:1/-1}.q .yn{align-self:center}}
 .q .k{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
 .q p{margin:0;max-width:60ch}
 .yn{display:flex;gap:6px}

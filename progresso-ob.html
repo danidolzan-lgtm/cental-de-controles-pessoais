@@ -36,6 +36,8 @@ label{display:grid;gap:3px;font-size:.72rem;color:var(--muted);text-transform:up
 input{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:140px}
 input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .ladder{display:grid;gap:6px}
+/* 16/11/2026: no PC a escada fica em colunas (de cima para baixo), sem linhas compridas e vazias */
+@media (min-width:900px){.ladder{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(5,auto);grid-auto-flow:column;column-gap:10px}}
 .step{appearance:none;font:inherit;color:var(--fg);text-align:left;cursor:pointer;display:grid;grid-template-columns:2rem 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:11px 12px}
 .step .n{font-family:var(--f-num);font-size:.8rem;color:var(--muted)}
 .step .b{font-family:var(--f-display);font-weight:700;font-size:1.05rem}

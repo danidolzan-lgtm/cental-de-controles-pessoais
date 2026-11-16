@@ -170,7 +170,9 @@
       "@media (max-width:640px){.month .dow{grid-template-columns:repeat(5,minmax(0,1fr))!important}.month .dow>span:first-child,.month .dow>span:last-child{display:none}" +
         ".month .grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:6px!important}.month .grid>.day.we{display:none!important}.month .grid>.day.blank:first-child{display:none!important}.month .grid>.fds-col{display:none!important}" +
         ".month .day .v{font-size:.72rem!important;letter-spacing:-.02em}.month .day .dots{gap:2px!important;flex-wrap:wrap}.month .day .dot{width:6px!important;height:6px!important}" +
-        ".legend .we-l{display:none}}" +
+        ".legend .we-l,.legend span:has(>i.we){display:none}" +
+        /* períodos (2026 · jan–mar · abr–jun) numa linha só, rolando para o lado */
+        ".per,#per.chips{flex-wrap:nowrap!important;max-width:calc(100vw - 32px);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.per::-webkit-scrollbar,#per.chips::-webkit-scrollbar{display:none}.per>*,#per.chips>*{flex:none}}" +
       ".day.we,.legend i.we{background-image:repeating-linear-gradient(135deg,transparent 0 5px,rgba(120,135,170,.22) 5px 6.5px)!important}" +
       ".site-back{margin-left:0;padding:8px 12px 8px 8px}.site-back svg{width:18px;height:18px}" +
       "@media (max-width:560px){.site-back .t{display:inline!important}.site-crumb .tag,.site-crumb .sep:first-child{display:none}}" +

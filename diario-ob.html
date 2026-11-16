@@ -68,6 +68,8 @@ td{font-family:var(--f-num);font-variant-numeric:tabular-nums}
 td:first-child{font-family:var(--f-body);white-space:normal}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:12px}
 .two>*{min-width:0}
+/* 16/11/2026: em tela larga os meses ficam 2 por linha (calendário mais baixo, alinhado com as tabelas ao lado) */
+@media (min-width:1200px){#cal{display:block!important;columns:2;column-gap:22px}#cal>*{break-inside:avoid;margin-bottom:20px}}
 .ov{position:fixed;inset:0;background:rgba(10,16,30,.55);display:flex;align-items:flex-end;justify-content:center;z-index:10}
 @media (min-width:640px){.ov{align-items:center}}
 .modal{background:var(--surface);color:var(--fg);width:100%;max-width:580px;max-height:92vh;overflow:auto;border-radius:14px 14px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:14px}

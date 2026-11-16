@@ -32,9 +32,14 @@ th{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mu
 th:first-child,td:first-child,th:last-child,td:last-child{text-align:left}
 td{font-family:var(--f-num);font-variant-numeric:tabular-nums;white-space:nowrap}
 td:first-child{font-family:var(--f-body);font-weight:600}
-td:last-child{font-family:var(--f-body);white-space:normal;min-width:16rem;color:var(--muted);font-size:.8rem}
+td:last-child{font-family:var(--f-body);white-space:normal;min-width:26rem;color:var(--muted);font-size:.8rem}
 td small{display:block;font-family:var(--f-body);color:var(--muted);font-size:.74rem;font-weight:400}
 tr.best td:not(:last-child){color:var(--win)}
+/* 16/11/2026: nome da administradora fixo ao rolar a tabela; dica de arrastar só no celular */
+#cmp tr>*:first-child{position:sticky;left:0;background:var(--surface);z-index:1;box-shadow:1px 0 0 var(--line)}
+.arrasta{display:none;margin:-4px 0 0;font-size:.75rem}
+details.hint summary{cursor:pointer;font-weight:600}
+@media (max-width:820px){.arrasta{display:block}}
 .ni{color:var(--muted);font-family:var(--f-body);font-style:italic}
 .alert{color:var(--warn)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:12px}
@@ -59,7 +64,8 @@ label textarea{resize:vertical;min-height:3.2em}
   <section class="panel">
     <h3>Comparação</h3>
     <div class="tbl"><table id="cmp"></table></div>
-    <p class="hint">Ordenado pelo que você paga a mais que o crédito. "Total das parcelas" é só a soma das parcelas informadas (parcela × prazo). Nos planos com parcela reduzida, a soma usa a parcela integral, porque a administradora não informou quanto a parcela fica depois da contemplação. A taxa ao mês aparece também no total do plano (taxa × prazo) para dar para comparar. "Não informado" é o que a administradora não mostrou.</p>
+    <p class="hint arrasta">Arraste a tabela para o lado para ver tudo →</p>
+    <details class="hint"><summary>Entenda a comparação</summary>Ordenado pelo que você paga a mais que o crédito. "Total das parcelas" é só a soma das parcelas informadas (parcela × prazo). Nos planos com parcela reduzida, a soma usa a parcela integral, porque a administradora não informou quanto a parcela fica depois da contemplação. A taxa ao mês aparece também no total do plano (taxa × prazo) para dar para comparar. "Não informado" é o que a administradora não mostrou.</details>
   </section>
 
   <div class="top"><h3>Propostas</h3><button type="button" class="btn" id="novo">+ Nova proposta</button></div>

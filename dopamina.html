@@ -117,10 +117,20 @@ img,svg{max-width:100%}
     <div><span class="lbl">Melhor</span><span class="big" id="sBest">0</span></div>
   </div>
   </aside>
-  <main class="main panel">
+  <main class="main">
+  <section class="panel calp">
     <div class="calhead"><h2>Calendário</h2><div class="legend"><span><i class="w"></i>Acertei</span><span><i class="l"></i>Errei</span><span><i class="t"></i>Hoje</span><span><i class="we"></i>Fim de semana (travado)</span></div></div>
     <div id="cal"></div>
+  </section>
+  <div class="duo" id="duo"></div>
   </main>
+<style>.calp{display:grid;gap:14px}.duo:empty{display:none}.duo .check{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:14px}.duo .check>h2,.duo .check>.hint{grid-column:1/-1}</style>
+<script>
+/* 16/11/2026: no PC o check-in vai para baixo do calendário, para as duas colunas ficarem equilibradas */
+(function(){const side=document.querySelector(".side"),duo=document.getElementById("duo"),ck=document.querySelector(".panel.check"),sc=document.querySelector(".panel.score"),mq=matchMedia("(min-width:900px)");
+ function arruma(){if(mq.matches){duo.appendChild(ck);}else{side.insertBefore(ck,sc);}}
+ arruma();(mq.addEventListener?mq.addEventListener("change",arruma):mq.addListener(arruma));})();
+</script>
 </div>
 <style>.per{display:flex;gap:6px;flex-wrap:wrap}.per button{appearance:none;font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap}.per button b{font-weight:700}.per button.on{background:var(--accent);border-color:var(--accent);color:#fff}</style>
 <script>
