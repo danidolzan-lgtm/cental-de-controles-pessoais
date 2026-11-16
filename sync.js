@@ -138,7 +138,7 @@
       ".site-h .site-brand .t{overflow:hidden;text-overflow:ellipsis;min-width:0}" +
       "@media (max-width:999px){html[data-group] .site-brand .t{display:none}}" +
       "html[data-page=index]:not([data-g]) .site-h a.site-mp{display:none!important}html[data-page=index]:not([data-g]) .site-mp+.site-btn{margin-left:auto}" +
-      ".site-out{appearance:none;font:600 .9rem 'IBM Plex Sans',system-ui,sans-serif;color:#E11D48;background:transparent;border:1px solid #E11D48;border-radius:9px;padding:8px 16px;cursor:pointer}.site-out:hover{background:#E11D48;color:#fff}" +
+      ".site-bk{appearance:none;font:600 .9rem 'IBM Plex Sans',system-ui,sans-serif;color:var(--accent,#2563EB);background:transparent;border:1px solid currentColor;border-radius:9px;padding:8px 14px;cursor:pointer;flex:none;white-space:nowrap}.site-bk[disabled]{opacity:.6;cursor:wait}.site-out{appearance:none;font:600 .9rem 'IBM Plex Sans',system-ui,sans-serif;color:#E11D48;background:transparent;border:1px solid #E11D48;border-radius:9px;padding:8px 16px;cursor:pointer}.site-out:hover{background:#E11D48;color:#fff}" +
       /* menu: cartões por área, ícone e descrição em cada página */
       ".site-veil{position:fixed;inset:0;top:calc(var(--site-h) + env(safe-area-inset-top,0px));background:rgba(15,23,42,.34);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);z-index:79;animation:mcFade .18s ease}" +
       ".site-drop{position:absolute;left:0;right:0;top:100%;background:linear-gradient(180deg,var(--surface,#fff),var(--bg,#EEF3FC));border-bottom:1px solid var(--line,#DDE4F2);box-shadow:0 30px 60px -30px rgba(19,32,59,.55);max-height:calc(100dvh - var(--site-h) - env(safe-area-inset-top,0px));overflow:auto;overscroll-behavior:contain;animation:mcDrop .22s cubic-bezier(.2,.8,.2,1)}" +
@@ -164,9 +164,11 @@
       "@media (prefers-reduced-motion:reduce){.site-drop,.site-g,.site-veil{animation:none}}" +
       ".site-crumb,.site-crumb *{text-transform:none!important;letter-spacing:normal!important}" +
       "@media (max-width:900px){.kpi .big{font-size:1.3rem!important;word-break:keep-all}}" +
+      /* títulos de cartões nunca quebram de linha */
+      ".kpi .lbl,.card>.lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:100%}" +
       /* calendários no celular: só seg–sex (fim de semana já é travado), células mais largas */
       "@media (max-width:640px){.month .dow{grid-template-columns:repeat(5,minmax(0,1fr))!important}.month .dow>span:first-child,.month .dow>span:last-child{display:none}" +
-        ".month .grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:6px!important}.month .grid>.day.we{display:none!important}.month .grid>.day.blank:first-child{display:none!important}" +
+        ".month .grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:6px!important}.month .grid>.day.we{display:none!important}.month .grid>.day.blank:first-child{display:none!important}.month .grid>.fds-col{display:none!important}" +
         ".month .day .v{font-size:.72rem!important;letter-spacing:-.02em}.month .day .dots{gap:2px!important;flex-wrap:wrap}.month .day .dot{width:6px!important;height:6px!important}" +
         ".legend .we-l{display:none}}" +
       ".day.we,.legend i.we{background-image:repeating-linear-gradient(135deg,transparent 0 5px,rgba(120,135,170,.22) 5px 6.5px)!important}" +
@@ -279,6 +281,8 @@
         acct.hidden = false;
         acct.innerHTML = "<span class='who'><i></i><span><small>Conectado</small><b></b></span></span>";
         acct.querySelector("b").textContent = u.email || "sua conta";
+        var bk = el("button", "site-bk", "Backup"); bk.type = "button"; bk.title = "Baixa um arquivo com todos os seus dados (backup)";
+        bk.onclick = function () { if (window.__siteBackup) window.__siteBackup(bk); }; acct.appendChild(bk);
         var out = el("button", "site-out", "Sair"); out.type = "button"; out.onclick = sair; acct.appendChild(out);
       };
       if (window.__siteAcctPend) window.__siteAcct.apply(null, window.__siteAcctPend);
@@ -599,8 +603,38 @@
       err.textContent = ""; auth.createUserWithEmailAndPassword(em.value.trim(), pw.value).catch(function (e) { err.textContent = explain(e); });
     };
   }
+  /* 16/11/2026: backup — baixa um .json com todos os dados da conta (todos os controles) */
+  var BK = {
+    "analise-b3": ["analises2"], "analise-ob": ["analises2"], "checklist-b3n": ["dias"], "checklist-ob3": ["dias"],
+    "compras": ["itens"], "consorcio": ["propostas", "config/propostas"], "diario-b3n": ["dias", "config/geral"], "diario-ob3": ["dias", "config/geral"],
+    "dopamina-b3n": ["dias"], "dopamina-ob3": ["dias"], "exercicios2": ["dias", "config/geral"], "ir-b3n": ["meses"], "ir-ob3": ["meses"],
+    "limpeza": ["lotes"], "lucro-b3": ["dias"], "lucro-ob2": ["meses"], "notas": ["notas", "blocos"], "oracao": ["consagracoes"],
+    "progresso-b3m": ["estado/progresso", "estado/simulador"], "progresso-ob2": ["estado/progresso", "estado/simulador"], "receitas": ["receitas"], "salario": ["meses"]
+  };
+  function backup(uid, btn) {
+    var txt = btn ? btn.textContent : ""; if (btn) { btn.disabled = true; btn.textContent = "Baixando…"; }
+    var out = { conta: (auth.currentUser && auth.currentUser.email) || "", gerado: new Date().toISOString(), apps: {} }, jobs = [];
+    Object.keys(BK).forEach(function (app) {
+      var base = "users/" + uid + "/apps/" + app + "/"; out.apps[app] = {};
+      BK[app].forEach(function (p) {
+        var isDoc = p.split("/").length % 2 === 0;
+        jobs.push((isDoc ? fs.doc(base + p).get() : fs.collection(base + p).get()).then(function (r) {
+          if (isDoc) { if (r.exists) out.apps[app][p] = r.data(); }
+          else { var m = {}; r.forEach(function (d) { m[d.id] = d.data(); }); if (r.size) out.apps[app][p] = m; }
+        }).catch(function () {}));
+      });
+    });
+    return Promise.all(jobs).then(function () {
+      var j = JSON.stringify(out, function (k, v) { return v && typeof v.toDate === "function" ? v.toDate().toISOString() : v; }, 1);
+      var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([j], { type: "application/json" }));
+      var d = new Date(); a.download = "controles-backup-" + d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0") + ".json";
+      document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+      if (window.ui && ui.toast) ui.toast("✓ Cópia dos dados baixada");
+    }).finally(function () { if (btn) { btn.disabled = false; btn.textContent = txt; } });
+  }
   function showUser(u) {
     if (bar) bar.hidden = true;
+    window.__siteBackup = function (btn) { return backup(u.uid, btn); };
     var sair = function () { auth.signOut().then(function () { location.reload(); }); };
     if (window.__siteAcct) window.__siteAcct(u, sair); else window.__siteAcctPend = [u, sair];
     return;
@@ -621,4 +655,23 @@
     };
     if (document.body) go(); else document.addEventListener("DOMContentLoaded", go);
   });
+})();
+
+/* Calendários: marca as casas de sábado/domingo pela coluna (inclui dias passados/antes do início),
+   para que no celular (seg–sex) nenhum dia saia da coluna certa. */
+(function () {
+  function marca() {
+    document.querySelectorAll(".month .grid").forEach(function (g) {
+      var k = 0;
+      Array.prototype.forEach.call(g.children, function (c) {
+        if (!c.classList || !c.classList.contains("day")) return;
+        var col = k % 7; k++;
+        c.classList.toggle("fds-col", col === 0 || col === 6);
+      });
+    });
+  }
+  var t = null;
+  function agenda() { if (t) return; t = setTimeout(function () { t = null; marca(); }, 0); }
+  function liga() { marca(); new MutationObserver(agenda).observe(document.body, { childList: true, subtree: true }); }
+  if (document.body) liga(); else document.addEventListener("DOMContentLoaded", liga);
 })();

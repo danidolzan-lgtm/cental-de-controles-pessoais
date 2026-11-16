@@ -46,6 +46,9 @@ p{margin:0}
 nav.tabs{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:48px;z-index:2;background:var(--bg);padding-block:8px}
 nav.tabs a{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;padding:6px 12px;text-decoration:none;font-weight:600;font-size:.88rem}
 nav.tabs a:hover{border-color:var(--accent);color:var(--accent)}
+nav.tabs a.on{background:var(--accent);border-color:var(--accent);color:#fff}
+/* 16/11/2026: no celular as seções ficam numa linha só, rolando para o lado */
+@media (max-width:640px){nav.tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-inline:-4px;padding-inline:4px}nav.tabs::-webkit-scrollbar{display:none}nav.tabs a{flex:none;white-space:nowrap}}
 ul,ol{margin:0;padding-left:20px;display:grid;gap:4px}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:12px}
 .box{border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:8px;min-width:0}
@@ -448,7 +451,7 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
   <!-- RISCO -->
   <section class="panel" id="risco">
     <h2>Risco por operação</h2>
-    <p>Coloque o tamanho do stop em pontos e veja quanto você arrisca e quanto ganha no alvo. Os valores ficam salvos na sua conta.</p>
+    <p>Coloque o tamanho do stop em pontos e veja quanto você arrisca e quanto ganha no alvo. Os valores vêm do seu Progresso B3.</p>
     <div class="calc">
       <label>Ativo<select id="rAtivo"><option value="WIN">WIN (R$ 0,20/ponto)</option><option value="WDO">WDO (R$ 10/ponto)</option></select></label>
       <label>Contratos<input id="rCt" type="number" inputmode="numeric" value="1" min="1" step="1"></label>
@@ -459,8 +462,9 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <div class="kpi"><span class="lbl">Risco no stop</span><b id="rRisco" class="neg">—</b></div>
       <div class="kpi"><span class="lbl">Ganho no alvo</span><b id="rGanho" class="pos">—</b></div>
       <div class="kpi"><span class="lbl">Alvo em pontos</span><b id="rAlvo">—</b></div>
-      <div class="kpi"><span class="lbl">Acerto mínimo p/ empatar</span><b id="rBe">—</b></div>
+      <div class="kpi"><span class="lbl" title="Acerto mínimo p/ empatar">Acerto p/ empatar</span><b id="rBe">—</b></div>
     </div>
+    <p class="hint" id="rProg"></p>
     <p class="hint" id="rAviso"></p>
     <div class="box no">
       <h3>Regras de cada sessão</h3>
@@ -624,7 +628,6 @@ const PV={WIN:0.2,WDO:10}, LIM={WIN:150,WDO:5}, DEF={WIN:150,WDO:5};
 const brl=v=>v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const num=v=>v.toLocaleString("pt-BR",{maximumFractionDigits:1});
 const $=id=>document.getElementById(id), LS="manualB3.risco.v2";
-try{const sv=JSON.parse(localStorage.getItem(LS)||"{}");["rAtivo","rCt","rStop","rMult"].forEach(k=>{if(sv[k]!=null)$(k).value=sv[k]})}catch(e){}
 function risco(){
   const a=$("rAtivo").value, ct=Math.max(0,parseFloat($("rCt").value)||0), st=Math.max(0,parseFloat($("rStop").value)||0), m=Math.max(0,parseFloat($("rMult").value)||0);
   const r=st*PV[a]*ct;
@@ -633,14 +636,36 @@ function risco(){
   $("rAlvo").textContent=num(st*m)+" pts";
   $("rBe").textContent=m>0?(100/(1+m)).toFixed(1).replace(".",",")+"%":"—";
   $("rAviso").textContent=st>LIM[a]?`Stop acima do limite do manual (${a}: ${LIM[a]} pontos). Pela regra, fique de fora.`:"";
-  try{localStorage.setItem(LS,JSON.stringify({rAtivo:a,rCt:$("rCt").value,rStop:$("rStop").value,rMult:$("rMult").value}))}catch(e){}
 }
-let rDb=null,rT=null;
-function rSalvar(){clearTimeout(rT);rT=setTimeout(async()=>{if(rDb){try{await rDb.doc("config/risco2").set({rAtivo:$("rAtivo").value,rCt:$("rCt").value,rStop:$("rStop").value,rMult:$("rMult").value});window.ui&&ui.toast("✓ Salvo")}catch(e){}}},600)}
-["rAtivo","rCt","rStop","rMult"].forEach(id=>$(id).addEventListener("change",rSalvar));
-(async()=>{try{rDb=window.claude?await window.claude.use("db"):null}catch(e){}if(rDb)rDb.doc("config/risco2").onSnapshot(d=>{if(!d.exists)return;const v=d.data();["rAtivo","rCt","rStop","rMult"].forEach(k=>{if(v[k]!=null&&document.activeElement!==$(k))$(k).value=v[k]});risco()},()=>{})})();
+/* 16/11/2026: ativo, contratos, stop e alvo vêm do Progresso B3 (escada + simulador), como no Diário e no Manual OB.
+   Mudar aqui é só para testar: não salva. */
+const PLV3=[500,1000,3000,5000,7000,10000,12000,15000,20000,25000,30000,35000,40000,50000,60000,70000,80000,90000,100000];
+const PCT3=[1,2,3,5,7,10,12,15,20,25,30,35,40,50,60,70,80,90,100];
+let pgSt=null,pgSim=null;
+function rDoProg(){
+  const out={};
+  if(pgSt){const c=new Set(pgSt.conquistados||[]);let last=-1;PLV3.forEach((v,i)=>{if(c.has(i))last=i});out.rCt=last>=0?PCT3[last]:1}
+  if(pgSim){if(pgSim.ativo==="WIN"||pgSim.ativo==="WDO")out.rAtivo=pgSim.ativo;if(+pgSim.stopPts>0)out.rStop=+pgSim.stopPts;if(+pgSim.mult>0)out.rMult=+pgSim.mult}
+  const a=document.activeElement;Object.keys(out).forEach(k=>{if(a!==$(k))$(k).value=out[k]});
+  const h=$("rProg");if(h)h.textContent=(pgSt||pgSim)?"Puxa do Progresso B3: "+$("rAtivo").value+", "+$("rCt").value+" contrato(s), stop "+num(+$("rStop").value||0)+" pts, alvo "+num(+$("rMult").value||0)+"x. Mudar aqui é só teste (não salva).":"";
+  risco();
+}
+try{pgSt=JSON.parse(localStorage.getItem("progressoB3m.v1")||"null")}catch(e){}
+try{pgSim=JSON.parse(localStorage.getItem("simuladorB3.v1")||"null")}catch(e){}
+rDoProg();
+(async()=>{let d=null;try{d=window.claude?await window.claude.use("db"):null}catch(e){}if(!d||!d.app)return;const P=d.app("progresso-b3m");
+  P.doc("estado/progresso").onSnapshot(x=>{pgSt=x.exists?x.data():pgSt;rDoProg()},()=>{});
+  P.doc("estado/simulador").onSnapshot(x=>{pgSim=x.exists?x.data():pgSim;rDoProg()},()=>{});})();
 $("rAtivo").addEventListener("change",()=>{$("rStop").value=DEF[$("rAtivo").value];risco()});
 ["rCt","rStop","rMult"].forEach(id=>$(id).addEventListener("input",risco)); risco();
 
+</script>
+<script>
+/* 16/11/2026: marca a seção em que você está e leva o botão dela para a vista */
+(function(){const nav=document.querySelector("nav.tabs");if(!nav||!("IntersectionObserver" in window))return;
+ const links=[...nav.querySelectorAll('a[href^="#"]')],secs=links.map(a=>document.querySelector(a.getAttribute("href"))).filter(Boolean);let cur=null;
+ const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const a=nav.querySelector('a[href="#'+e.target.id+'"]');if(a&&a!==cur){if(cur)cur.classList.remove("on");a.classList.add("on");cur=a;
+   const r=a.getBoundingClientRect(),n=nav.getBoundingClientRect();if(r.left<n.left||r.right>n.right)nav.scrollTo({left:a.offsetLeft-nav.offsetLeft-16,behavior:"smooth"})}}})},{rootMargin:"-35% 0px -60% 0px"});
+ secs.forEach(s=>io.observe(s));})();
 </script>
 </body></html>

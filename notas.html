@@ -1,4 +1,5 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2563EB"><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="firebase-config.js"></script><script src="sync.js" data-app="notas"></script><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{overflow-x:hidden}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.voltar{display:inline-block;margin:12px 16px 0;font:600 14px system-ui,sans-serif;color:inherit;opacity:.7;text-decoration:none}</style><title>Notas</title></head><body><a class="voltar" href="index.html">← Central de Controles Pessoais</a>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2563EB"><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="firebase-config.js"></script><script src="sync.js" data-app="notas"></script><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{overflow-x:hidden}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.voltar{display:inline-block;margin:12px 16px 0;font:600 14px system-ui,sans-serif;color:inherit;opacity:.7;text-decoration:none}.nt{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+</style><title>Notas</title></head><body><a class="voltar" href="index.html">← Central de Controles Pessoais</a>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 /* Layout: bloco de notas — vários blocos (cadernos) em abas; notas em lista ou em blocos (cartões); fixar, cor, lista de tarefas, arrastar para organizar e para mover de bloco. */
@@ -268,6 +269,31 @@ $("area").addEventListener("change",e=>{const l=e.target.closest("[data-nck]");i
   it.ok=true;salvarNota(n);setTimeout(renderNotas,220);window.ui&&ui.toast("✓ Item feito")});
 $("area").addEventListener("click",e=>{if(e.target.closest("[data-nck]")||e.target.closest(".drag"))return;const c=e.target.closest(".nt");if(c&&!c._arrastou)abrir(c.dataset.id)});
 $("area").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.classList.contains("nt"))abrir(e.target.dataset.id)});
+
+/* ---------- 16/11/2026: clicar e segurar numa nota (ou botão direito no PC) abre o menu com Excluir ---------- */
+let LP=null;
+function menuNota(id){
+  const n=notas.find(x=>x.id===id);if(!n)return;
+  const {v,fe}=janela("<h2>"+esc(n.titulo||(n.tipo==="lista"?"Lista":"Sem título"))+"</h2><div class='acts'>"+
+    "<button type='button' class='btn' data-a='abrir'>✏️ Abrir nota</button>"+
+    "<button type='button' class='btn' data-a='pin'>📌 "+(n.fixa?"Desafixar":"Fixar no topo")+"</button>"+
+    "<button type='button' class='btn danger' data-a='del'>🗑 Excluir nota</button></div><div class='row'><button type='button' class='btn' data-x>Fechar</button></div>");
+  const t0=Date.now();v.addEventListener("click",e=>{if(Date.now()-t0<450){e.stopImmediatePropagation();e.preventDefault()}},true);
+  v.querySelector("[data-x]").onclick=fe;
+  v.querySelector(".acts").onclick=e=>{const a=e.target.closest("[data-a]");if(!a)return;const ac=a.dataset.a;fe();
+    if(ac==="abrir")abrir(id);
+    if(ac==="pin"){n.fixa=!n.fixa;salvarNota(n);render();window.ui&&ui.toast(n.fixa?"📌 Fixada no topo":"Desafixada")}
+    if(ac==="del"){const copia=JSON.parse(JSON.stringify(n));apagarNota(n.id);render();desfazer("Nota excluída",()=>{notas.push(copia);salvarNota(copia);render()})}};
+}
+$("area").addEventListener("pointerdown",e=>{
+  if(e.button>0||e.target.closest(".drag")||e.target.closest("[data-nck]"))return;
+  const c=e.target.closest(".nt");if(!c)return;
+  const x0=e.clientX,y0=e.clientY;
+  LP={c,x0,y0,t:setTimeout(()=>{if(!LP)return;LP=null;c._arrastou=true;setTimeout(()=>{c._arrastou=false},450);try{navigator.vibrate&&navigator.vibrate(30)}catch(x){}menuNota(c.dataset.id)},550)};
+});
+document.addEventListener("pointermove",e=>{if(LP&&Math.hypot(e.clientX-LP.x0,e.clientY-LP.y0)>10){clearTimeout(LP.t);LP=null}});
+["pointerup","pointercancel","scroll"].forEach(ev=>document.addEventListener(ev,()=>{if(LP){clearTimeout(LP.t);LP=null}},true));
+$("area").addEventListener("contextmenu",e=>{const c=e.target.closest(".nt");if(!c)return;e.preventDefault();if(LP){clearTimeout(LP.t);LP=null}if(!c._arrastou){c._arrastou=true;setTimeout(()=>{c._arrastou=false},450);menuNota(c.dataset.id)}});
 
 /* ---------- arrastar: muda a ordem e solta num bloco para mover ---------- */
 let D=null;

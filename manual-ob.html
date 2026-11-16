@@ -46,6 +46,9 @@ p{margin:0}
 nav.tabs{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:48px;z-index:2;background:var(--bg);padding-block:8px}
 nav.tabs a{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;padding:6px 12px;text-decoration:none;font-weight:600;font-size:.88rem}
 nav.tabs a:hover{border-color:var(--accent);color:var(--accent)}
+nav.tabs a.on{background:var(--accent);border-color:var(--accent);color:#fff}
+/* 16/11/2026: no celular as seções ficam numa linha só, rolando para o lado */
+@media (max-width:640px){nav.tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-inline:-4px;padding-inline:4px}nav.tabs::-webkit-scrollbar{display:none}nav.tabs a{flex:none;white-space:nowrap}}
 ul,ol{margin:0;padding-left:20px;display:grid;gap:4px}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:12px}
 .box{border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:8px;min-width:0}
@@ -384,9 +387,9 @@ input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offs
     </div>
     <div class="kpis">
       <div class="kpi"><span class="lbl">2ª entrada (Soros)</span><b id="sNext">—</b></div>
-      <div class="kpi"><span class="lbl">Ciclo completo (2 wins)</span><b id="sCiclo" class="pos">—</b></div>
+      <div class="kpi"><span class="lbl" title="Ciclo completo (2 wins)">Ciclo (2 wins)</span><b id="sCiclo" class="pos">—</b></div>
       <div class="kpi"><span class="lbl">Win e depois loss</span><b id="sMeio" class="neg">—</b></div>
-      <div class="kpi"><span class="lbl">Acerto mínimo p/ empatar</span><b id="sBe">—</b></div>
+      <div class="kpi"><span class="lbl" title="Acerto mínimo p/ empatar">Acerto p/ empatar</span><b id="sBe">—</b></div>
     </div>
     <div class="box no">
       <h3>Stop de cada sessão</h3>
@@ -405,11 +408,11 @@ input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offs
     <h2>A meta: 71,4% de assertividade e 50% de aproveitamento</h2>
     <p>São os dois números juntos: <b>71,4% de assertividade</b> (5 wins a cada 7 entradas) e <b>50% de aproveitamento</b> (metade das sessões fecha no positivo com a mão completa). É o mesmo que <b>1 mão completa para cada stop</b>, contando <b>metade dos stops na 1ª mão</b> (loss na base) e <b>metade na 2ª</b> (win na base e loss no Soros). Em 4 sessões: 2 mãos completas (4 wins), 1 stop na 1ª (1 loss) e 1 stop na 2ª (1 win + 1 loss) = 5 wins em 7 entradas, 71,4%; 2 sessões boas e 2 ruins, 50%. O valor perdido no stop é o mesmo nos dois casos: a mão base.</p>
     <div class="kpis">
-      <div class="kpi"><span class="lbl">1 mão completa + 1 stop</span><b id="vPar" class="pos">—</b></div>
-      <div class="kpi"><span class="lbl">Semana cheia na meta (23 sessões)</span><b id="vSem" class="pos">—</b></div>
-      <div class="kpi"><span class="lbl">Aproveitamento mínimo p/ empatar</span><b id="vBe">—</b></div>
+      <div class="kpi"><span class="lbl" title="1 mão completa + 1 stop">1 mão + 1 stop</span><b id="vPar" class="pos">—</b></div>
+      <div class="kpi"><span class="lbl" title="Semana cheia na meta (23 sessões)">Semana na meta</span><b id="vSem" class="pos">—</b></div>
+      <div class="kpi"><span class="lbl" title="Aproveitamento mínimo p/ empatar">Aprov. p/ empatar</span><b id="vBe">—</b></div>
     </div>
-    <p class="hint">Usa a mão base e o payout da calculadora do Soros, acima.</p>
+    <p class="hint">Semana na meta = semana cheia (23 sessões) batendo a meta. Usa a mão base e o payout do Progresso, os mesmos da calculadora do Soros, acima.</p>
     <h3>Como validar</h3>
     <ol>
       <li>Volte no gráfico e anote <b>100 sinais de cada setup</b> nos horários das sessões, sem pular nenhum. Faça o OTC (sessão 5) separado do mercado aberto.</li>
@@ -564,8 +567,12 @@ function soros(){
 const PLV=[50,100,150,250,350,500,750,1000,1500,2500,3500,5000,7500,10000], PLS="progressoOB2.v1";
 function sorosLoad(d){if(!d)return;const c=new Set(d.conquistados||[]);let last=-1;PLV.forEach((v,i)=>{if(c.has(i))last=i});const a=document.activeElement;
   if(a!==document.getElementById("sBase"))document.getElementById("sBase").value=(last>=0?PLV[last]:PLV[0])/5;
-  if(+d.payout>0&&a!==document.getElementById("sPay"))document.getElementById("sPay").value=+d.payout;soros()}
-try{sorosLoad(JSON.parse(localStorage.getItem(PLS)||"null")||{})}catch(e){}
+  const pay=+d.payout>0?+d.payout:(simPay>0?simPay:0);
+  if(pay>0&&a!==document.getElementById("sPay"))document.getElementById("sPay").value=pay;soros()}
+/* 16/11/2026: o payout é o mesmo do Progresso (se o Progresso não tiver, usa o do simulador dele, como lá). */
+let simPay=0,progD={};
+try{const r=JSON.parse(localStorage.getItem("simuladorOB.v1")||"null");if(r&&+r.pay>0)simPay=+r.pay}catch(e){}
+try{progD=JSON.parse(localStorage.getItem(PLS)||"null")||{};sorosLoad(progD)}catch(e){}
 let sorosDb=null;
 document.getElementById("sPay").addEventListener("change",async()=>{const v=parseFloat(document.getElementById("sPay").value)||0;if(!(v>0))return;
   try{const r=JSON.parse(localStorage.getItem(PLS)||"null")||{conquistados:[],banca:null};r.payout=v;localStorage.setItem(PLS,JSON.stringify(r))}catch(e){}
@@ -573,6 +580,14 @@ document.getElementById("sPay").addEventListener("change",async()=>{const v=pars
   window.ui&&ui.toast("✓ Payout salvo para todos");
 });
 soros();
-(async()=>{try{sorosDb=window.claude?await window.claude.use("db"):null}catch(e){}if(sorosDb&&sorosDb.app)sorosDb.app("progresso-ob2").doc("estado/progresso").onSnapshot(d=>{if(d.exists)sorosLoad(d.data())},()=>{})})();
+(async()=>{try{sorosDb=window.claude?await window.claude.use("db"):null}catch(e){}if(sorosDb&&sorosDb.app){const P=sorosDb.app("progresso-ob2");P.doc("estado/progresso").onSnapshot(d=>{if(d.exists){progD=d.data();sorosLoad(progD)}},()=>{});P.doc("estado/simulador").onSnapshot(d=>{if(d.exists&&+d.data().pay>0){simPay=+d.data().pay;sorosLoad(progD)}},()=>{})}})();
+</script>
+<script>
+/* 16/11/2026: marca a seção em que você está e leva o botão dela para a vista */
+(function(){const nav=document.querySelector("nav.tabs");if(!nav||!("IntersectionObserver" in window))return;
+ const links=[...nav.querySelectorAll('a[href^="#"]')],secs=links.map(a=>document.querySelector(a.getAttribute("href"))).filter(Boolean);let cur=null;
+ const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const a=nav.querySelector('a[href="#'+e.target.id+'"]');if(a&&a!==cur){if(cur)cur.classList.remove("on");a.classList.add("on");cur=a;
+   const r=a.getBoundingClientRect(),n=nav.getBoundingClientRect();if(r.left<n.left||r.right>n.right)nav.scrollTo({left:a.offsetLeft-nav.offsetLeft-16,behavior:"smooth"})}}})},{rootMargin:"-35% 0px -60% 0px"});
+ secs.forEach(s=>io.observe(s));})();
 </script>
 </body></html>
