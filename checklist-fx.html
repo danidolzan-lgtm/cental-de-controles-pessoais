@@ -72,7 +72,7 @@ img,svg{max-width:100%}
 </style>
 <div class="wrap">
   <div class="top">
-    <div><h1>Check-list Forex</h1><div class="sub">EURUSD e GBPUSD · M2 · uma vez por dia, de manhã, antes da 1ª sessão. Quatro "sim" liberam o dia.</div></div>
+    <div><h1>Check-list Forex</h1><div class="sub">Pares de moedas e ouro · M2 · uma vez por dia, de manhã, antes da 1ª sessão. Quatro "sim" liberam o dia.</div></div>
     <div class="status" id="status">Carregando…</div>
   </div>
   <div class="lembrete" role="note" title="Toque para a próxima frase">
@@ -137,8 +137,8 @@ const pausasTxt=ds=>pausas(ds).map(p=>p.de+"–"+p.ate+" ("+p.n+")").join(" e ")
 const sessTxt=()=>SESS.map(s=>s.nome+" "+JAN[s.id].join("–")).join(" · ");
 const QS=[
   {id:"hor",k:"Horários e notícias",t:ds=>{const pl=pulos(ds),k=Object.keys(pl);return "Vou operar só nas sessões ("+sessTxt()+"), respeitando a pausa das "+pausasTxt(ds)+(k.length?", vou PULAR "+k.map(x=>SESS.find(s=>s.id===x).nome+" ("+pl[x]+")").join(", "):"")+" e, em dia de Payroll, CPI ou decisão de juros do BCE ou do Banco da Inglaterra, só começo 30 min depois da notícia?"}},
-  {id:"op",k:"Operacional",t:"Vou entrar só em Respiro, Virada, Muralha, Giro ou Armadilha no M2, com médias 9, 21 e 50 espaçadas, volume da vela de sinal acima da média, stop técnico dentro do limite (EURUSD 8 pips · GBPUSD 10 pips), spread normal (até 1 pip), o DXY (índice do dólar) não indo forte contra a entrada e todos os filtros do manual conferidos?"},
-  {id:"ger",k:"Gerenciamento",t:"Lote do meu degrau no Progresso, ordem com stop e alvo de 2x o stop junto, no máximo 2 operações em cada sessão (manhã e tarde), uma aberta por vez (nunca EURUSD e GBPUSD juntos), e encerro a sessão no 1º loss?"},
+  {id:"op",k:"Operacional",t:"Vou entrar só em Respiro, Virada, Muralha, Giro ou Armadilha no M2, com médias 9, 21 e 50 espaçadas, volume da vela de sinal acima da média, stop técnico dentro do limite do par (tabela do Manual), spread normal, o DXY (índice do dólar) não indo forte contra a entrada nos pares com dólar e no ouro, e todos os filtros do manual conferidos?"},
+  {id:"ger",k:"Gerenciamento",t:"Lote do meu degrau no Progresso, ordem com stop e alvo de 2x o stop junto, no máximo 2 operações em cada sessão (manhã e tarde), uma aberta por vez (nunca dois pares ao mesmo tempo), e encerro a sessão no 1º loss?"},
   {id:"men",k:"Mentalidade",t:"Estou calmo, sem vontade de recuperar nada, e aceito o stop se ele vier?"}
 ];
 let data={}, db=null, sel=null, draft=null;

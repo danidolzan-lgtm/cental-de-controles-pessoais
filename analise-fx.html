@@ -39,6 +39,7 @@ input[type=file]{font:inherit;font-size:.9rem;max-width:100%}
 .shot svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .seg{display:flex;gap:6px;flex-wrap:wrap}
 .seg button{appearance:none;font:inherit;font-weight:600;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:7px;padding:9px 14px;cursor:pointer;flex:1 1 auto;min-width:max-content}
+.par{display:flex;gap:8px;align-items:center;font-weight:600}.par select{flex:1;font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:8px;padding:8px 10px}
 .seg button.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
 .seg button.call.on{background:var(--win);border-color:var(--win)}
 .seg button.put.on{background:var(--loss);border-color:var(--loss)}
@@ -93,7 +94,7 @@ textarea#ctx,textarea#q,textarea#resp{min-height:52px}
 </style>
 <div class="wrap">
   <div class="top">
-    <div><h1>Análise de Entrada Forex</h1><div class="sub">EURUSD e GBPUSD · M2 · print da entrada · seta na vela · o Claude confere com o Manual Forex</div></div>
+    <div><h1>Análise de Entrada Forex</h1><div class="sub">Pares de moedas e ouro · M2 · print da entrada · seta na vela · o Claude confere com o Manual Forex</div></div>
     <div class="status" id="status">Carregando…</div>
   </div>
 
@@ -119,7 +120,7 @@ textarea#ctx,textarea#q,textarea#resp{min-height:52px}
     <div class="step"><i>3</i>O que você operou</div>
     <div class="seg" id="opSeg"><button type="button" data-op="respiro">Respiro</button><button type="button" data-op="virada">Virada</button><button type="button" data-op="muralha">Muralha</button><button type="button" data-op="giro">Giro</button><button type="button" data-op="armadilha">Armadilha</button></div>
     <div class="seg" id="dirSeg"><button type="button" class="call" data-dir="call">Compra ▲</button><button type="button" class="put" data-dir="put">Venda ▼</button></div>
-    <div class="seg" id="atSeg"><button type="button" data-at="EURUSD">EURUSD</button><button type="button" data-at="GBPUSD">GBPUSD</button></div>
+    <label class="par">Par<select id="atSel"><option value="EURUSD">EURUSD · Euro × dólar</option><option value="GBPUSD">GBPUSD · Libra × dólar</option><option value="USDJPY">USDJPY · Dólar × iene</option><option value="AUDUSD">AUDUSD · Dólar australiano</option><option value="NZDUSD">NZDUSD · Dólar neozelandês</option><option value="USDCAD">USDCAD · Dólar × dólar canadense</option><option value="USDCHF">USDCHF · Dólar × franco suíço</option><option value="EURGBP">EURGBP · Euro × libra</option><option value="EURJPY">EURJPY · Euro × iene</option><option value="GBPJPY">GBPJPY · Libra × iene</option><option value="XAUUSD">XAUUSD · Ouro</option></select></label>
     <span class="hint">Volume de ticks da vela de sinal (comparado com a média das últimas 10):</span>
     <div class="seg" id="volSeg"><button type="button" data-vol="acima">Volume acima da média</button><button type="button" data-vol="abaixo">Volume abaixo</button></div>
     <textarea id="ctx" placeholder="Algo a mais para o Claude saber (opcional): stop e alvo em pips, cores das médias, horário…"></textarea>
@@ -187,10 +188,10 @@ const BASE_F=[
   ["As três médias estavam emboladas, sem espaço entre elas?"],
   ["Era 5 min antes ou até 15 min depois de notícia forte?"],
   ["O volume da vela de sinal estava abaixo da média das últimas 10 velas?"],
-  ["O stop técnico passava do limite (EURUSD 8 pips · GBPUSD 10 pips)?"],
+  ["O stop técnico passava do limite do par (tabela do Manual)?"],
   ["O spread estava aberto (mais de 1 pip)?"],
   ["A vela de sinal era maior que 2x a média das últimas 10 velas?"],
-  ["O DXY (índice do dólar) estava indo forte contra a entrada?"],
+  ["Par com dólar ou ouro: o DXY (índice do dólar) estava indo forte contra a entrada?"],
 ];
 const R={
   respiro:{c:[
@@ -295,7 +296,7 @@ $("shot").addEventListener("click",e=>{const r=$("shot").getBoundingClientRect()
 
 $("opSeg").addEventListener("click",e=>{const b=e.target.closest("[data-op]");if(!b)return;if(cur.op!==b.dataset.op){cur.op=b.dataset.op;cur.resp={};cur.ia=null;$("aiRes").innerHTML="";$("guia").hidden=true;$("resp").value=""}drawForm()});
 $("volSeg").addEventListener("click",e=>{const b=e.target.closest("[data-vol]");if(!b)return;cur.vol=cur.vol===b.dataset.vol?"":b.dataset.vol;drawForm()});
-$("atSeg").addEventListener("click",e=>{const b=e.target.closest("[data-at]");if(!b)return;cur.ativo=b.dataset.at;drawForm()});
+$("atSel").addEventListener("change",e=>{cur.ativo=e.target.value;drawForm()});
 $("dirSeg").addEventListener("click",e=>{const b=e.target.closest("[data-dir]");if(!b)return;cur.dir=b.dataset.dir;drawForm();drawShot()});
 $("resSeg").addEventListener("click",e=>{const b=e.target.closest("[data-res]");if(!b)return;cur.res=b.dataset.res||null;drawForm()});
 $("obs").addEventListener("input",e=>{cur.obs=e.target.value});
@@ -304,7 +305,7 @@ function drawForm(){
   prepararPrint();
   [...$("opSeg").children].forEach(b=>b.classList.toggle("on",b.dataset.op===cur.op));
   [...$("dirSeg").children].forEach(b=>b.classList.toggle("on",b.dataset.dir===cur.dir));
-  [...$("atSeg").children].forEach(b=>b.classList.toggle("on",b.dataset.at===cur.ativo));
+  $("atSel").value=cur.ativo||"EURUSD";
   [...$("volSeg").children].forEach(b=>b.classList.toggle("on",b.dataset.vol===cur.vol));
   [...$("resSeg").children].forEach(b=>b.classList.toggle("on",(b.dataset.res||null)===cur.res));
   [...$("vSeg").children].forEach(b=>b.classList.toggle("on",!!cur.ia&&cur.ia.veredito===b.dataset.v));
@@ -402,9 +403,9 @@ $("lista").addEventListener("click",async e=>{
 
 /* ---------- Claude: o print vai com a legenda desenhada; você cola na SUA conversa ----------
    Sem chave e sem custo extra. A conversa escolhida fica salva na sua conta. */
-const MANUAL=`MANUAL FOREX (EURUSD e GBPUSD, conta em dólar)
-Base: gráfico M2, médias exponenciais 9, 21 e 50. Entrada na abertura da vela seguinte à vela de sinal. Toda entrada já vai com stop e alvo. Alvo = 2x a distância do stop. Duas sessões por dia (manhã 09:45–11:15 e tarde 12:00–13:30, horário de Brasília); máximo 2 operações por sessão; loss na 1ª encerra a sessão; uma operação aberta por vez, nunca EURUSD e GBPUSD juntos. Valor do pip: US$ 10 por lote 1,00 (US$ 0,10 por 0,01 lote). Volume = volume de ticks da plataforma.
-Não opera em nenhum setup quando: as três médias estão emboladas sem espaço entre elas (lateral); faltam 5 min ou menos para notícia de impacto ou ela saiu há menos de 15 min; a vela de sinal é maior que 2x o tamanho médio das últimas 10 velas; o volume da vela de sinal está abaixo da média das últimas 10 velas; o stop técnico passa de EURUSD 8 pips ou GBPUSD 10 pips; o spread está aberto (mais de 1 pip); o DXY (índice do dólar) está indo forte contra a entrada (EURUSD e GBPUSD andam contra o dólar: compra no par pede DXY caindo ou de lado; se o print não mostra o DXY, pergunte).
+const MANUAL=`MANUAL FOREX (pares de moedas e ouro, conta em dólar)
+Base: gráfico M2, médias exponenciais 9, 21 e 50. Entrada na abertura da vela seguinte à vela de sinal. Toda entrada já vai com stop e alvo. Alvo = 2x a distância do stop. Duas sessões por dia (manhã 09:45–11:15 e tarde 12:00–13:30, horário de Brasília); máximo 2 operações por sessão; loss na 1ª encerra a sessão; uma operação aberta por vez, nunca dois pares ao mesmo tempo. Valor do pip por lote 1,00 (aproximado): EURUSD US$ 10, GBPUSD US$ 10, USDJPY US$ 6,5, AUDUSD US$ 10, NZDUSD US$ 10, USDCAD US$ 7,2, USDCHF US$ 12,5, EURGBP US$ 13, EURJPY US$ 6,5, GBPJPY US$ 6,5, XAUUSD US$ 10. Volume = volume de ticks da plataforma.
+Não opera em nenhum setup quando: as três médias estão emboladas sem espaço entre elas (lateral); faltam 5 min ou menos para notícia de impacto ou ela saiu há menos de 15 min; a vela de sinal é maior que 2x o tamanho médio das últimas 10 velas; o volume da vela de sinal está abaixo da média das últimas 10 velas; o stop técnico passa do limite do par (em pips: EURUSD 8, GBPUSD 10, USDJPY 10, AUDUSD 8, NZDUSD 8, USDCAD 10, USDCHF 8, EURGBP 6, EURJPY 12, GBPJPY 15, XAUUSD 30); o spread está aberto (mais de 1 pip); o DXY (índice do dólar) está indo forte contra a entrada, nos pares com dólar e no ouro (EURUSD, GBPUSD, AUDUSD, NZDUSD e XAUUSD andam contra o dólar; USDJPY, USDCAD e USDCHF andam a favor; nos cruzados EURGBP, EURJPY e GBPJPY o DXY não conta; se o print não mostra o DXY, pergunte).
 RESPIRO (pullback na zona 9–21). COMPRA: 9 acima da 21, 21 acima da 50, 50 subindo; o preço recua até a zona 9–21 e encosta ou fura um pouco a 21 (o toque pode ser na própria vela de gatilho ou em até 2 velas antes dela); gatilho, um dos dois: 1 VELA (fecha acima da 9 com pavio inferior) ou 2 VELAS (a vela que toca ou fura a 21 deixa pavio inferior e a vela imediatamente seguinte fecha acima da 9, mesmo sem pavio); entrada na abertura da vela seguinte à que fechou acima da 9; stop 1–2 pips abaixo da mínima da vela de sinal ou da 21 (o mais baixo; no gatilho de 2 velas, abaixo da menor mínima das duas). VENDA: espelho (9 abaixo da 21, 21 abaixo da 50, 50 caindo; toque na 21 até 2 velas antes; gatilho de 1 vela fechando abaixo da 9 com pavio superior, ou de 2 velas com pavio superior na vela do toque e a seguinte fechando abaixo da 9; stop acima da máxima do sinal ou da 21, o mais alto; no de 2 velas, acima da maior máxima das duas). Volume: no recuo até a 21 o volume diminui; a vela de sinal tem volume acima da média das últimas 10. Não entra se: no recuo o preço furou a 50; a 50 está deitada; já é o 3º recuo seguido; o toque na 21 foi mais de 2 velas antes do gatilho; entre o toque e o gatilho alguma vela fechou do lado errado da 21 (abaixo na compra, acima na venda); no gatilho de 2 velas, o pavio não está na vela imediatamente anterior (está 2 ou 3 velas atrás) ou a vela do pavio fechou do lado errado da 21.
 VIRADA (cruzamento 9 x 21 a favor da 50). COMPRA: preço acima da 50; a 9 cruza a 21 para cima; gatilho: primeira vela verde que fecha depois do cruzamento; entrada na vela seguinte; stop 1–2 pips abaixo da menor mínima das últimas 3 velas. VENDA: espelho (abaixo da 50, cruza para baixo, primeira vela vermelha, stop acima da maior máxima das últimas 3 velas). Volume: a vela de confirmação tem volume acima da média das últimas 10; cruzamento com volume fraco costuma virar lateral, fique de fora. Não entra se: 9 e 21 cruzaram mais de 2 vezes nas últimas 15 velas; a 50 está deitada ou o preço cruzou a 50 nas últimas 10 velas; a vela de confirmação fecha colada na 50.
 MURALHA (rejeição na 50). COMPRA: 21 acima da 50 e 50 subindo; o preço cai até tocar a 50; gatilho: vela com pavio inferior maior ou igual ao corpo que fecha acima da 50; entrada na vela seguinte; stop 1–2 pips abaixo do pavio da vela de sinal. VENDA: espelho (pavio superior, fecha abaixo da 50, stop acima do pavio). Volume: a vela de rejeição (pavio na 50) tem volume acima da média; toque na 50 com volume baixo é rejeição fraca e pode romper. Não entra se: 3º toque seguido na 50; a vela de sinal fecha do outro lado da 50; a 50 está deitada.
@@ -414,7 +415,7 @@ GIRO (reversão: o preço rompe a 50 e as médias viram). COMPRA: antes o mercad
 Horários fixos (Brasília): manhã 09:45–11:15 e tarde 12:00–13:30, com Londres e Nova York abertas. Pausa todo dia 10:25–10:45 (dados dos EUA). Payroll e CPI: manhã só 30 min depois da notícia. Decisão do BCE (10:15 e coletiva 10:45): sem a manhã. ISM/JOLTS às 12:00: tarde só a partir de 12:15. Feriado nos EUA: só a manhã; feriado em Londres e Sexta-feira Santa: não opera. Qualquer notícia de alto impacto: sem operar de 5 min antes até 15 min depois. Evitar a virada do dia (18:00–19:00, spread aberto), depois das 14:00 (Londres fechada), domingo à noite e sexta depois das 15:00. Entrada dentro de uma pausa é ERRADA.`;
 const CONFIG_MSG=MANUAL+`
 
-Esta conversa é só para analisar minhas entradas no Forex (EURUSD e GBPUSD). Vou mandar prints do gráfico M2. Cada print tem uma faixa escura no topo dizendo o operacional, a direção (compra ou venda), o ativo e às vezes uma observação. Confira sempre o VOLUME (de ticks) da vela de sinal: ele precisa estar acima da média das últimas 10 velas (a faixa diz o que eu vi; se as barras de volume aparecerem no print, confira também) e coloque o volume como um dos critérios da resposta. Se o stop e o alvo aparecerem no print, confira também se estão no lugar do manual e se o alvo é 2x o stop. No gráfico há um círculo e uma seta (verde para cima = compra, vermelha para baixo = venda) marcando a vela em que ENTREI; a vela de sinal é a anterior.
+Esta conversa é só para analisar minhas entradas no Forex (pares de moedas e ouro). Vou mandar prints do gráfico M2. Cada print tem uma faixa escura no topo dizendo o operacional, a direção (compra ou venda), o ativo e às vezes uma observação. Confira sempre o VOLUME (de ticks) da vela de sinal: ele precisa estar acima da média das últimas 10 velas (a faixa diz o que eu vi; se as barras de volume aparecerem no print, confira também) e coloque o volume como um dos critérios da resposta. Se o stop e o alvo aparecerem no print, confira também se estão no lugar do manual e se o alvo é 2x o stop. No gráfico há um círculo e uma seta (verde para cima = compra, vermelha para baixo = venda) marcando a vela em que ENTREI; a vela de sinal é a anterior.
 Para cada print, compare só pelo que dá para ver com as regras do operacional informado e com os filtros da Base. Se algo não dá para confirmar no print, diga em vez de chutar. Responda em português, curto, neste formato:
 VEREDITO: CERTA, ERRADA ou INCERTA (confiança alta/média/baixa)
 Critérios: um por linha com ✓, ✕ ou ?

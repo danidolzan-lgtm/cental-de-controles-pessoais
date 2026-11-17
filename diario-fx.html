@@ -92,6 +92,7 @@ td:first-child{font-family:var(--f-body);white-space:normal}
 .seg button.stop.on{background:var(--loss);border-color:var(--loss);color:var(--surface)}
 .ro button[data-a]:not([data-a=close]):not([data-a=sess]),.ro input,.ro select{pointer-events:none}
 .stabs{display:flex;gap:6px}
+.seg select.par{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;padding:8px 10px;min-width:110px}
 .stabs button{flex:1;appearance:none;font:inherit;font-weight:600;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:8px;padding:8px 10px;cursor:pointer;display:grid;gap:1px}
 .stabs button small{font-family:var(--f-num);font-weight:400;font-size:.75rem;opacity:.85}
 .stabs button.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
@@ -99,7 +100,7 @@ td:first-child{font-family:var(--f-body);white-space:normal}
 
 <div class="wrap">
   <div class="top">
-    <div><h1>Diário Forex</h1><div class="sub">EURUSD e GBPUSD · M2 · Respiro, Virada, Muralha, Giro e Armadilha · alvo 2x o stop · manhã e tarde · máx. 2 operações por sessão · stop na 1ª encerra a sessão</div></div>
+    <div><h1>Diário Forex</h1><div class="sub">Pares de moedas e ouro · M2 · Respiro, Virada, Muralha, Giro e Armadilha · alvo 2x o stop · manhã e tarde · máx. 2 operações por sessão · stop na 1ª encerra a sessão</div></div>
     <div class="status" id="status">Carregando…</div>
   </div>
 
@@ -193,7 +194,7 @@ document.getElementById("fHoje").addEventListener("click",()=>{FREF=_hj;fGo()});
 fUI();
 const OPS=[{id:"respiro",nome:"Respiro"},{id:"virada",nome:"Virada"},{id:"muralha",nome:"Muralha"},{id:"giro",nome:"Giro"},{id:"armadilha",nome:"Armadilha"}];
 const opNome=id=>(OPS.find(o=>o.id===(id==="muralhaEng"?"muralha":id))||{nome:id||"Sem operacional"}).nome;
-const ATIVOS={EURUSD:{nome:"EURUSD",pt:10},GBPUSD:{nome:"GBPUSD",pt:10}};
+const ATIVOS={EURUSD:{nome:"EURUSD",pt:10},GBPUSD:{nome:"GBPUSD",pt:10},USDJPY:{nome:"USDJPY",pt:6.5},AUDUSD:{nome:"AUDUSD",pt:10},NZDUSD:{nome:"NZDUSD",pt:10},USDCAD:{nome:"USDCAD",pt:7.2},USDCHF:{nome:"USDCHF",pt:12.5},EURGBP:{nome:"EURGBP",pt:13},EURJPY:{nome:"EURJPY",pt:6.5},GBPJPY:{nome:"GBPJPY",pt:6.5},XAUUSD:{nome:"XAUUSD",pt:10}};
 let days={}, cfg={ct:0.01}, db=null;
 const $=id=>document.getElementById(id);
 const brl=v=>(v<0?"-":"")+"US$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -272,7 +273,7 @@ function statRow(nome,ops){const g=ops.filter(o=>opVal(o)>0).length,v=ops.reduce
 function renderTables(){
   const ops=allOps(), head="<thead><tr><th></th><th>Ops</th><th>Acerto</th><th>US$</th></tr></thead><tbody>";
   $("tOp").innerHTML=head+OPS.map(x=>statRow(x.nome,ops.filter(o=>(o.operacional==="muralhaEng"?"muralha":o.operacional)===x.id))).join("")+"</tbody>";
-  $("tAt").innerHTML=head+Object.keys(ATIVOS).map(k=>statRow(ATIVOS[k].nome,ops.filter(o=>o.ativo===k))).join("")+SESS.map(x=>statRow(x.nome,ops.filter(o=>sessOf(o)===x.id))).join("")+statRow("1ª da sessão",ops.filter(o=>o.idx===0))+statRow("2ª da sessão",ops.filter(o=>o.idx===1))+"</tbody>";
+  $("tAt").innerHTML=head+((l=>l.length?l:["EURUSD"])(Object.keys(ATIVOS).filter(k=>ops.some(o=>o.ativo===k)))).map(k=>statRow(ATIVOS[k].nome,ops.filter(o=>o.ativo===k))).join("")+SESS.map(x=>statRow(x.nome,ops.filter(o=>sessOf(o)===x.id))).join("")+statRow("1ª da sessão",ops.filter(o=>o.idx===0))+statRow("2ª da sessão",ops.filter(o=>o.idx===1))+"</tbody>";
 }
 function renderList(){}
 
@@ -301,7 +302,7 @@ function drawModal(){
       const k=curOps().indexOf(o);
       h+="<div class='op'><div class='t'><span>"+(k+1)+"ª operação da "+(cs==="manha"?"manhã":"tarde")+"</span><span id='rv"+i+"' class='num "+(opVal(o)>0?"pos":opVal(o)<0?"neg":"")+"'>"+(o.resultado==null?"":n2(opVal(o)))+"</span></div>";
       h+="<div class='lbl'>Operacional</div><div class='seg'>"+OPS.map(x=>"<button type='button' data-a='opr' data-i='"+i+"' data-v='"+x.id+"' class='"+(o.operacional===x.id?"on":"")+"'>"+x.nome+"</button>").join("")+"</div>";
-      h+="<div class='seg'>"+Object.keys(ATIVOS).map(k=>"<button type='button' data-a='ativo' data-i='"+i+"' data-v='"+k+"' class='"+(o.ativo===k?"on":"")+"'>"+k+"</button>").join("")+
+      h+="<div class='seg'><select class='par' data-par='"+i+"' aria-label='Par'>"+Object.keys(ATIVOS).map(k=>"<option value='"+k+"'"+(o.ativo===k?" selected":"")+">"+k+"</option>").join("")+"</select>"+
         "<button type='button' data-a='dir' data-i='"+i+"' data-v='C' class='"+(o.direcao==="C"?"on":"")+"'>Compra ▲</button><button type='button' data-a='dir' data-i='"+i+"' data-v='V' class='"+(o.direcao==="V"?"on":"")+"'>Venda ▼</button></div>";
       h+="<div class='seg big2'><button type='button' data-a='tipo' data-i='"+i+"' data-v='meta' class='meta"+(o.tipo==="meta"?" on":"")+"'>Meta ✓</button><button type='button' data-a='tipo' data-i='"+i+"' data-v='stop' class='stop"+(o.tipo==="stop"?" on":"")+"'>Stop ✕</button></div>";
       h+="<div class='fields'><label for='vl"+i+"'>Valor (US$)<input id='vl"+i+"' type='number' min='0' step='0.01' inputmode='decimal' data-f='valor' data-i='"+i+"' value='"+(o.valor??"")+"' placeholder='0,00'></label>"+
@@ -328,6 +329,8 @@ function softUpdate(i){
   const rv=$("rv"+i); if(rv){rv.textContent=o.resultado==null?"":n2(opVal(o));rv.className="num "+(opVal(o)>0?"pos":opVal(o)<0?"neg":"")}
   const net=dayNet(draft), mn=$("mNet"); mn.textContent=n2(net); mn.className="num "+(net>0?"pos":net<0?"neg":"");
 }
+/* par escolhido na lista */
+$("modal").addEventListener("change",e=>{const s=e.target.closest("select[data-par]");if(!s||ro)return;const o=draft.ops[+s.dataset.par];if(o)o.ativo=s.value});
 $("modal").addEventListener("click",e=>{
   const b=e.target.closest("button[data-a]");if(!b)return;
   const a=b.dataset.a;

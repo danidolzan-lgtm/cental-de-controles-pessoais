@@ -80,7 +80,7 @@ img,svg{max-width:100%}
 </style>
 <div class="wrap">
   <div class="top">
-    <div><h1>Progresso Forex</h1><div class="sub">Lote por banca e simulador EURUSD/GBPUSD · conta em dólar</div></div>
+    <div><h1>Progresso Forex</h1><div class="sub">Lote por banca e simulador · pares de moedas e ouro · conta em dólar</div></div>
     <div class="status" id="status">Carregando…</div>
   </div>
   <div class="tabs" role="tablist"><button type="button" class="on" data-tab="metas">Metas</button><button type="button" data-tab="sim">Simulador</button></div>
@@ -104,7 +104,7 @@ img,svg{max-width:100%}
       <h2>Seus números</h2>
       <div class="fields">
         <label>Banca (US$)<input id="sBanca" type="number" min="0" step="0.01" inputmode="decimal"></label>
-        <label>Ativo<select id="sAtivo" style="font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%"><option value="EURUSD">EURUSD (US$ 10/pip por lote)</option><option value="GBPUSD">GBPUSD (US$ 10/pip por lote)</option></select></label>
+        <label>Ativo<select id="sAtivo" style="font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%"><option value="EURUSD">EURUSD</option><option value="GBPUSD">GBPUSD</option><option value="USDJPY">USDJPY</option><option value="AUDUSD">AUDUSD</option><option value="NZDUSD">NZDUSD</option><option value="USDCAD">USDCAD</option><option value="USDCHF">USDCHF</option><option value="EURGBP">EURGBP</option><option value="EURJPY">EURJPY</option><option value="GBPJPY">GBPJPY</option><option value="XAUUSD">XAUUSD</option></select></label>
         <label>Lote<input id="sCt" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="pela escada"></label>
         <label>Stop (pips)<input id="sStopPts" type="number" min="0" step="0.5" inputmode="decimal"></label>
         <label>Alvo (x o stop)<input id="sMult" type="number" min="0.5" step="0.1" inputmode="decimal"></label>
@@ -194,7 +194,7 @@ function render(){
 $("banca").addEventListener("change",e=>{const v=parseFloat(e.target.value),n=isNaN(v)?null:v;if(n===st.banca)return;st.banca=n;render();save();puxarMetas();window.ui&&ui.toast("✓ Banca salva")});
 load(); if(st.banca!=null) $("banca").value=st.banca; render(); $("status").textContent="Conectando…";
 /* ---------- Simulador Forex (valor do pip: US$ 10 por lote 1,00 em EURUSD e GBPUSD) ---------- */
-const PT={EURUSD:10,GBPUSD:10}, STOPDEF={EURUSD:8,GBPUSD:10}, LIM={EURUSD:8,GBPUSD:10};
+const PT={EURUSD:10,GBPUSD:10,USDJPY:6.5,AUDUSD:10,NZDUSD:10,USDCAD:7.2,USDCHF:12.5,EURGBP:13,EURJPY:6.5,GBPJPY:6.5,XAUUSD:10}, STOPDEF={EURUSD:8,GBPUSD:10,USDJPY:10,AUDUSD:8,NZDUSD:8,USDCAD:10,USDCHF:8,EURGBP:6,EURJPY:12,GBPJPY:15,XAUUSD:30}, LIM={EURUSD:8,GBPUSD:10,USDJPY:10,AUDUSD:8,NZDUSD:8,USDCAD:10,USDCHF:8,EURGBP:6,EURJPY:12,GBPJPY:15,XAUUSD:30}; // valor do pip aproximado (pares com USD na frente e cruzados variam com a cotação)
 const SLS="simuladorFX.v1", DEF={banca:null,ativo:"EURUSD",ct:null,stopPts:8,mult:2,custo:0,dias:5,gain:6,loss:4,modo:"fixo"};
 let sim=Object.assign({},DEF), sref=null;
 try{const r=JSON.parse(localStorage.getItem(SLS)||"null");if(r)sim=Object.assign({},DEF,r)}catch(e){}
@@ -229,7 +229,7 @@ function calcSim(){
   if(!(banca>0)||!(+sim.stopPts>0)){["oCt","oAlvoPts","oG","oL","oSem","oMes","oFim"].forEach(i=>$(i).textContent="–");$("tMes").innerHTML="";$("fMes").innerHTML="";$("oPaga").textContent="Informe a banca e o stop em pips.";return}
   const w=semana(banca), m=+sim.mult||0;
   $("sCtTxt").textContent=sim.ct?"Usando "+ctTxt(+sim.ct)+" (teste à mão; ↺ volta para a escada).":"Pela escada, a banca de "+brl2(banca)+" usa "+ctTxt(ctDaBanca(banca))+".";
-  $("oCt").textContent=ctTxt(w.ct); $("oCt1").textContent=sim.ativo+" · "+(sim.ct?"definido por você":"pela escada");
+  $("oCt").textContent=ctTxt(w.ct);if(!PT[sim.ativo]){sim.ativo="EURUSD"} $("oCt1").textContent=sim.ativo+" · "+(sim.ct?"definido por você":"pela escada");
   $("oAlvoPts").textContent=nf((+sim.stopPts)*m)+" pips"; $("oAlvoPts1").textContent="stop de "+nf(+sim.stopPts)+" pips × "+nf(m)+(+sim.stopPts>LIM[sim.ativo]?" · stop acima do limite do manual ("+LIM[sim.ativo]+" pips)":"");
   $("oG").textContent=sg(w.g); $("oG1").textContent=pc(w.g/banca)+" da banca"+(+sim.custo?" · já tirando o custo":"");
   $("oL").textContent=sg(-w.l); $("oL1").textContent=pc(w.l/banca)+" da banca"+(+sim.custo?" · com o custo":"");
