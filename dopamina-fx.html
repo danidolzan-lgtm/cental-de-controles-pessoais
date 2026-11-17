@@ -1,0 +1,237 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2563EB"><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="firebase-config.js"></script><script src="sync.js" data-app="dopamina-fx"></script><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{overflow-x:hidden}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.voltar{display:inline-block;margin:12px 16px 0;font:600 14px system-ui,sans-serif;color:inherit;opacity:.7;text-decoration:none}</style></head><body><a class="voltar" href="index.html">← Central de Controles Pessoais</a><title>Dopamina Forex</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: placar no topo, check-in de hoje, calendário seg–sex (só dias de operar): 29/10 a 17/12/2026, 11/01 a 31/03/2027 e 01/04 a 30/06/2027. Card de cima: % do período (100% e cai a cada erro). */
+:root{
+  --bg:#EEF3FC; --surface:#FFFFFF; --line:#DDE4F2; --fg:#13203B; --muted:#58668A;
+  --accent:#2563EB; --win:#15803D; --win-soft:#DCFCE7; --loss:#E11D48; --loss-soft:#FFE4EA;
+  --f-display:"Archivo",system-ui,sans-serif; --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-num:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B1220; --surface:#16213A; --line:#2A3A5C; --fg:#E6EDFA; --muted:#9AA9C7;
+  --accent:#60A5FA; --win:#4ADE80; --win-soft:#123D26; --loss:#FB7185; --loss-soft:#4A1A28; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1220; --surface:#16213A; --line:#2A3A5C; --fg:#E6EDFA; --muted:#9AA9C7;
+  --accent:#60A5FA; --win:#4ADE80; --win-soft:#123D26; --loss:#FB7185; --loss-soft:#4A1A28; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45}
+.wrap{width:100%;max-width:1600px;margin:0 auto;padding-inline:clamp(16px,3vw,40px);padding-block:16px 40px;display:grid;gap:16px;grid-template-columns:minmax(0,1fr);align-items:start}
+.side,.main{display:grid;gap:14px;min-width:0;align-content:start}
+@media (min-width:900px){.wrap{grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:22px}.side{position:sticky;top:70px}}
+h1{font-family:var(--f-display);font-weight:800;font-size:1.5rem;margin:0;line-height:1.15}
+h2{font-family:var(--f-display);font-size:1rem;margin:0}
+.sub,.status{color:var(--muted);font-size:.82rem}
+.status{display:inline-flex;align-items:center;gap:6px}
+.status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.status.ok::before{background:var(--win)}
+.top{display:grid;gap:4px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.score{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.score div{display:grid;gap:2px}
+.lbl{font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.big{font-family:var(--f-num);font-weight:600;font-size:1.4rem;font-variant-numeric:tabular-nums}
+.pos{color:var(--win)} .neg{color:var(--loss)}
+.check{display:grid;gap:10px}
+.check h2::first-letter{text-transform:uppercase}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{appearance:none;font:inherit;font-weight:600;border-radius:9px;padding:12px 16px;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--fg);flex:1;min-width:110px;transition:background .15s,border-color .15s}
+.btn:hover:not([disabled]){border-color:var(--accent)}
+.btn[disabled]{opacity:.5;cursor:default}
+.btn.w.on{background:var(--win);border-color:var(--win);color:var(--surface)}
+.btn.l.on{background:var(--loss);border-color:var(--loss);color:var(--surface)}
+.btn.save{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.calhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1px solid var(--line);background:var(--surface)}
+.legend i.w{background:var(--win);border-color:var(--win)} .legend i.l{background:var(--loss);border-color:var(--loss)} .legend i.t{border:2px solid var(--accent)}
+#cal{display:grid;gap:18px 20px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.month{display:grid;gap:6px;align-content:start}
+.month h3{font-family:var(--f-display);font-size:.92rem;margin:0;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.month h3 span:first-child::first-letter{text-transform:uppercase}
+.month h3 small{font-family:var(--f-num);font-weight:400;font-size:.72rem;color:var(--muted)}
+.dow,.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.day.we{opacity:.35;cursor:default;background:var(--bg)}.day.we:hover{border-color:var(--line);transform:none}
+
+.dow span{font-size:.64rem;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:.05em}
+.day{appearance:none;font:inherit;color:var(--fg);border:1px solid var(--line);background:var(--surface);border-radius:6px;height:36px;min-width:0;display:grid;place-items:center;font-family:var(--f-num);font-size:.8rem;cursor:pointer;padding:0;transition:border-color .12s,transform .12s}
+.day:hover:not([disabled]){border-color:var(--accent);transform:translateY(-1px)}
+.day.blank{visibility:hidden}
+.day.w{background:var(--win);border-color:var(--win);color:var(--surface);font-weight:600}
+.day.l{background:var(--loss);border-color:var(--loss);color:var(--surface);font-weight:600}
+.day.today{border:2px solid var(--accent)}
+.day.sel{box-shadow:0 0 0 2px var(--accent)}
+.day[disabled]{cursor:default;opacity:.45}
+.day.past:not(.w):not(.l){background:var(--bg);border-style:dashed}
+.hint{font-size:.8rem;color:var(--muted)}
+.pctp{display:grid;gap:8px;border-width:2px}
+.pcth{display:flex;justify-content:space-between;align-items:baseline}
+.pcth .big{font-size:2.2rem}
+.bar{height:10px;border-radius:6px;background:var(--loss-soft);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--win);width:100%;transition:width .3s}
+img,svg{max-width:100%}
+.weeks{display:grid;gap:6px}
+.wk{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;font-size:.85rem;padding:6px 8px;border-radius:8px;background:var(--bg)}
+.wk b{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.wk small{font-family:var(--f-num);color:var(--muted);font-size:.74rem}
+.wk.cur{outline:2px solid var(--accent)}
+.wk.bad b{color:var(--loss)} .wk.good b{color:var(--win)}
+@media (orientation:landscape) and (max-height:560px){.wrap{grid-template-columns:minmax(260px,38%) minmax(0,1fr);gap:14px;padding-block:8px 24px}.side{position:sticky;top:8px}.big{font-size:1.2rem}.pcth .big{font-size:1.8rem}.btn{padding:9px 12px}.panel{padding:12px}h1{font-size:1.3rem}}
+@media (min-width:1200px){.day{height:42px;font-size:.88rem}}
+@media (max-width:420px){.day{height:34px}.big{font-size:1.25rem}.score{gap:6px}}
+</style>
+<div class="wrap">
+  <aside class="side">
+    <div class="top"><div><h1>Dopamina Forex</h1><div class="sub" id="perSub"></div><div class="per" id="per" style="margin-top:8px"></div></div><div class="status" id="status">Carregando…</div></div>
+<div class="lembrete" role="note" title="Toque para a próxima frase">
+  <style>.lembrete{display:flex;align-items:center;gap:10px;border-radius:10px;padding:8px 12px;background:linear-gradient(135deg,#0F172A,#1E3A8A 70%,#2563EB);color:#fff;cursor:pointer;min-height:40px;-webkit-tap-highlight-color:transparent;user-select:none}
+  .lembrete .lk{font:700 .6rem system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;background:#FBBF24;color:#0F172A;border-radius:5px;padding:2px 6px;flex:none}
+  .lembrete .lt{font:700 .86rem/1.3 "Archivo",system-ui,sans-serif;flex:1;min-width:0;transition:opacity .35s}
+  .lembrete .lt.off{opacity:0}
+  html[data-page^=checklist] .wrap>.lembrete{grid-column:1/-1}</style>
+  <span class="lk">Lembrete</span><span class="lt">6 meses é tudo que você precisa.</span>
+  <script>(function(){const F=["6 meses é tudo que você precisa.","6 meses de disciplina.","6 meses de constância.","6 meses de rotina.","6 meses de padronização.","6 meses de silêncio.","O mercado não apareceu na sua vida por acaso. Não desperdice isso."];
+  const box=document.currentScript.parentNode,t=box.querySelector(".lt");let i=0,tm;
+  function vai(){t.classList.add("off");setTimeout(()=>{i=(i+1)%F.length;t.textContent=F[i];t.classList.remove("off")},350)}
+  function ciclo(){clearInterval(tm);tm=setInterval(vai,5000)}
+  box.addEventListener("click",()=>{vai();ciclo()});ciclo();})();</script>
+</div>
+<div class="panel pctp">
+    <div class="pcth"><span class="lbl" style="font-size:.8rem" id="gLbl">Nota do período</span><span class="big" id="gPct">100%</span></div>
+    <div class="bar" aria-hidden="true"><i id="gBar"></i></div>
+    <div class="hint" id="gPctTxt"></div>
+  </div>
+  <div class="panel check">
+    <h2 id="cTitle">Check-in</h2>
+    <div class="btns">
+      <button type="button" class="btn w" id="bW">Acertei</button>
+      <button type="button" class="btn l" id="bL">Errei</button>
+    </div>
+    <div class="btns"><button type="button" class="btn save" id="bSave">Salvar</button><button type="button" class="btn" id="bCancel">Cancelar</button></div>
+    <div class="hint" id="cHint"></div>
+  </div>
+  <div class="panel score">
+    <div><span class="lbl">Acertei</span><span class="big pos" id="sW">0</span></div>
+    <div><span class="lbl">Errei</span><span class="big neg" id="sL">0</span></div>
+    <div><span class="lbl">Sequência</span><span class="big" id="sSeq">0</span></div>
+    <div><span class="lbl">Melhor</span><span class="big" id="sBest">0</span></div>
+  </div>
+  </aside>
+  <main class="main">
+  <section class="panel calp">
+    <div class="calhead"><h2>Calendário</h2><div class="legend"><span><i class="w"></i>Acertei</span><span><i class="l"></i>Errei</span><span><i class="t"></i>Hoje</span><span><i class="we"></i>Fim de semana (travado)</span></div></div>
+    <div id="cal"></div>
+  </section>
+  <div class="duo" id="duo"></div>
+  </main>
+<style>.calp{display:grid;gap:14px}.duo:empty{display:none}.duo .check{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:14px}.duo .check>h2,.duo .check>.hint{grid-column:1/-1}</style>
+<script>
+/* 16/11/2026: no PC o check-in vai para baixo do calendário, para as duas colunas ficarem equilibradas */
+(function(){const side=document.querySelector(".side"),duo=document.getElementById("duo"),ck=document.querySelector(".panel.check"),sc=document.querySelector(".panel.score"),mq=matchMedia("(min-width:900px)");
+ function arruma(){if(mq.matches){duo.appendChild(ck);}else{side.insertBefore(ck,sc);}}
+ arruma();(mq.addEventListener?mq.addEventListener("change",arruma):mq.addListener(arruma));})();
+</script>
+</div>
+<style>.per{display:flex;gap:6px;flex-wrap:wrap}.per button{appearance:none;font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap}.per button b{font-weight:700}.per button.on{background:var(--accent);border-color:var(--accent);color:#fff}</style>
+<script>
+// 29/10/2026: tudo zerado. Três períodos: 29/10 a 17/12/2026, 11/01 a 31/03/2027 e 01/04 a 30/06/2027 (botões em cima do calendário).
+const PER=[{y:"2026",a:"2026-10-29",b:"2026-12-17",t:"29/10 a 17/12/2026"},{y:"jan–mar/27",a:"2027-01-11",b:"2027-03-31",t:"11/01 a 31/03/2027"},{y:"abr–jun/27",a:"2027-04-01",b:"2027-06-30",t:"01/04 a 30/06/2027"}];
+const _hj=(()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")})();
+let PI=PER.findIndex(p=>_hj<=p.b);if(PI<0)PI=PER.length-1;
+let START=PER[PI].a, END=PER[PI].b;
+const inPer=ds=>ds>=START&&ds<=END;
+const usDst=ds=>ds<"2026-11-02"||(ds>="2027-03-14"&&ds<"2027-11-07"); // horário de verão dos EUA
+function perUI(cb){const box=document.getElementById("per");if(box){box.innerHTML=PER.map((p,i)=>"<button type='button' data-i='"+i+"' class='"+(i===PI?"on":"")+"' aria-pressed='"+(i===PI)+"'><b>"+p.y+"</b> · "+p.t.slice(0,13)+"</button>").join("");box.querySelectorAll("button").forEach(b=>b.onclick=()=>{PI=+b.dataset.i;START=PER[PI].a;END=PER[PI].b;perUI(cb);cb()})}const s=document.getElementById("perSub");if(s)s.textContent=PER[PI].t+" · segunda a sexta"}
+perUI(()=>{const t=today();sel=lastWd(t<START?START:(t>END?END:t));if(sel<START)sel=START;draft=marks[sel]||null;render()});
+const LS="dopaminaFX.v1";
+let marks={}, db=null, sel=null, draft=null;
+const $=id=>document.getElementById(id);
+const isWd=ds=>{const g=new Date(ds+"T12:00:00").getDay();return g>0&&g<6};
+function wdCount(a,b){let n=0;const d=new Date(a+"T12:00:00"),e=new Date(b+"T12:00:00");while(d<=e){const g=d.getDay();if(g>0&&g<6)n++;d.setDate(d.getDate()+1)}return n}
+function lastWd(ds){const d=new Date(ds+"T12:00:00");while(d.getDay()===0||d.getDay()===6)d.setDate(d.getDate()-1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+const fmt=ds=>new Date(ds+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit"});
+function editable(ds){const t=today();return isWd(ds)&&ds>=START&&ds<=END&&ds<=t&&(ds===t||!marks[ds])}
+function load(){try{const r=JSON.parse(localStorage.getItem(LS)||"null");if(r)marks=r}catch(e){}}
+function ymd(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function monOf(ds){const d=new Date(ds+"T12:00:00");const g=d.getDay();d.setDate(d.getDate()-(g===0?6:g-1));return ymd(d)}
+function addD(ds,n){const d=new Date(ds+"T12:00:00");d.setDate(d.getDate()+n);return ymd(d)}
+const sdm=ds=>ds.slice(8,10)+"/"+ds.slice(5,7);
+function weekInfo(mon){const a=mon<START?START:mon,fri=addD(mon,4),b=fri>END?END:fri;const total=wdCount(a,b);let w=0,l=0;Object.keys(marks).forEach(k=>{if(k>=a&&k<=b&&isWd(k)){if(marks[k]==="w")w++;else if(marks[k]==="l")l++}});const p=total?Math.max(0,100-l/total*100):100;return{a,b,total,w,l,p}}
+const okW=x=>x.l===0; // semana: 1 erro já deixa vermelho
+// geral: 100% = verde cheio, vai perdendo o verde e chega no vermelho em 0%
+const grad=p=>"color-mix(in oklab, var(--win) "+Math.max(0,Math.min(100,p)).toFixed(1)+"%, var(--loss))";
+const pf=p=>p.toLocaleString("pt-BR",{maximumFractionDigits:1})+"%";
+function stats(){ // tudo pelo período escolhido (nada semanal)
+  const keys=Object.keys(marks).filter(k=>isWd(k)&&k>=START&&k<=END).sort();
+  let best=0,run=0;keys.forEach(k=>{if(marks[k]==="w"){run++;best=Math.max(best,run)}else{run=0}});
+  let seq=0;for(let i=keys.length-1;i>=0;i--){if(marks[keys[i]]==="w")seq++;else break}
+  let gw=0,gl=0;keys.forEach(k=>{if(marks[k]==="w")gw++;else if(marks[k]==="l")gl++});
+  $("sW").textContent=gw;$("sL").textContent=gl;$("sSeq").textContent=seq;$("sBest").textContent=best;
+  const gt=wdCount(START,END)||1,gp=Math.max(0,100-gl/gt*100);
+  // % do período: começa em 100% e cai proporcional a cada erro; verde em 100%, vai puxando para o vermelho até 0%
+  $("gLbl").textContent="% do período · "+sdm(START)+" a "+sdm(END)+"/"+END.slice(2,4);
+  $("gPct").textContent=pf(gp);$("gPct").className="big";$("gPct").style.color=grad(gp);
+  $("gBar").style.width=gp+"%";$("gBar").style.background=grad(gp);
+  $("gPctTxt").textContent="Começa em 100% e cada \"errei\" tira "+(100/gt).toLocaleString("pt-BR",{maximumFractionDigits:2})+"% ("+gt+" dias úteis até "+sdm(END)+"). Em 100% fica verde e vai ficando vermelho conforme cai, vermelho total se errar todos. "+gw+(gw===1?" acerto e ":" acertos e ")+gl+(gl===1?" erro.":" erros.");
+}
+function pick(ds){sel=ds;draft=marks[ds]||null;drawCheck();drawCal()}
+function drawCheck(){
+  const ok=sel&&editable(sel);
+  $("cTitle").textContent=sel?fmt(sel):"Check-in";
+  $("bW").classList.toggle("on",draft==="w");$("bL").classList.toggle("on",draft==="l");
+  ["bW","bL","bSave","bCancel"].forEach(id=>$(id).disabled=!ok);
+  $("cHint").textContent= !sel?"Toque em um dia.": ok?(draft&&marks[sel]===draft?"Marcado. Dá pra trocar até o fim do dia.":draft?"Toque em Salvar para gravar.":"Escolha Acertei ou Errei."):"Dia já marcado. Só visualização.";
+}
+function drawCal(){
+  const cal=$("cal");cal.innerHTML="";const t=today();
+  let cur=new Date(+START.slice(0,4),+START.slice(5,7)-1,1,12);const end=new Date(END+"T12:00:00");
+  while(cur<=end){
+    const y=cur.getFullYear(),m=cur.getMonth();
+    const box=document.createElement("div");box.className="month";
+    const mk=String(y)+"-"+String(m+1).padStart(2,"0");let mw=0,ml=0;Object.keys(marks).forEach(k=>{if(k.startsWith(mk)&&isWd(k)&&k>=START&&k<=END){marks[k]==="w"?mw++:ml++}});
+    box.innerHTML="<h3><span>"+cur.toLocaleDateString("pt-BR",{month:"long",year:"numeric"})+"</span><small>"+mw+" ✓ · "+ml+" ✗</small></h3><div class='dow'><span>dom</span><span>seg</span><span>ter</span><span>qua</span><span>qui</span><span>sex</span><span>sáb</span></div>";
+    const g=document.createElement("div");g.className="grid";
+    const sd=new Date(START+"T12:00:00"), d0=(y===sd.getFullYear()&&m===sd.getMonth())?sd.getDate():1;
+    let lead=false;
+    const last=new Date(y,m+1,0).getDate();
+    for(let d=d0;d<=last;d++){
+      const ds=y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+      const b=document.createElement("button");b.type="button";b.textContent=d;
+      if(ds>END)break;
+      const wd=new Date(y,m,d).getDay();
+      if(!lead){for(let i=0;i<wd;i++){const bk=document.createElement("div");bk.className="day blank";g.appendChild(bk)}lead=true}
+      if(wd===0||wd===6){b.className="day we";b.disabled=true;b.title="Fim de semana: travado";g.appendChild(b);continue}
+      if(ds<START){b.className="day blank";g.appendChild(b);continue}
+      b.className="day"+(marks[ds]==="w"?" w":marks[ds]==="l"?" l":"")+(ds===t?" today":"")+(ds===sel?" sel":"")+(ds<t&&!marks[ds]?" past nop":"");
+      if(ds>t) b.disabled=true;
+      b.setAttribute("aria-label",fmt(ds)+(marks[ds]?(marks[ds]==="w"?", acertei":", errei"):""));
+      b.addEventListener("click",()=>pick(ds));
+      g.appendChild(b);
+    }
+    box.appendChild(g);cal.appendChild(box);
+    cur=new Date(y,m+1,1,12);
+  }
+}
+function render(){stats();drawCheck();drawCal()}
+$("bW").onclick=()=>{draft="w";drawCheck()};
+$("bL").onclick=()=>{draft="l";drawCheck()};
+$("bCancel").onclick=()=>{draft=marks[sel]||null;drawCheck()};
+$("bSave").onclick=async()=>{
+  if(!sel||!draft||!editable(sel))return;
+  marks[sel]=draft;render();
+  if(db){try{await db.doc("dias/"+sel).set({r:draft});$("status").textContent="Salvo";window.ui&&ui.done($("bSave"),"Salvo")}catch(e){$("status").textContent="Não salvou. Tente de novo.";window.ui&&ui.toast("Não salvou. Tente de novo.",1)}}
+  else{try{localStorage.setItem(LS,JSON.stringify(marks))}catch(e){}$("status").textContent="Salvo neste aparelho";window.ui&&ui.done($("bSave"),"Salvo")}
+};
+load();sel=lastWd(today()<START?START:(today()>END?END:today()));if(sel<START)sel=START;draft=marks[sel]||null;render();$("status").textContent="Conectando…";
+(async()=>{
+  try{db=window.claude?await window.claude.use("db"):null}catch(e){db=null}
+  if(!db){$("status").textContent="Salvando neste aparelho";return}
+  db.collection("dias").onSnapshot(q=>{
+    const m={};q.docs.forEach(d=>{const r=d.data().r;if(r==="w"||r==="l")m[d.id]=r});marks=m;
+    if(sel&&!editable(sel)) draft=marks[sel]||null;
+    render();$("status").textContent="Sincronizado";$("status").classList.add("ok");
+  },()=>{$("status").textContent="Sem conexão com o salvamento"});
+})();
+</script>
+</body></html>

@@ -1,0 +1,189 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2563EB"><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="firebase-config.js"></script><script src="sync.js" data-app="lucro-fx"></script><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{overflow-x:hidden}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.voltar{display:inline-block;margin:12px 16px 0;font:600 14px system-ui,sans-serif;color:inherit;opacity:.7;text-decoration:none}</style></head><body><a class="voltar" href="index.html">← Central de Controles Pessoais</a><title>Lucro Forex</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: seletor de ano, resumo (IR do ano, prejuízos a compensar), um cartão por mês com os lançamentos e o DARF calculado, regras no fim. */
+:root{
+  --bg:#EEF3FC; --surface:#FFFFFF; --line:#DDE4F2; --fg:#13203B; --muted:#58668A;
+  --accent:#2563EB; --accent-soft:#DCE7FF; --win:#15803D; --loss:#E11D48; --warn:#B45309; --warn-soft:#FEF3C7;
+  --f-display:"Archivo",system-ui,sans-serif; --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-num:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B1220; --surface:#16213A; --line:#2A3A5C; --fg:#E6EDFA; --muted:#9AA9C7; --accent:#60A5FA; --accent-soft:#1E3A8A; --win:#4ADE80; --loss:#FB7185; --warn:#FBBF24; --warn-soft:#3F2A06; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1220; --surface:#16213A; --line:#2A3A5C; --fg:#E6EDFA; --muted:#9AA9C7; --accent:#60A5FA; --accent-soft:#1E3A8A; --win:#4ADE80; --loss:#FB7185; --warn:#FBBF24; --warn-soft:#3F2A06; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:16px}
+.wrap>*{min-width:0}
+h1{font-family:var(--f-display);font-weight:800;font-size:1.6rem;margin:0}
+h2{font-family:var(--f-display);font-size:1rem;margin:0}
+.sub,.status,.hint{color:var(--muted);font-size:.84rem}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:12px}
+.lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.big{font-family:var(--f-num);font-weight:600;font-size:1.35rem;font-variant-numeric:tabular-nums}
+.pos{color:var(--win)} .neg{color:var(--loss)}
+.years{display:flex;gap:6px}
+.years button{appearance:none;font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;padding:6px 12px;cursor:pointer;font-family:var(--f-num)}
+.years button.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mes{display:grid;gap:12px}
+.mh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.mh h2::first-letter{text-transform:uppercase}
+.darf{font-family:var(--f-num);font-weight:600}
+.darf small{font-family:var(--f-body);font-weight:400;color:var(--muted);font-size:.78rem;margin-left:6px}
+.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:8px}
+label{display:grid;gap:3px;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+input[type=number]{font:inherit;font-family:var(--f-num);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;min-width:0;text-align:right}
+.chk{display:flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0;font-size:.85rem;color:var(--fg)}
+details summary{cursor:pointer;font-size:.85rem;color:var(--accent);font-weight:600}
+details[open] summary{margin-bottom:10px}
+.brk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.bx{border-radius:8px;padding:8px 10px;display:grid;gap:2px;border:1px solid var(--line);background:var(--bg);min-width:0}
+.bx span{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);line-height:1.2}
+.bx b{font-family:var(--f-num);font-size:1.05rem;font-weight:600;overflow-wrap:anywhere}
+.bx.g b{color:var(--win)} .bx.p b{color:var(--loss)} .bx.t b{color:var(--warn)}
+.bx.l{border-width:2px} .bx.l.g{border-color:var(--win)} .bx.l.p{border-color:var(--loss)}
+@media (max-width:380px){.bx b{font-size:.92rem}}
+details.dias summary{font-size:.85rem}
+td.tx{color:var(--warn)}
+.calc{font-size:.84rem;color:var(--muted);display:grid;gap:2px;border-top:1px dashed var(--line);padding-top:10px}
+.calc b{color:var(--fg);font-family:var(--f-num);font-weight:600}
+.pend{background:var(--warn-soft);color:var(--warn);border-radius:6px;padding:6px 10px;font-size:.84rem}
+.btn{appearance:none;font:inherit;font-weight:600;border-radius:7px;padding:6px 12px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-size:.82rem}
+.btn.danger{color:var(--loss);border-color:var(--loss)}
+.note{display:grid;gap:8px;font-size:.85rem}
+.st{border-radius:9px;padding:12px 14px;display:grid;gap:2px;border:1px solid var(--line);background:var(--bg)}
+.st .tag{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+.st b{font-family:var(--f-num);font-size:1.5rem;font-weight:600}
+.st span{font-size:.82rem;color:var(--muted)}
+.st .chk{margin-top:6px}
+.st.deve{background:#FFE4EA;border-color:var(--loss)} .st.deve .tag,.st.deve b{color:var(--loss)}
+.st.pago{background:var(--accent-soft);border-color:var(--accent)} .st.pago .tag,.st.pago b{color:var(--accent)}
+.st.acum{background:var(--warn-soft);border-color:var(--warn)} .st.acum .tag,.st.acum b{color:var(--warn)}
+.st.ok{background:#DCFCE7;border-color:var(--win)} .st.ok .tag,.st.ok b{color:var(--win)}
+.st.prej{background:#DCFCE7;border-color:var(--win)} .st.prej .tag{color:var(--win)} .st.prej b{color:var(--muted);font-size:1.15rem}
+.st.vazio .tag{display:none} .st.vazio b{font-size:1rem;font-family:var(--f-body)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .st.deve{background:#4A1A28} :root:not([data-theme="light"]) .st.ok,:root:not([data-theme="light"]) .st.prej{background:#123D26}}
+.ib{display:grid;gap:10px}
+.ib input[type=file],.ib select{font:inherit;font-size:.9rem;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px;width:100%;min-width:0;text-transform:none;letter-spacing:0}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface);font-size:.9rem;padding:9px 14px}
+.btn[disabled]{opacity:.55;cursor:default}
+.ibm{display:grid;gap:8px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:.88rem}
+.ibh{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+.prev{border-collapse:collapse;width:100%;font-size:.8rem}
+.prev th,.prev td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-family:var(--f-num)}
+.prev th{font-family:var(--f-body);font-size:.68rem;text-transform:uppercase;color:var(--muted)}
+.hint.neg{color:var(--loss)}
+.note p{margin:0;max-width:66ch;color:var(--muted)}
+.note b{color:var(--fg)}
+</style>
+<style>
+input[type=date],input[type=text]{font:inherit;font-family:var(--f-num);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;min-width:0}
+.tbl{width:100%;border-collapse:collapse;font-size:.86rem}
+.tbl th,.tbl td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-family:var(--f-num)}
+.tbl th{font-family:var(--f-body);font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+.tbl td:first-child,.tbl th:first-child{text-align:left}
+.tbl tfoot td{font-weight:600;border-bottom:0}
+.tw{overflow-x:auto}
+.mnav{display:flex;gap:8px;align-items:center}
+.mnav b{min-width:150px;text-align:center}
+.mnav b::first-letter{text-transform:uppercase}
+.x{appearance:none;border:0;background:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:2px 6px}
+.x:hover{color:var(--loss)}
+.row2{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.row2 .btn{white-space:nowrap}
+.ptaxmsg{font-size:.78rem}
+.ir-m th:nth-child(2),.ir-m td:nth-child(2){width:1%}
+@media (max-width:520px){.ir-m th:nth-child(2),.ir-m td:nth-child(2){display:none}.tbl th,.tbl td{padding:7px 4px}}
+summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:1rem;color:var(--fg)}
+</style>
+<div class="wrap">
+  <div class="top">
+    <div><h1>Lucro Forex</h1><div class="sub">Resultado de cada dia na corretora, em dólar, com comissão e swap. A cotação do dólar do dia já converte para reais e alimenta o IR Forex.</div></div>
+    <div class="status" id="status">Carregando…</div>
+  </div>
+  <div class="kpis">
+    <div class="panel"><div class="lbl">Líquido do mês (US$)</div><div class="big" id="kMesU">US$ 0,00</div><div class="hint" id="kMesSub"></div></div>
+    <div class="panel"><div class="lbl">Líquido do mês (R$)</div><div class="big" id="kMesR">R$ 0,00</div><div class="hint">pela cotação de cada dia</div></div>
+    <div class="panel"><div class="lbl">Líquido do ano (R$)</div><div class="big" id="kAnoR">R$ 0,00</div><div class="hint" id="kAnoU"></div></div>
+  </div>
+  <div class="panel ib">
+    <h2>Lançar um dia</h2>
+    <div class="f">
+      <label for="dData">Dia<input id="dData" type="date"></label>
+      <label for="dOp">Resultado das operações (US$)<input id="dOp" type="number" step="0.01" inputmode="decimal" placeholder="lucro + / perda −"></label>
+      <label for="dCus">Comissão e swap (US$)<input id="dCus" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></label>
+      <label for="dPtax">Cotação do dólar (R$)<input id="dPtax" type="number" min="0" step="0.0001" inputmode="decimal" placeholder="PTAX do dia"></label>
+    </div>
+    <div class="row2"><button type="button" class="btn primary" id="dSalvar">Salvar dia</button><button type="button" class="btn" id="dBusca">Buscar cotação do dia</button><span class="hint ptaxmsg" id="ptaxMsg"></span></div>
+    <p class="hint" style="margin:0">Use o fechamento do dia na plataforma (MT5 ou cTrader): o resultado das operações fechadas naquele dia. A cotação é a PTAX do Banco Central do dia; em fim de semana ou feriado vale a do último dia útil antes.</p>
+  </div>
+  <div class="panel" style="display:grid;gap:10px">
+    <div class="mh"><h2>Dias lançados</h2><div class="mnav"><button type="button" class="btn" id="mPrev" aria-label="Mês anterior">‹</button><b id="mLbl"></b><button type="button" class="btn" id="mNext" aria-label="Próximo mês">›</button></div></div>
+    <div class="tw"><table class="tbl"><thead><tr><th>Dia</th><th>Operações</th><th>Comissão/swap</th><th>Líquido US$</th><th>Cotação</th><th>Líquido R$</th><th></th></tr></thead><tbody id="tDias"></tbody><tfoot id="fDias"></tfoot></table></div>
+  </div>
+</div>
+<script>
+const LS="lucroFX.v1", $=id=>document.getElementById(id);
+const r2=v=>Math.round(v*100)/100;
+const us=v=>(v<0?"-":"")+"US$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const brl=v=>(v<0?"-":"")+"R$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const n2=v=>(v<0?"−":v>0?"+":"")+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const hoje=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+let dias={}, db=null, mes=hoje().slice(0,7);
+const liqU=d=>r2((+d.op||0)-Math.abs(+d.cus||0));
+const liqR=d=>+d.ptax>0?r2(liqU(d)*(+d.ptax)):null;
+function lsLoad(){try{const r=JSON.parse(localStorage.getItem(LS)||"null");if(r)dias=r}catch(e){}}
+function lsSave(){try{localStorage.setItem(LS,JSON.stringify(dias))}catch(e){}}
+function setStatus(t){$("status").textContent=t}
+function render(){
+  $("mLbl").textContent=new Date(mes+"-15T12:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+  const ks=Object.keys(dias).filter(k=>k.startsWith(mes)).sort();
+  let tu=0,tr=0,to=0,tc=0,semPtax=0;
+  $("tDias").innerHTML=ks.length?ks.map(k=>{const d=dias[k],u=liqU(d),r=liqR(d);tu+=u;to+=+d.op||0;tc+=Math.abs(+d.cus||0);if(r==null)semPtax++;else tr+=r;
+    return "<tr><td>"+k.slice(8,10)+"/"+k.slice(5,7)+"</td><td class='"+((+d.op||0)>=0?"pos":"neg")+"'>"+n2(+d.op||0)+"</td><td>"+(d.cus?"−"+Math.abs(+d.cus).toLocaleString("pt-BR",{minimumFractionDigits:2}):"0,00")+"</td><td class='"+(u>=0?"pos":"neg")+"'>"+n2(u)+"</td><td>"+(+d.ptax>0?(+d.ptax).toLocaleString("pt-BR",{minimumFractionDigits:4}):"<span class='neg'>falta</span>")+"</td><td class='"+(r==null?"":r>=0?"pos":"neg")+"'>"+(r==null?"–":n2(r))+"</td><td><button type='button' class='x' data-del='"+k+"' aria-label='Apagar o dia'>✕</button></td></tr>"}).join(""):"<tr><td colspan='7' class='hint' style='text-align:left;font-family:var(--f-body)'>Nenhum dia lançado neste mês.</td></tr>";
+  $("fDias").innerHTML=ks.length?"<tr><td>Mês</td><td>"+n2(r2(to))+"</td><td>"+(tc?"−"+r2(tc).toLocaleString("pt-BR",{minimumFractionDigits:2}):"0,00")+"</td><td class='"+(tu>=0?"pos":"neg")+"'>"+n2(r2(tu))+"</td><td></td><td class='"+(tr>=0?"pos":"neg")+"'>"+n2(r2(tr))+"</td><td></td></tr>":"";
+  $("kMesU").textContent=us(r2(tu));$("kMesU").className="big "+(tu>0?"pos":tu<0?"neg":"");
+  $("kMesR").textContent=brl(r2(tr));$("kMesR").className="big "+(tr>0?"pos":tr<0?"neg":"");
+  $("kMesSub").textContent=ks.length?ks.length+" dia"+(ks.length>1?"s":"")+(semPtax?" · "+semPtax+" sem cotação":""):"";
+  const y=mes.slice(0,4);let ar=0,au=0;Object.keys(dias).filter(k=>k.startsWith(y)).forEach(k=>{au+=liqU(dias[k]);const r=liqR(dias[k]);if(r!=null)ar+=r});
+  $("kAnoR").textContent=brl(r2(ar));$("kAnoR").className="big "+(ar>0?"pos":ar<0?"neg":"");$("kAnoU").textContent=y+" · "+us(r2(au));
+}
+async function salvarDia(d){dias[d.date]=d;lsSave();render();
+  if(db){try{await db.doc("dias/"+d.date).set(d);setStatus("Salvo")}catch(e){setStatus("Não salvou na conta. Ficou neste aparelho.")}}else setStatus("Salvo neste aparelho")}
+async function apagarDia(k){const c=dias[k];delete dias[k];lsSave();render();if(db){try{await db.doc("dias/"+k).delete()}catch(e){}}
+  window.ui&&ui.toast("Dia apagado")}
+/* cotação PTAX do Banco Central (se o navegador deixar buscar); volta até 7 dias para achar o último dia útil */
+async function buscaPtax(ds){
+  const msg=$("ptaxMsg");msg.textContent="Buscando…";
+  for(let i=0;i<7;i++){const d=new Date(ds+"T12:00:00");d.setDate(d.getDate()-i);
+    const q=String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+"-"+d.getFullYear();
+    try{const r=await fetch("https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='"+q+"'&$format=json");
+      const j=await r.json();const v=j&&j.value&&j.value[0];
+      if(v&&v.cotacaoCompra){msg.textContent="PTAX de "+d.toLocaleDateString("pt-BR")+" (compra).";return v.cotacaoCompra}}
+    catch(e){msg.textContent="Não deu para buscar daqui. Digite a cotação (veja em bcb.gov.br › Cotações).";return null}}
+  msg.textContent="Cotação não encontrada. Digite à mão.";return null}
+$("dData").value=hoje();
+const preenche=()=>{const d=dias[$("dData").value];$("dOp").value=d?d.op:"";$("dCus").value=d&&d.cus?d.cus:"";$("dPtax").value=d&&d.ptax?d.ptax:"";$("ptaxMsg").textContent=""};
+$("dData").addEventListener("change",()=>{preenche();if($("dData").value)mes=$("dData").value.slice(0,7);render()});
+$("dBusca").addEventListener("click",async()=>{const ds=$("dData").value;if(!ds)return;const v=await buscaPtax(ds);if(v)$("dPtax").value=v});
+$("dSalvar").addEventListener("click",async()=>{
+  const ds=$("dData").value,op=parseFloat($("dOp").value);if(!ds){window.ui&&ui.toast("Escolha o dia",1);return}
+  if(isNaN(op)){window.ui&&ui.toast("Digite o resultado das operações",1);return}
+  let px=parseFloat($("dPtax").value);
+  if(!(px>0)){const v=await buscaPtax(ds);if(v){px=v;$("dPtax").value=v}}
+  const d={date:ds,op:r2(op),cus:r2(Math.abs(parseFloat($("dCus").value)||0)),ptax:px>0?px:null};
+  mes=ds.slice(0,7);await salvarDia(d);window.ui&&ui.toast(px>0?"✓ Dia salvo":"✓ Salvo · falta a cotação para o IR")});
+$("tDias").addEventListener("click",e=>{const b=e.target.closest("[data-del]");if(!b)return;if(confirm("Apagar o dia "+b.dataset.del.split("-").reverse().join("/")+"?"))apagarDia(b.dataset.del)});
+$("mPrev").addEventListener("click",()=>{const d=new Date(mes+"-15T12:00:00");d.setMonth(d.getMonth()-1);mes=d.toISOString().slice(0,7);render()});
+$("mNext").addEventListener("click",()=>{const d=new Date(mes+"-15T12:00:00");d.setMonth(d.getMonth()+1);mes=d.toISOString().slice(0,7);render()});
+lsLoad();preenche();render();setStatus("Conectando…");
+(async()=>{
+  try{db=window.claude?await window.claude.use("db"):null}catch(e){db=null}
+  if(!db){setStatus("Salvando neste aparelho");return}
+  db.collection("dias").onSnapshot(q=>{const m={};q.docs.forEach(d=>{m[d.id]=d.data()});dias=m;lsSave();render();setStatus("Sincronizado")},()=>setStatus("Sem conexão com o salvamento"));
+})();
+</script>
+</body></html>

@@ -1,0 +1,671 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2563EB"><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="firebase-config.js"></script><script src="sync.js" data-app="manual-fx"></script><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{overflow-x:hidden}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.voltar{display:inline-block;margin:12px 16px 0;font:600 14px system-ui,sans-serif;color:inherit;opacity:.7;text-decoration:none}
+/* cartões de horários e notícias: sem tabela, nada sai da tela */
+.ses-list,.nw-list{display:grid;gap:8px}
+.ses{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:2px;background:var(--surface)}
+.ses .hd{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.ses .hd b{font-family:var(--f-display)}
+.ses .hd span{font-family:var(--f-num);font-weight:600;color:var(--accent)}
+.ses p{font-size:.88rem;color:var(--muted)}
+.nw-h{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-top:4px}
+.nw{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 12px;align-items:baseline}
+.nw .o{font-size:.9rem;min-width:0}
+.nw .o small{display:block;color:var(--muted);font-size:.8rem}
+.nw .t{font-family:var(--f-num);font-size:.85rem;font-weight:600;text-align:right;white-space:nowrap}
+.nw .a{grid-column:1/-1;font-size:.8rem;color:var(--muted)}
+.nw .a.skip{color:var(--loss);font-weight:600}
+@media (max-width:480px){.nw{grid-template-columns:minmax(0,1fr)}.nw .t{text-align:left;white-space:normal}}
+</style></head><body><a class="voltar" href="index.html">← Central de Controles Pessoais</a><title>Manual Forex</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#EEF3FC; --surface:#FFFFFF; --line:#DDE4F2; --fg:#13203B; --muted:#58668A;
+  --accent:#2563EB; --accent-soft:#DCE7FF; --warm:#EA580C; --win:#15803D; --loss:#E11D48; --warn:#B45309; --warn-soft:#FEF3C7;
+  --m50:#7C3AED;
+  --f-display:"Archivo",system-ui,sans-serif; --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-num:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B1220; --surface:#16213A; --line:#2A3A5C; --fg:#E6EDFA; --muted:#9AA9C7; --accent:#60A5FA; --accent-soft:#1E3A8A; --warm:#FB923C; --win:#4ADE80; --loss:#FB7185; --warn:#FBBF24; --warn-soft:#3F2A06; --m50:#A78BFA; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1220; --surface:#16213A; --line:#2A3A5C; --fg:#E6EDFA; --muted:#9AA9C7; --accent:#60A5FA; --accent-soft:#1E3A8A; --warm:#FB923C; --win:#4ADE80; --loss:#FB7185; --warn:#FBBF24; --warn-soft:#3F2A06; --m50:#A78BFA; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15.5px;line-height:1.55}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:20px 56px;display:grid;gap:16px}
+.wrap>*{min-width:0}
+h1{font-family:var(--f-display);font-weight:800;font-size:1.6rem;margin:0}
+h2{font-family:var(--f-display);font-weight:800;font-size:1.3rem;margin:0}
+h3{font-family:var(--f-display);font-size:1rem;margin:0}
+p{margin:0}
+.sub,.hint{color:var(--muted);font-size:.85rem}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.back{color:var(--accent);text-decoration:none;font-weight:600;font-size:.9rem}
+.panel{scroll-margin-top:150px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px;min-width:0}
+.lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:10px}
+.kpi{border:1px solid var(--line);border-radius:8px;padding:10px}
+.kpi b{display:block;font-family:var(--f-num);font-weight:600;font-size:1.05rem}
+nav.tabs{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:48px;z-index:2;background:var(--bg);padding-block:8px}
+nav.tabs a{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;padding:6px 12px;text-decoration:none;font-weight:600;font-size:.88rem}
+nav.tabs a:hover{border-color:var(--accent);color:var(--accent)}
+nav.tabs a.on{background:var(--accent);border-color:var(--accent);color:#fff}
+/* 16/11/2026: no celular as seções ficam numa linha só, rolando para o lado */
+@media (max-width:640px){nav.tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-inline:-4px;padding-inline:4px}nav.tabs::-webkit-scrollbar{display:none}nav.tabs a{flex:none;white-space:nowrap}}
+ul,ol{margin:0;padding-left:20px;display:grid;gap:4px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:12px}
+.box{border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:8px;min-width:0}
+.box.call{border-left:4px solid var(--win)}
+.box.put{border-left:4px solid var(--loss)}
+.box.no{border-left:4px solid var(--warn);background:var(--warn-soft)}
+.tag{display:inline-block;font-family:var(--f-num);font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:5px;color:var(--surface)}
+.tag.call{background:var(--win)} .tag.put{background:var(--loss)}
+.name{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.name small{color:var(--muted)}
+figure{margin:0;display:grid;gap:6px}
+figure svg{width:100%;height:auto;display:block;background:var(--bg);border-radius:8px}
+figcaption{font-size:.84rem;color:var(--muted)}
+.anim{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.anim .play{appearance:none;font:inherit;font-size:.8rem;font-weight:600;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:7px;padding:6px 12px;cursor:pointer;flex:none}
+.anim .amsg{font-size:.8rem;color:var(--fg);flex:1;min-width:160px}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:16px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.t{font-family:var(--f-num);white-space:nowrap}
+.scroll{overflow-x:auto}
+.calc{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+label{display:grid;gap:4px;font-size:.75rem;color:var(--muted)}
+input,select{font:inherit;font-family:var(--f-num);border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:var(--surface);color:var(--fg);width:120px}
+select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.out{font-family:var(--f-num);font-weight:600;font-size:1.1rem}
+.pos{color:var(--win)} .neg{color:var(--loss)}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:5;display:flex;gap:8px;opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .2s,transform .2s}
+.fab.on{opacity:1;transform:none;pointer-events:auto}
+.fab a,.fab button{appearance:none;font:inherit;font-weight:600;font-size:.9rem;border-radius:999px;padding:10px 16px;text-decoration:none;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18);border:1px solid var(--accent)}
+.fab a{background:var(--accent);color:var(--surface)}
+.fab button{background:var(--surface);color:var(--accent);padding:10px 14px}
+.fab a:active,.fab button:active{transform:scale(.96)}
+.wrap{padding-bottom:96px}
+.box.vol{border-left:4px solid var(--accent);background:var(--accent-soft)}
+.note{background:var(--accent-soft);border-radius:8px;padding:10px 12px;font-size:.9rem}
+</style>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <h1>Manual Forex</h1>
+      <div class="sub">EURUSD e GBPUSD · M2 · EMAs 9, 21 e 50 · stop e alvo · conta em dólar</div>
+    </div>
+  </div>
+
+  <nav class="tabs" aria-label="Seções">
+    <a href="#base">Base</a>
+    <a href="#respiro">Respiro</a>
+    <a href="#virada">Virada</a>
+    <a href="#muralha">Muralha</a>
+    <a href="#giro">Giro</a>
+    <a href="#armadilha">Armadilha</a>
+    <a href="#horarios">Horários</a>
+    <a href="#risco">Risco</a>
+    <a href="#validar">Validar</a>
+  </nav>
+
+  <!-- BASE -->
+  <section class="panel" id="base">
+    <h2>Base de tudo</h2>
+    <div class="kpis">
+      <div class="kpi"><span class="lbl">Tempo gráfico</span><b>M2</b></div>
+      <div class="kpi"><span class="lbl">Pares</span><b>EURUSD · GBPUSD</b></div>
+      <div class="kpi"><span class="lbl">Médias (EMA)</span><b>9 · 21 · 50</b></div>
+      <div class="kpi"><span class="lbl">Entrada</span><b>Abertura da vela seguinte</b></div>
+      <div class="kpi"><span class="lbl">Alvo</span><b>2x o stop</b></div>
+      <div class="kpi"><span class="lbl">Por sessão</span><b>Máx. 2 · loss na 1ª encerra a sessão</b></div>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--warm)"></i>EMA 9</span>
+      <span><i style="background:var(--accent)"></i>EMA 21</span>
+      <span><i style="background:var(--m50)"></i>EMA 50</span>
+      <span><i style="background:var(--loss)"></i>Stop</span>
+      <span><i style="background:var(--win)"></i>Alvo</span>
+      <span><i style="background:var(--muted);height:8px;width:6px"></i>Volume</span>
+    </div>
+    <div class="note">A lógica dos setups é a mesma da OB. O que muda é a saída: em vez de expiração, toda entrada já vai com <b>ordem de stop e de alvo</b> junto. Nunca entre sem stop.<br><br><b>Volume no Forex:</b> não existe volume real centralizado. Use o <b>volume de ticks</b> da plataforma (MT5 ou cTrader): ele mostra a mesma coisa, se tem muita ou pouca gente negociando naquela vela.</div>
+    <div class="box no">
+      <h3>Não opera em nenhum setup quando</h3>
+      <ul>
+        <li>As três médias estão emboladas, sem espaço entre elas (mercado lateral).</li>
+        <li>Faltam 5 minutos ou menos para uma notícia de impacto, ou ela saiu há menos de 15 minutos.</li>
+        <li>A vela de sinal é maior que 2x o tamanho médio das últimas 10 velas.</li>
+        <li>O <b>volume</b> da vela de sinal está abaixo da média das últimas 10 velas.</li>
+        <li>O stop técnico passa do limite: <b>EURUSD 8 pips</b> ou <b>GBPUSD 10 pips</b>.</li>
+        <li>O <b>spread</b> está aberto (mais de 1 pip), como na virada do dia (18:00–19:00 de Brasília) e logo depois de notícia.</li>
+        <li><b>Dólar contra:</b> o DXY (índice do dólar) está indo forte contra a sua entrada (compra no EURUSD ou no GBPUSD com o DXY subindo forte, ou o contrário).</li>
+      </ul>
+    </div>
+    <div class="note"><b>Par × DXY, um contra o outro.</b> EURUSD e GBPUSD andam ao contrário do dólar. Antes de comprar o par, olhe o DXY (índice do dólar) no M2: dólar caindo ou de lado confirma; dólar subindo forte, fique de fora. Vale o mesmo para a venda. É filtro, não sinal de entrada: em dia de notícia da Europa ou do Reino Unido o par pode andar sozinho, sem o dólar.</div>
+  </section>
+
+  <!-- RESPIRO -->
+  <section class="panel" id="respiro">
+    <div class="name"><h2>Respiro</h2><small>pullback na zona 9–21</small></div>
+    <p>O mercado está em tendência, dá uma "respirada" até a média de 21 e volta a andar. Você entra na volta.</p>
+    <div class="two">
+      <div class="box call">
+        <span><span class="tag call">COMPRA</span></span>
+        <ol>
+          <li>Médias alinhadas: 9 acima da 21, 21 acima da 50, com a 50 subindo.</li>
+          <li>O preço recua até a zona entre a 9 e a 21 e encosta ou fura um pouco a 21. O toque pode ser na própria vela de gatilho ou em <b>até 2 velas antes</b> dela.</li>
+          <li>Gatilho, um dos dois:<br><b>1 vela:</b> a vela fecha <b>acima da 9</b>, com pavio inferior.<br><b>2 velas:</b> a vela toca ou fura a 21 e deixa pavio inferior; a vela <b>imediatamente seguinte</b> fecha <b>acima da 9</b>, mesmo sem pavio.</li>
+          <li>Entrada na abertura da vela seguinte à que fechou acima da 9.</li>
+          <li><b>Stop:</b> 1–2 pips abaixo da mínima da vela de sinal ou da 21, o que estiver mais baixo. No gatilho de 2 velas, abaixo da menor mínima das duas.</li>
+          <li><b>Alvo:</b> 2x a distância do stop.</li>
+        </ol>
+      </div>
+      <div class="box put">
+        <span><span class="tag put">VENDA</span></span>
+        <ol>
+          <li>Médias alinhadas: 9 abaixo da 21, 21 abaixo da 50, com a 50 caindo.</li>
+          <li>O preço sobe até a zona entre a 9 e a 21 e encosta ou fura um pouco a 21. O toque pode ser na própria vela de gatilho ou em <b>até 2 velas antes</b> dela.</li>
+          <li>Gatilho, um dos dois:<br><b>1 vela:</b> a vela fecha <b>abaixo da 9</b>, com pavio superior.<br><b>2 velas:</b> a vela toca ou fura a 21 e deixa pavio superior; a vela <b>imediatamente seguinte</b> fecha <b>abaixo da 9</b>, mesmo sem pavio.</li>
+          <li>Entrada na abertura da vela seguinte à que fechou abaixo da 9.</li>
+          <li><b>Stop:</b> 1–2 pips acima da máxima da vela de sinal ou da 21, o que estiver mais alto. No gatilho de 2 velas, acima da maior máxima das duas.</li>
+          <li><b>Alvo:</b> 2x a distância do stop.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="box vol">
+      <h3>Volume</h3>
+      <ul>
+        <li>No recuo até a 21, o volume <b>diminui</b>: é só uma respirada, sem vendedor forte.</li>
+        <li>A vela de sinal tem volume <b>acima da média</b> das últimas 10: os compradores voltaram.</li>
+      </ul>
+    </div>
+    <div class="box no">
+      <h3>Filtros: não entra se</h3>
+      <ul>
+        <li>No recuo, o preço furou a média de 50.</li>
+        <li>A 50 está deitada (sem inclinação).</li>
+        <li>Já é o 3º recuo seguido na mesma tendência (ela está cansando).</li>
+        <li>O toque na 21 foi mais de 2 velas antes do gatilho.</li>
+        <li>Entre o toque e o gatilho, alguma vela fechou do lado errado da 21 (abaixo dela na compra, acima dela na venda).</li>
+        <li>No gatilho de 2 velas: o pavio não está na vela imediatamente anterior (está 2 ou 3 velas atrás), ou a vela do pavio fechou do lado errado da 21.</li>
+      </ul>
+    </div>
+    <div class="two">
+      <figure><div data-chart="respiro" data-side="call"></div><figcaption>Compra: o preço recua até a 21, a vela de sinal fecha de volta acima da 9 e a entrada é na vela seguinte, com stop abaixo da 21.</figcaption></figure>
+      <figure><div data-chart="respiro" data-side="put"></div><figcaption>Venda: o preço sobe até a 21, a vela de sinal fecha de volta abaixo da 9 e a entrada é na vela seguinte, com stop acima da 21.</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- VIRADA -->
+  <section class="panel" id="virada">
+    <div class="name"><h2>Virada</h2><small>cruzamento 9 × 21 a favor da 50</small></div>
+    <p>A média rápida cruza a de 21 no mesmo lado em que o preço está em relação à 50. Você espera uma vela confirmar e entra.</p>
+    <div class="two">
+      <div class="box call">
+        <span><span class="tag call">COMPRA</span></span>
+        <ol>
+          <li>O preço está acima da 50.</li>
+          <li>A 9 cruza a 21 para cima.</li>
+          <li>Gatilho: a primeira vela verde que fecha depois do cruzamento.</li>
+          <li>Entrada na abertura da vela seguinte.</li>
+          <li><b>Stop:</b> 1–2 pips abaixo da menor mínima das últimas 3 velas.</li>
+          <li><b>Alvo:</b> 2x a distância do stop.</li>
+        </ol>
+      </div>
+      <div class="box put">
+        <span><span class="tag put">VENDA</span></span>
+        <ol>
+          <li>O preço está abaixo da 50.</li>
+          <li>A 9 cruza a 21 para baixo.</li>
+          <li>Gatilho: a primeira vela vermelha que fecha depois do cruzamento.</li>
+          <li>Entrada na abertura da vela seguinte.</li>
+          <li><b>Stop:</b> 1–2 pips acima da maior máxima das últimas 3 velas.</li>
+          <li><b>Alvo:</b> 2x a distância do stop.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="box vol">
+      <h3>Volume</h3>
+      <ul>
+        <li>A vela de confirmação tem volume <b>acima da média</b> das últimas 10.</li>
+        <li>Cruzamento com volume fraco costuma virar lateral. Fique de fora.</li>
+      </ul>
+    </div>
+    <div class="box no">
+      <h3>Filtros: não entra se</h3>
+      <ul>
+        <li>A 9 e a 21 cruzaram mais de 2 vezes nas últimas 15 velas.</li>
+        <li>A 50 está deitada ou o preço cruzou a 50 nas últimas 10 velas.</li>
+        <li>A vela de confirmação fecha colada na 50 (sem espaço para andar).</li>
+      </ul>
+    </div>
+    <div class="two">
+      <figure><div data-chart="virada" data-side="call"></div><figcaption>Compra: acima da 50, a 9 cruza a 21 para cima, a primeira vela verde confirma e a entrada é na vela seguinte, com stop abaixo das últimas 3 velas.</figcaption></figure>
+      <figure><div data-chart="virada" data-side="put"></div><figcaption>Venda: abaixo da 50, a 9 cruza a 21 para baixo, a primeira vela vermelha confirma e a entrada é na vela seguinte, com stop acima das últimas 3 velas.</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- MURALHA -->
+  <section class="panel" id="muralha">
+    <div class="name"><h2>Muralha</h2><small>rejeição na média de 50</small></div>
+    <p>O preço volta até a 50, bate nela como numa parede e é rejeitado. Você entra a favor da tendência maior.</p>
+    <div class="two">
+      <div class="box call">
+        <span><span class="tag call">COMPRA</span></span>
+        <ol>
+          <li>Tendência de alta: a 21 acima da 50 e a 50 subindo.</li>
+          <li>O preço cai até tocar a 50.</li>
+          <li>Gatilho, um dos dois:<br><b>Pavio:</b> a vela tem pavio inferior maior ou igual ao corpo e fecha <b>acima da 50</b>.<br><b>Engolfo:</b> a vela que toca a 50 fecha acima dela, e a vela seguinte é verde e <b>engole o corpo inteiro</b> dela.</li>
+          <li>Entrada na abertura da vela seguinte ao pavio ou ao engolfo.</li>
+          <li><b>Stop:</b> 1–2 pips abaixo da mínima do pavio da vela de sinal. No engolfo, abaixo da menor mínima das duas velas.</li>
+          <li><b>Alvo:</b> 2x a distância do stop.</li>
+        </ol>
+      </div>
+      <div class="box put">
+        <span><span class="tag put">VENDA</span></span>
+        <ol>
+          <li>Tendência de baixa: a 21 abaixo da 50 e a 50 caindo.</li>
+          <li>O preço sobe até tocar a 50.</li>
+          <li>Gatilho, um dos dois:<br><b>Pavio:</b> a vela tem pavio superior maior ou igual ao corpo e fecha <b>abaixo da 50</b>.<br><b>Engolfo:</b> a vela que toca a 50 fecha abaixo dela, e a vela seguinte é vermelha e <b>engole o corpo inteiro</b> dela.</li>
+          <li>Entrada na abertura da vela seguinte ao pavio ou ao engolfo.</li>
+          <li><b>Stop:</b> 1–2 pips acima da máxima do pavio da vela de sinal. No engolfo, acima da maior máxima das duas velas.</li>
+          <li><b>Alvo:</b> 2x a distância do stop.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="box vol">
+      <h3>Volume</h3>
+      <ul>
+        <li>A vela de rejeição (o pavio na 50) tem volume <b>acima da média</b>: a 50 foi defendida de verdade.</li>
+        <li>Toque na 50 com volume baixo é rejeição fraca e pode romper.</li>
+        <li>No engolfo, a vela que engole tem volume <b>acima da média</b>.</li>
+      </ul>
+    </div>
+    <div class="box no">
+      <h3>Filtros: não entra se</h3>
+      <ul>
+        <li>É o 3º toque seguido na 50 (ela tende a romper).</li>
+        <li>A vela de sinal fecha do outro lado da 50.</li>
+        <li>A 50 está deitada.</li>
+        <li>No engolfo: a vela que tocou a 50 fechou do outro lado dela (aí é <a href="#armadilha">Armadilha</a>), ou o corpo dela é minúsculo, tipo doji (qualquer vela engole).</li>
+        <li>No engolfo: a 21 está mais perto da entrada do que 1x o stop. Ela costuma travar o preço antes do alvo.</li>
+      </ul>
+    </div>
+    <div class="two">
+      <figure><div data-chart="muralha" data-side="call"></div><figcaption>Compra: na tendência de alta, o preço cai até a 50, a vela deixa pavio embaixo e fecha acima dela; o stop fica abaixo do pavio.</figcaption></figure>
+      <figure><div data-chart="muralha" data-side="put"></div><figcaption>Venda: na tendência de baixa, o preço sobe até a 50, a vela deixa pavio em cima e fecha abaixo dela; o stop fica acima do pavio.</figcaption></figure>
+    </div>
+    <div class="two">
+      <figure><div data-chart="muralhaEng" data-side="call"></div><figcaption>Engolfo na compra: a vela toca a 50 sem pavio grande e fecha acima dela; a seguinte é verde e engole o corpo dela. A entrada é na vela seguinte. O stop fica abaixo da menor mínima das duas velas.</figcaption></figure>
+      <figure><div data-chart="muralhaEng" data-side="put"></div><figcaption>Engolfo na venda: a vela toca a 50 sem pavio grande e fecha abaixo dela; a seguinte é vermelha e engole o corpo dela. A entrada é na vela seguinte. O stop fica acima da maior máxima das duas velas.</figcaption></figure>
+    </div>
+    <p class="hint">Pavio e engolfo são só duas formas de entrar no mesmo setup, com os mesmos filtros. No diário e na análise, os dois são Muralha.</p>
+  </section>
+
+  <!-- GIRO -->
+  <section class="panel" id="giro">
+    <div class="name"><h2>Giro</h2><small>reversão: o preço rompe a 50 e as médias viram</small></div>
+    <p>O mercado vinha numa direção, o preço rompe a 50 e as médias se cruzam para o outro lado. Você <b>não</b> entra no rompimento. Espera o preço voltar e mostrar que a 50 virou apoio, e entra na confirmação.</p>
+    <div class="two">
+      <div class="box call">
+        <span><span class="tag call">COMPRA</span></span>
+        <ol>
+          <li>Antes: o mercado vinha caindo, com 9 abaixo da 21 e 21 abaixo da 50.</li>
+          <li>Uma vela de corpo cheio fecha <b>acima da 50</b>.</li>
+          <li>A 9 cruza a 21 para cima.</li>
+          <li>O preço recua até a 9 ou a 50 sem fechar abaixo da 50.</li>
+          <li>Gatilho: uma vela verde fecha acima da 50.</li>
+          <li>Entrada na abertura da vela seguinte.</li>
+          <li><b>Stop:</b> 1–2 pips abaixo da 50 ou da mínima do recuo, o que estiver mais baixo.</li>
+          <li><b>Alvo:</b> 2x a distância do stop.</li>
+        </ol>
+      </div>
+      <div class="box put">
+        <span><span class="tag put">VENDA</span></span>
+        <ol>
+          <li>Antes: o mercado vinha subindo, com 9 acima da 21 e 21 acima da 50.</li>
+          <li>Uma vela de corpo cheio fecha <b>abaixo da 50</b>.</li>
+          <li>A 9 cruza a 21 para baixo.</li>
+          <li>O preço sobe até a 9 ou a 50 sem fechar acima da 50.</li>
+          <li>Gatilho: uma vela vermelha fecha abaixo da 50.</li>
+          <li>Entrada na abertura da vela seguinte.</li>
+          <li><b>Stop:</b> 1–2 pips acima da 50 ou da máxima do recuo, o que estiver mais alto.</li>
+          <li><b>Alvo:</b> 2x a distância do stop.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="box vol">
+      <h3>Volume</h3>
+      <ul>
+        <li>A vela do rompimento da 50 tem volume <b>forte</b>, pelo menos 1,5x a média das últimas 10.</li>
+        <li>No recuo, o volume <b>diminui</b>.</li>
+        <li>A vela de sinal volta com volume <b>acima da média</b>.</li>
+      </ul>
+    </div>
+    <div class="box no">
+      <h3>Filtros: não entra se</h3>
+      <ul>
+        <li>A 50 ainda está bem inclinada contra você. Ela precisa estar perdendo inclinação, ficando deitada.</li>
+        <li>A vela do rompimento é maior que 2x a média das últimas 10 velas (esticou demais).</li>
+        <li>No recuo, uma vela fechou de volta do outro lado da 50: o rompimento falhou. Se foi só uma vela do outro lado, veja se virou <a href="#armadilha">Armadilha</a> para o lado contrário.</li>
+        <li>Passaram mais de 10 velas desde o rompimento sem o recuo aparecer.</li>
+        <li>O preço já rompeu e voltou pela 50 nas últimas 20 velas (mercado lateral).</li>
+      </ul>
+    </div>
+    <div class="two">
+      <figure><div data-chart="giro" data-side="call"></div><figcaption>Compra: o mercado vinha caindo, o preço rompe a 50, recua até perto dela, a vela de sinal fecha verde acima e a entrada é na vela seguinte, com stop abaixo da 50.</figcaption></figure>
+      <figure><div data-chart="giro" data-side="put"></div><figcaption>Venda: o mercado vinha subindo, o preço perde a 50, sobe até perto dela, a vela de sinal fecha vermelha abaixo e a entrada é na vela seguinte, com stop acima da 50.</figcaption></figure>
+    </div>
+    <p class="hint">Reversão costuma acertar menos que entrada a favor da tendência. Teste o Giro no backtest separado dos outros antes de colocar dinheiro.</p>
+  </section>
+
+  <!-- ARMADILHA -->
+  <section class="panel" id="armadilha">
+    <div class="name"><h2>Armadilha</h2><small>falso rompimento da 50</small></div>
+    <p>Parece que a 50 caiu: uma vela fecha do outro lado dela. Mas a vela seguinte devolve tudo e quem apostou no rompimento fica preso. Você entra a favor da tendência, quando o preço volta para o lado certo da 9.</p>
+    <div class="two">
+      <div class="box call">
+        <span><span class="tag call">COMPRA</span></span>
+        <ol>
+          <li>Tendência de alta: a 21 acima da 50 e a 50 subindo.</li>
+          <li><b>Uma única vela</b> fecha abaixo da 50.</li>
+          <li>A vela seguinte é verde e engole o corpo da que furou.</li>
+          <li>Gatilho: o engolfo fecha <b>acima da 9</b>. Se ele fechar acima da 50 mas abaixo da 9, a vela seguinte ainda pode fechar acima da 9. Passou disso, cancelado.</li>
+          <li>Entrada na abertura da vela seguinte ao gatilho.</li>
+          <li><b>Stop:</b> 1–2 pips abaixo da mínima da vela que furou a 50.</li>
+          <li><b>Alvo:</b> 2x a distância do stop.</li>
+        </ol>
+      </div>
+      <div class="box put">
+        <span><span class="tag put">VENDA</span></span>
+        <ol>
+          <li>Tendência de baixa: a 21 abaixo da 50 e a 50 caindo.</li>
+          <li><b>Uma única vela</b> fecha acima da 50.</li>
+          <li>A vela seguinte é vermelha e engole o corpo da que furou.</li>
+          <li>Gatilho: o engolfo fecha <b>abaixo da 9</b>. Se ele fechar abaixo da 50 mas acima da 9, a vela seguinte ainda pode fechar abaixo da 9. Passou disso, cancelado.</li>
+          <li>Entrada na abertura da vela seguinte ao gatilho.</li>
+          <li><b>Stop:</b> 1–2 pips acima da máxima da vela que furou a 50.</li>
+          <li><b>Alvo:</b> 2x a distância do stop.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="box vol">
+      <h3>Volume</h3>
+      <ul>
+        <li>O engolfo tem volume <b>acima da média</b>: quem apostou no rompimento foi pego.</li>
+        <li>A vela de gatilho (a que fecha do lado certo da 9) tem volume acima da média das últimas 10.</li>
+      </ul>
+    </div>
+    <div class="box no">
+      <h3>Filtros: não entra se</h3>
+      <ul>
+        <li>Fecharam 2 velas ou mais do outro lado da 50: a 50 caiu de verdade.</li>
+        <li>Nem o engolfo nem a vela seguinte fecharam do lado certo da 9.</li>
+        <li>A 9 já cruzou a 21 com força para o lado do rompimento e a 50 está perdendo inclinação: pode ser um Giro começando.</li>
+        <li>A 50 está deitada.</li>
+        <li>O stop passa do limite (EURUSD 8 pips · GBPUSD 10 pips). Aqui acontece bastante, porque o stop fica depois do furo.</li>
+      </ul>
+    </div>
+    <div class="note">Aparece de dois jeitos: na <b>Muralha</b>, quando o toque fecha do outro lado da 50; e no <b>Giro</b> que falhou, quando o rompimento teve uma vela só do outro lado da 50 e o preço voltou. Aí a entrada é a favor da tendência antiga.</div>
+    <div class="two">
+      <figure><div data-chart="armadilha" data-side="call"></div><figcaption>Compra: uma vela fecha abaixo da 50, a seguinte engole e fecha acima da 50, e a próxima fecha acima da 9. A entrada é na vela seguinte.</figcaption></figure>
+      <figure><div data-chart="armadilha" data-side="put"></div><figcaption>Venda: uma vela fecha acima da 50, a seguinte engole e fecha abaixo da 50, e a próxima fecha abaixo da 9. A entrada é na vela seguinte.</figcaption></figure>
+    </div>
+    <p class="hint">O alvo de 2x quase sempre passa pela 21. Por isso aqui não vale o filtro da 21 do engolfo na Muralha: com ele, quase nenhuma Armadilha passaria. Anote no diário quando a 21 segurou o preço antes do alvo. Aparece pouco e é um setup novo: teste no backtest separado dos outros antes de colocar dinheiro.</p>
+  </section>
+
+  <!-- HORÁRIOS -->
+  <section class="panel" id="horarios">
+    <h2>Horários (Brasília)</h2>
+    <p><b>2 sessões, horário fixo</b>, manhã e tarde, com no máximo 2 operações em cada, sempre com <b>Londres e Nova York abertas</b> (é quando EURUSD e GBPUSD têm mais volume e menor spread). O check-list é feito <b>uma vez por dia</b>, de manhã, e já avisa se alguma sessão deve ser pulada.</p>
+    <div class="ses-list"><div class="ses"><div class="hd"><b>Manhã</b><span>09:45–11:15</span></div><p>Londres e Nova York abertas juntas: maior volume do dia. Pausa todo dia às 10:25–10:45 (dados dos EUA; até 01/11 e a partir de 14/03, abertura da bolsa de Nova York).</p></div><div class="ses"><div class="hd"><b>Tarde</b><span>12:00–13:30</span></div><p>Ainda com Londres aberta. Depois das 14:00 a Europa fecha e o volume cai. Em dia de ISM ou JOLTS (12:00), comece às 12:15.</p></div></div>
+    <div class="box no">
+      <h3>⛔ Notícias relevantes (alto impacto)</h3>
+      <p>No Investing.com, filtre <b>alto impacto (3 touros)</b> · EUA, Zona do Euro e Reino Unido. Regra: <b>nada de 5 min antes até 15 min depois</b>.</p>
+      <div class="nw-list">
+        <div class="nw-h">Caem nas sessões: dias de pular</div>
+        <div class="nw"><div class="o"><b>Payroll e CPI</b><small>EUA · 1ª sexta e meio do mês</small></div><div class="t">10:30 (09:30 no verão dos EUA)</div><div class="a skip">Manhã só 30 min depois da notícia</div></div>
+        <div class="nw"><div class="o"><b>Decisão do BCE</b><small>juros da Zona do Euro · coletiva logo depois</small></div><div class="t">10:15 e 10:45</div><div class="a skip">Pula a manhã</div></div>
+        <div class="nw"><div class="o"><b>Feriados</b><small>EUA fechado · Londres fechada</small></div><div class="t">26/11 · Sexta-feira Santa · feriados de Londres</div><div class="a skip">EUA fechado: só de manhã · Londres fechada: não opera</div></div>
+        <div class="nw-h">Fixas, fora das sessões · horário de inverno nos EUA e na Europa</div>
+        <div class="nw"><div class="o"><b>Europa e Reino Unido</b><small>CPI, PMI, PIB, emprego</small></div><div class="t">04:00 → 07:00</div><div class="a">Antes da manhã</div></div>
+        <div class="nw"><div class="o"><b>Banco da Inglaterra</b><small>juros do Reino Unido</small></div><div class="t">09:00</div><div class="a">Antes da manhã: confira o GBPUSD antes de entrar</div></div>
+        <div class="nw"><div class="o"><b>EUA</b><small>PPI, varejo, PIB, PCE, seguro-desemprego</small></div><div class="t">10:30</div><div class="a">Dentro da pausa fixa 10:25–10:45</div></div>
+        <div class="nw"><div class="o"><b>EUA</b><small>ISM, JOLTS, confiança do consumidor</small></div><div class="t">12:00</div><div class="a">Tarde começa às 12:15</div></div>
+        <div class="nw"><div class="o"><b>FOMC</b><small>juros dos EUA</small></div><div class="t">16:00</div><div class="a">Depois das sessões: não deixe posição aberta</div></div>
+      </div>
+      <p class="hint">Também conta: fala do presidente do Fed, do BCE ou do Banco da Inglaterra, e o par disparando do nada. Nesses casos, para 15 minutos. No horário de verão dos EUA (até 01/11 e a partir de 14/03) e da Europa (fim de março a fim de outubro), as notícias chegam 1 hora antes.</p>
+    </div>
+    <div class="box no">
+      <h3>Evite também</h3>
+      <ul>
+        <li>A virada do dia (18:00–19:00), quando o spread abre e o swap é cobrado.</li>
+        <li>Depois das 14:00, com Londres fechada: o volume cai e o par fica lateral.</li>
+        <li>Domingo à noite (abertura da semana, com gap) e sexta depois das 15:00.</li>
+      </ul>
+    </div>
+    <p class="hint">De manhã, no check-list, confira o calendário econômico do dia.</p>
+  </section>
+
+  <!-- RISCO -->
+  <section class="panel" id="risco">
+    <h2>Risco por operação</h2>
+    <p>Coloque o tamanho do stop em pips e veja quanto você arrisca e quanto ganha no alvo, em dólar. Os valores vêm do seu Progresso Forex.</p>
+    <div class="calc">
+      <label>Par<select id="rAtivo"><option value="EURUSD">EURUSD (US$ 10/pip por lote)</option><option value="GBPUSD">GBPUSD (US$ 10/pip por lote)</option></select></label>
+      <label>Lote<input id="rCt" type="number" inputmode="decimal" value="0.01" min="0.01" step="0.01"></label>
+      <label>Stop (pips)<input id="rStop" type="number" inputmode="decimal" value="8" min="0" step="0.5"></label>
+      <label>Alvo (x o stop)<input id="rMult" type="number" inputmode="decimal" value="2" min="0.5" step="0.1"></label>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><span class="lbl">Risco no stop</span><b id="rRisco" class="neg">—</b></div>
+      <div class="kpi"><span class="lbl">Ganho no alvo</span><b id="rGanho" class="pos">—</b></div>
+      <div class="kpi"><span class="lbl">Alvo em pips</span><b id="rAlvo">—</b></div>
+      <div class="kpi"><span class="lbl" title="Acerto mínimo p/ empatar">Acerto p/ empatar</span><b id="rBe">—</b></div>
+    </div>
+    <p class="hint" id="rProg"></p>
+    <p class="hint" id="rAviso"></p>
+    <div class="box no">
+      <h3>Regras de cada sessão</h3>
+      <ul>
+        <li>Duas sessões por dia (manhã e tarde). Em cada uma, no máximo <b>2 operações</b>; loss na 1ª, <b>sessão encerrada</b>.</li>
+        <li>A tarde começa do zero, com o mesmo lote. Stop de manhã não se recupera à tarde com mão maior.</li>
+        <li>Lote pela sua tabela de progresso da banca. Nunca aumente para recuperar um loss.</li>
+        <li>Stop e alvo entram junto com a ordem. Nunca afaste o stop depois de entrar.</li>
+        <li><b>Uma operação aberta por vez.</b> Nunca EURUSD e GBPUSD juntos: os dois andam quase iguais contra o dólar, é a mesma aposta duas vezes e, se virar, são dois stops de uma vez.</li>
+        <li>O spread e a comissão não estão na conta acima. Eles pesam mais com stop curto: com stop de 8 pips, 1 pip de spread já é 12% do risco.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- VALIDAR -->
+  <section class="panel" id="validar">
+    <h2>Como validar</h2>
+    <ol>
+      <li>Volte no gráfico M2 e anote <b>50 a 100 sinais de cada setup</b> nos horários das sessões, sem pular nenhum.</li>
+      <li>Para cada sinal, veja se o preço bateu primeiro o <b>alvo</b> ou o <b>stop</b>.</li>
+      <li>Com alvo de 2x, o empate é em <b>33%</b> de acerto. Fique com os setups que passarem de <b>40%</b> no papel.</li>
+      <li>Depois, opere 2 semanas com 0,01 lote antes de subir.</li>
+    </ol>
+    <div class="note">Anote o EURUSD e o GBPUSD separados. O mesmo setup pode funcionar num e não no outro.</div>
+  </section>
+
+</div>
+
+
+<script>
+// ---- exemplos de gráfico (valores ilustrativos) ----
+const EX={
+  respiro:{vol:[1,1,1.1,1,1.1,.9,.8,.7,.65,.6,1.6,1.4,1.2,1.1,1,1],signal:10,entry:11,stop:51,
+    e50:[30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45],
+    e21:[40,42,44,46,48,49.5,51,52,52.5,53,53.3,54,55.3,57,58.8,60.7],
+    e9:[46,49,52,55,58,60,60.5,59.5,58,56.5,55.8,57,59.5,62.5,65.5,68.5],
+    c:[[44,48,43,47],[47,52,46,51],[51,55,50,54],[54,59,53,58],[58,63,57,62],[62,65,60,64],[64,65,60,61],[61,62,57.5,58],[58,58.5,55,55.5],[55.5,56,52.5,53],[53,57,51.5,56.5],[56.5,60,56,59.5],[59.5,63,59,62.5],[62.5,66.5,62,66],[66,69,65.5,68.5],[68.5,72,68,71.5]]},
+  virada:{vol:[1,1,.9,.9,1,1,1.1,1.2,1,1.6,1.3,1.2,1,1,1,.9],signal:9,entry:10,stop:53.5,
+    e50:[38,38.5,39,39.5,40,40.5,41,41.5,42,42.5,43,43.5,44,44.5,45,45.5],
+    e21:[56,55.5,55,54.5,54,53.8,53.6,53.6,53.8,54.2,54.8,55.5,56.3,57.2,58,59],
+    e9:[55,53.5,52,51,50.5,50.5,51.5,53,54.5,56,58,60,62,63.5,65,66],
+    c:[[56,57,53,54],[54,55,51,52],[52,53,49,50],[50,51,48,49],[49,51,47.5,50.5],[50.5,53,50,52.5],[52.5,55,52,54.5],[54.5,57,54,56.5],[56.5,57,55,55.5],[55.5,59,55,58.5],[58.5,62,58,61.5],[61.5,64,61,63.5],[63.5,65,62.5,64.5],[64.5,67,64,66.5],[66.5,68,65.5,67.5],[67.5,70,67,69.5]]},
+  muralha:{vol:[1,1,.9,.9,1,1,1.1,1,1.8,1.3,1.1,1,1,1,1,.9],signal:8,entry:9,stop:35.5,
+    e50:[30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45],
+    e21:[45,46.5,48,49,49.5,49.5,49,48.5,48,48,48.5,49.5,51,52.5,54,55.5],
+    e9:[55,57,58,57,55,52,49,46.5,44.5,44,45.5,48,51,54,57,59],
+    c:[[52,58,51,57],[57,61,56,60],[60,62,57,58],[58,59,54,55],[55,56,51,52],[52,53,47,48],[48,49,43,44],[44,45,40,40.5],[40,43,36,42],[42,46,41.5,45.5],[45.5,49,45,48.5],[48.5,52,48,51],[51,54,50.5,53.5],[53.5,57,53,56],[56,59,55.5,58],[58,61,57.5,60]]},
+  muralhaEng:{vol:[1,1,.9,1,1.1,1,.9,.85,.8,1.7,1.3,1.2,1.1,1,1,.9],signal:9,entry:10,stop:42,
+    e50:[39.3,40.0,40.7,41.2,41.7,42.0,42.2,42.3,42.4,42.5,42.7,43.0,43.4,43.8,44.2,44.8],
+    e21:[53.7,54.1,54.4,54.4,54.3,53.9,53.3,52.5,51.7,51.1,50.9,50.8,50.9,51.2,51.6,52.2],
+    e9:[56.0,56.4,56.5,56.2,55.5,54.4,53.0,51.4,49.7,48.9,48.8,49.0,49.6,50.5,51.6,52.9],
+    c:[[54,57,53,56],[56,59,55,58],[58,60,56.5,57],[57,58,54.5,55],[55,55.5,52,52.5],[52.5,53,49.5,50],[50,50.5,47,47.5],[47.5,48,44.6,45],[45,45.3,42.3,42.8],[42.6,46.5,42.4,46],[46,48.5,45.5,48],[48,50.5,47.5,50],[50,52.5,49.5,52],[52,54.5,51.5,54],[54,56.5,53.5,56],[56,58.5,55.5,58]]},
+  armadilha:{vol:[1,1,.9,1,1.1,1.1,1,1,1.4,1.6,1.5,1.2,1.1,1,1,.9,1,1,1.1],signal:10,entry:11,stop:40.7,
+    e50:[41.2,41.9,42.6,43.1,43.5,43.7,43.9,43.9,43.8,43.8,44.0,44.3,44.7,45.1,45.7,46.2,46.9,47.6,48.4],
+    e21:[54.4,54.8,55.2,55.2,55.0,54.6,53.9,53.0,52.0,51.4,51.2,51.2,51.4,51.8,52.4,53.1,54.0,55.0,56.1],
+    e9:[57.2,57.7,57.8,57.5,56.6,55.3,53.6,51.8,49.7,48.8,48.9,49.3,50.1,51.3,52.8,54.3,56.2,58.2,60.3],
+    c:[[56,58.5,55.5,58],[58,60,57.5,59.5],[59.5,60.5,58,58.5],[58.5,59,55.5,56],[56,56.5,52.5,53],[53,53.5,49.5,50],[50,50.5,46.5,47],[47,47.5,44,44.5],[44.5,45,41,41.5],[41.5,45.5,41.2,45],[45,49.5,44.6,49.3],[49.3,51.5,48.8,51],[51,54,50.5,53.5],[53.5,56.5,53,56],[56,59,55.5,58.5],[58.5,61,58,60.5],[60.5,63.5,60,63],[63,65.5,62.5,65],[65,67.5,64.5,67]]},
+  giro:{vol:[1,1,1,.9,.9,.8,1,1.1,1.2,2.2,.8,1.5,1.3,1.1,1,1,.9],signal:11,entry:12,stop:54.5,
+    e50:[62,61,60,59,58,57.2,56.5,56,55.6,55.3,55.1,55,55,55.1,55.3,55.6,56],
+    e21:[56,54.5,53,51.5,50,49,48.3,48,48.2,49,50,51,52,53,54,55,56],
+    e9:[52,50,48,46,44.5,44,44.5,46,48.5,52,54.5,56,57,58.5,60,61.5,63],
+    c:[[53,54,50,51],[51,52,48,49],[49,50,46,47],[47,48,44,45],[45,46,42,43],[43,45,41.5,44.5],[44.5,48,44,47.5],[47.5,51,47,50.5],[50.5,54,50,53.5],[53.5,59,53,58.5],[58.5,59,56,56.5],[56.5,58.5,55.2,58],[58,61,57.5,60.5],[60.5,63,60,62.5],[62.5,64,61.5,63],[63,66,62.5,65.5],[65.5,67,64.5,66.5]]}
+};
+const MULT=2;
+function mirror(d){const f=v=>100-v;return {...d,stop:f(d.stop),e50:d.e50.map(f),e21:d.e21.map(f),e9:d.e9.map(f),c:d.c.map(([o,h,l,c])=>[f(o),f(l),f(h),f(c)])}}
+function dados(el){
+  const side=el.dataset.side, base=EX[el.dataset.chart], d=side==="put"?mirror(base):base;
+  const ent=d.c[d.entry][0], alvo=ent+MULT*(ent-d.stop), up=side!=="put";
+  let fim=d.c.length-1, res=null;
+  for(let i=d.entry;i<d.c.length;i++){const [o,h,l]=d.c[i];
+    const bateStop=up?l<=d.stop:h>=d.stop, bateAlvo=up?h>=alvo:l<=alvo;
+    if(bateStop){fim=i;res="stop";break} if(bateAlvo){fim=i;res="alvo";break}}
+  return {...d,side,ent,alvo,fim,res};
+}
+function draw(el,t){
+  const d=dados(el), side=d.side, full=t==null, ent=d.ent, alvo=d.alvo;
+  const W=340,H=210,pl=8,pr=34,pt=30,pb=44,n=d.c.length,step=(W-pl-pr)/n,cw=step*.58;
+  const all=[...d.e50,...d.e21,...d.e9,...d.c.flat(),d.stop,alvo],mn=Math.min(...all)-2,mx=Math.max(...all)+2;
+  const y=v=>pt+(mx-v)/(mx-mn)*(H-pt-pb), x=i=>pl+step*i+step/2;
+  if(full)t=n;
+  const k=Math.min(n,Math.floor(t)), f=t-k;
+  const upto=a=>{const p=a.slice(0,Math.min(k,a.length));if(k<a.length&&f>0&&k>0)p.push(a[k-1]+(a[k]-a[k-1])*f);else if(k<a.length&&k===0&&f>0)p.push(a[0]);return p};
+  const line=(a,col,w)=>a.length<2?"":`<polyline fill="none" stroke="${col}" stroke-width="${w}" stroke-linejoin="round" points="${a.map((v,i)=>x(i).toFixed(1)+","+y(v).toFixed(1)).join(" ")}"/>`;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Exemplo de ${side==="put"?"venda":"compra"} no ${el.dataset.chart}, com stop e alvo">`;
+  const x0=x(d.entry)-step/2, x1=full?W-pr:Math.min(W-pr,Math.max(x0,pl+step*Math.min(t,d.fim+1)));
+  const emOp=t>=d.entry;
+  // faixas de stop e alvo
+  const zone=(a,b,col)=>`<rect x="${x0}" y="${Math.min(y(a),y(b))}" width="${Math.max(0,x1-x0)}" height="${Math.abs(y(a)-y(b))}" fill="${col}" opacity=".12"/>`;
+  if(emOp)s+=zone(ent,d.stop,"var(--loss)")+zone(ent,alvo,"var(--win)");
+  const hl=(v,col,txt)=>`<line x1="${x0}" x2="${x1}" y1="${y(v)}" y2="${y(v)}" stroke="${col}" stroke-width="1.4" stroke-dasharray="4 3"/><text x="${W-pr+3}" y="${y(v)+3.5}" font-size="10" font-weight="600" fill="${col}" font-family="IBM Plex Sans,sans-serif">${txt}</text>`;
+  s+=line(upto(d.e50),"var(--m50)",2)+line(upto(d.e21),"var(--accent)",2)+line(upto(d.e9),"var(--warm)",2);
+  const vis=i=>!(i>k||(i===k&&f<=0));
+  d.c.forEach(([o,h,l,c],i)=>{
+    if(!vis(i))return;
+    if(i===k){const c2=o+(c-o)*f;h=Math.max(o,c2)+(h-Math.max(o,c))*f;l=Math.min(o,c2)-(Math.min(o,c)-l)*f;c=c2}
+    const up=c>=o,col=up?"var(--win)":"var(--loss)",top=y(Math.max(o,c)),bh=Math.max(1.5,Math.abs(y(o)-y(c)));
+    s+=`<line x1="${x(i)}" x2="${x(i)}" y1="${y(h)}" y2="${y(l)}" stroke="${col}" stroke-width="1.3"/><rect x="${x(i)-cw/2}" y="${top}" width="${cw}" height="${bh}" fill="${col}" rx="1"/>`});
+  // barras de volume (crescem junto com a vela)
+  const vmax=Math.max(...d.vol), vb=H-6, vh=26;
+  s+=`<line x1="${pl}" x2="${W-pr}" y1="${vb+.5}" y2="${vb+.5}" stroke="var(--line)"/>`;
+  d.vol.forEach((v,i)=>{if(!vis(i))return;const hh=v/vmax*vh*(i===k?f:1), up=d.c[i][3]>=d.c[i][0];s+=`<rect x="${x(i)-cw/2}" y="${vb-hh}" width="${cw}" height="${hh}" fill="${up?"var(--win)":"var(--loss)"}" opacity="${i===d.signal&&t>=d.signal+1?.9:.35}" rx="1"/>`});
+  const vm=d.vol.slice(0,d.signal).slice(-10), avg=vm.reduce((a,b)=>a+b,0)/vm.length, ya=vb-avg/vmax*vh;
+  s+=`<line x1="${pl}" x2="${W-pr}" y1="${ya}" y2="${ya}" stroke="var(--muted)" stroke-dasharray="2 3"/><text x="${W-pr+3}" y="${ya+3.5}" font-size="9" fill="var(--muted)" font-family="IBM Plex Sans,sans-serif">média</text>`;
+  if(emOp)s+=hl(d.stop,"var(--loss)","stop")+hl(alvo,"var(--win)","alvo");
+  if(t>=d.signal+1){const sg=d.c[d.signal], markY=y(sg[1])-9;
+    s+=`<text x="${x(d.signal)}" y="${Math.max(12,markY)}" text-anchor="middle" font-size="10" font-weight="600" fill="var(--fg)" font-family="IBM Plex Sans,sans-serif">sinal</text>`}
+  if(emOp){const tag=side==="put"?"VENDA":"COMPRA",col=side==="put"?"var(--loss)":"var(--win)";
+    s+=`<g><rect x="${x(d.entry)-25}" y="6" width="50" height="15" rx="4" fill="${col}"/><text x="${x(d.entry)}" y="17" text-anchor="middle" font-size="10" font-weight="600" fill="var(--surface)" font-family="IBM Plex Mono,monospace">${tag}</text><line x1="${x(d.entry)}" x2="${x(d.entry)}" y1="21" y2="${y(ent)}" stroke="${col}" stroke-dasharray="3 3"/></g>`}
+  if(!full&&t>=d.fim+1&&d.res){const g=d.res==="alvo",col=g?"var(--win)":"var(--loss)",xx=Math.min(W-pr-28,x(d.fim)+30),yy=y(g?alvo:d.stop);
+    s+=`<circle cx="${x(d.fim)}" cy="${yy}" r="4" fill="${col}"/><g><rect x="${xx-28}" y="${Math.max(24,yy-(g===(side!=="put")?20:-6))}" width="56" height="15" rx="4" fill="var(--surface)" stroke="${col}" stroke-width="1.5"/><text x="${xx}" y="${Math.max(24,yy-(g===(side!=="put")?20:-6))+11}" text-anchor="middle" font-size="10" font-weight="700" fill="${col}" font-family="IBM Plex Mono,monospace">${g?"GAIN ✓":"STOP"}</text></g>`}
+  s+=`</svg>`; el.innerHTML=s;
+}
+function msgAnim(el,d,t){
+  const m=el.parentNode.querySelector(".amsg");if(!m)return;
+  const dir=d.side==="put"?"venda":"compra";
+  const vs=d.vol[d.signal], vm=d.vol.slice(0,d.signal).slice(-10), avg=vm.reduce((a,b)=>a+b,0)/vm.length;
+  let txt;
+  if(t<d.signal)txt="As velas vão se formando, com as médias e o volume embaixo…";
+  else if(t<d.signal+1)txt="Vela de sinal se formando: espera ela fechar e olha o volume.";
+  else if(t<d.entry+.01)txt="Sinal fechou"+(vs>avg?" com volume acima da média":"")+". Entrada de "+dir+" na abertura da próxima vela, stop e alvo "+MULT+"x marcados.";
+  else if(t<d.fim+1)txt="Dentro da operação: esperando bater o alvo ou o stop…";
+  else txt=d.res==="alvo"?"Fim da operação: bateu o alvo ("+MULT+"x o stop). GAIN.":d.res==="stop"?"Fim da operação: bateu o stop. LOSS.":"Fim do exemplo.";
+  m.textContent=txt;
+}
+// ---- gráfico andando: toque no exemplo e as velas vão se formando até a entrada e o fim da entrada ----
+const SPEED=420; // ms por vela
+function animar(el){
+  if(el._raf){cancelAnimationFrame(el._raf);el._raf=null;if(el._t<el._end){el._paused=true;setBtn(el,"▶ Continuar");return}}
+  const info=dados(el);el._end=info.fim+1;
+  if(!el._paused||el._t==null||el._t>=el._end)el._t=0;
+  el._paused=false;el._hold=0;setBtn(el,"⏸ Pausar");
+  let last=performance.now();
+  const tick=now=>{
+    const dt=now-last;last=now;
+    if(el._hold>0){el._hold-=dt}
+    else{
+      const prev=el._t;let t=prev+dt/SPEED;
+      // pausas: quando a vela de sinal fecha e quando a entrada abre
+      if(prev<info.signal+1&&t>=info.signal+1){t=info.signal+1;el._hold=1100}
+      else if(prev<info.entry+.001&&t>=info.entry+.001){t=info.entry+.001;el._hold=1000}
+      el._t=Math.min(t,el._end);
+    }
+    draw(el,el._t);msgAnim(el,info,el._t);
+    if(el._t>=el._end&&el._hold<=0){el._raf=null;setBtn(el,"↻ Ver de novo");return}
+    el._raf=requestAnimationFrame(tick);
+  };
+  el._raf=requestAnimationFrame(tick);
+}
+function setBtn(el,txt){const b=el.parentNode.querySelector(".play");if(b)b.textContent=txt}
+function prepAnim(el){
+  const fig=el.closest("figure");const bar=document.createElement("div");bar.className="anim";
+  bar.innerHTML="<button type='button' class='play'>▶ Ver andando</button><span class='amsg'>Toque para ver o gráfico se formando até a entrada.</span>";
+  el.after(bar);
+  bar.querySelector(".play").addEventListener("click",()=>animar(el));
+  el.addEventListener("click",()=>animar(el));el.style.cursor="pointer";el.title="Toque para ver o gráfico andando";
+}
+document.querySelectorAll("[data-chart]").forEach(el=>{draw(el);prepAnim(el)});
+
+// ---- calculadora de risco ----
+const PV={EURUSD:10,GBPUSD:10}, LIM={EURUSD:8,GBPUSD:10}, DEF={EURUSD:8,GBPUSD:10};
+const brl=v=>"US$ "+v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const num=v=>v.toLocaleString("pt-BR",{maximumFractionDigits:1});
+const $=id=>document.getElementById(id), LS="manualFX.risco.v1";
+function risco(){
+  const a=$("rAtivo").value, ct=Math.max(0,parseFloat($("rCt").value)||0), st=Math.max(0,parseFloat($("rStop").value)||0), m=Math.max(0,parseFloat($("rMult").value)||0);
+  const r=st*PV[a]*ct;
+  $("rRisco").textContent="−"+brl(r);
+  $("rGanho").textContent="+"+brl(r*m);
+  $("rAlvo").textContent=num(st*m)+" pips";
+  $("rBe").textContent=m>0?(100/(1+m)).toFixed(1).replace(".",",")+"%":"—";
+  $("rAviso").textContent=st>LIM[a]?`Stop acima do limite do manual (${a}: ${LIM[a]} pips). Pela regra, fique de fora.`:"";
+}
+/* par, lote, stop e alvo vêm do Progresso Forex (escada + simulador), como no Diário e no Manual OB.
+   Mudar aqui é só para testar: não salva. */
+const PLV3=[100,200,600,1000,1400,2000,2400,3000,4000,5000,6000,7000,8000,10000,12000,14000,16000,18000,20000];
+const PCT3=[0.01,0.02,0.03,0.05,0.07,0.1,0.12,0.15,0.2,0.25,0.3,0.35,0.4,0.5,0.6,0.7,0.8,0.9,1];
+let pgSt=null,pgSim=null;
+function rDoProg(){
+  const out={};
+  if(pgSt){const c=new Set(pgSt.conquistados||[]);let last=-1;PLV3.forEach((v,i)=>{if(c.has(i))last=i});out.rCt=last>=0?PCT3[last]:0.01}
+  if(pgSim){if(pgSim.ativo==="EURUSD"||pgSim.ativo==="GBPUSD")out.rAtivo=pgSim.ativo;if(+pgSim.stopPts>0)out.rStop=+pgSim.stopPts;if(+pgSim.mult>0)out.rMult=+pgSim.mult}
+  const a=document.activeElement;Object.keys(out).forEach(k=>{if(a!==$(k))$(k).value=out[k]});
+  const h=$("rProg");if(h)h.textContent=(pgSt||pgSim)?"Puxa do Progresso Forex: "+$("rAtivo").value+", "+(+$("rCt").value).toLocaleString("pt-BR",{minimumFractionDigits:2})+" lote, stop "+num(+$("rStop").value||0)+" pips, alvo "+num(+$("rMult").value||0)+"x. Mudar aqui é só teste (não salva).":"";
+  risco();
+}
+try{pgSt=JSON.parse(localStorage.getItem("progressoFX.v1")||"null")}catch(e){}
+try{pgSim=JSON.parse(localStorage.getItem("simuladorFX.v1")||"null")}catch(e){}
+rDoProg();
+(async()=>{let d=null;try{d=window.claude?await window.claude.use("db"):null}catch(e){}if(!d||!d.app)return;const P=d.app("progresso-fx");
+  P.doc("estado/progresso").onSnapshot(x=>{pgSt=x.exists?x.data():pgSt;rDoProg()},()=>{});
+  P.doc("estado/simulador").onSnapshot(x=>{pgSim=x.exists?x.data():pgSim;rDoProg()},()=>{});})();
+$("rAtivo").addEventListener("change",()=>{$("rStop").value=DEF[$("rAtivo").value];risco()});
+["rCt","rStop","rMult"].forEach(id=>$(id).addEventListener("input",risco)); risco();
+
+</script>
+<script>
+/* 16/11/2026: marca a seção em que você está e leva o botão dela para a vista */
+(function(){const nav=document.querySelector("nav.tabs");if(!nav||!("IntersectionObserver" in window))return;
+ const links=[...nav.querySelectorAll('a[href^="#"]')],secs=links.map(a=>document.querySelector(a.getAttribute("href"))).filter(Boolean);let cur=null;
+ const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const a=nav.querySelector('a[href="#'+e.target.id+'"]');if(a&&a!==cur){if(cur)cur.classList.remove("on");a.classList.add("on");cur=a;
+   const r=a.getBoundingClientRect(),n=nav.getBoundingClientRect();if(r.left<n.left||r.right>n.right)nav.scrollTo({left:a.offsetLeft-nav.offsetLeft-16,behavior:"smooth"})}}})},{rootMargin:"-35% 0px -60% 0px"});
+ secs.forEach(s=>io.observe(s));})();
+</script>
+</body></html>

@@ -95,6 +95,7 @@ a.lnk .ar{margin-left:auto;color:var(--gc);font-weight:700}
 a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:0 20px 40px -14px var(--gc);z-index:5;border-color:var(--gc)}
 @media (max-width:560px){.tiles.org .tm{top:6px;right:6px}.tm button,.tm .dg{width:26px;height:26px}}
 @media (max-width:560px){.gh,html .gh{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:6px 12px}.gh>div{display:contents}.gh h1{grid-column:2;grid-row:1;font-size:clamp(1.15rem,6vw,1.6rem)}.gh .gi{grid-column:1;grid-row:1}.gh .btn-org{grid-column:3;grid-row:1}.gh .sub{grid-column:1/-1;grid-row:2;margin:2px 0 0}}
+.mkt{display:inline-flex;gap:4px;padding:4px;border-radius:12px;background:var(--surface,#fff);border:1px solid var(--line,#DDE4F2);margin-top:8px}.mkt button{appearance:none;border:0;background:none;font:600 .9rem 'IBM Plex Sans',system-ui,sans-serif;color:var(--muted,#58668A);padding:7px 16px;border-radius:9px;cursor:pointer}.mkt button.on{background:var(--gc,#0F766E);color:#fff}.mkt small{font-weight:500;opacity:.8;font-size:.72rem}.gh .mkt{grid-column:1/-1}
 </style></head><body>
 <div class="wrap">
   <section class="home" id="home">
@@ -102,7 +103,7 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
     <div class="mods" id="mods"></div>
   </section>
   <section id="grupo" hidden style="display:grid;gap:16px">
-    <div class="gh"><span class="gi" id="gIc"></span><div><h1 id="gTit"></h1><p class="sub" id="gSub"></p></div>
+    <div class="gh"><span class="gi" id="gIc"></span><div><h1 id="gTit"></h1><p class="sub" id="gSub"></p><div class="mkt" id="gMk" hidden></div></div>
       <button type="button" class="btn-org" id="bOrg" aria-haspopup="menu" aria-label="Ordenar e organizar" title="Ordenar e organizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg><span>Concluir</span></button></div>
     <div class="orgtip" id="orgtip" hidden>Arraste os cartões pelo <b>⠿</b> (ou use ◀ ▶) para colocar na ordem que quiser. Toque no <b>✓</b> lá em cima quando terminar.</div>
     <div class="tiles" id="tiles"></div>
@@ -112,7 +113,7 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
 <script>
 (function(){
   const MC=window.__MC||{GROUPS:[],ICO:{},DESC:{}};
-  const SUB={ob:"Operacional, gerenciamento e mentalidade",b3:"Mini índice e mini dólar",pes:"Rotina, casa e finanças"};
+  const SUB={ob:"Operacional, gerenciamento e mentalidade",b3:"Mini índice e mini dólar · EURUSD e GBPUSD",pes:"Rotina, casa e finanças"};
   /* links viram cards junto com as páginas: [url, título, descrição, chave do link salvo, posição] — posição = depois de qual página ("" = no fim) */
   const IL=(d)=>"<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>"+d+"</svg>";
   const LICO={"Quotex":IL("<path d='M4 19l5-6 4 3 7-9'/><path d='M15 7h5v5'/>"),"Notícias":IL("<rect x='3' y='4' width='18' height='16' rx='3'/><path d='M7 9h10M7 13h10M7 17h6'/>"),"Claude":IL("<path d='M4 5h16v11H9l-5 4z'/>")};
@@ -120,7 +121,9 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
     ob:[["https://quotex.com/pt/trade","Quotex","Corretora · operar","","checklist-ob"],["https://br.investing.com/economic-calendar","Notícias","Calendário econômico","","checklist-ob"],["analise-ob.html#cfgBox","Claude","Conversa OB · prints e dúvidas","analiseOB.claudeUrl",""]],
     b3:[["https://br.investing.com/economic-calendar","Notícias","Calendário econômico","","checklist-b3"],["analise-b3.html#cfgBox","Claude","Conversa B3 · prints e dúvidas","analiseB3.claudeUrl",""]]};
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const sigla=g=>g.s==="Pessoal"?"EU":g.s;
+  const sigla=g=>g.s==="Pessoal"?"EU":g.k==="b3"?"B3":g.s;
+  const mk=()=>{try{return localStorage.getItem("mc.mercado")==="fx"?"fx":"b3"}catch(e){return "b3"}};
+  const hrefPg=id=>window.__mcHref?window.__mcHref(id):id;
   const $=id=>document.getElementById(id);
   $("mods").innerHTML=MC.GROUPS.map(g=>"<button type='button' class='mod' data-k='"+g.k+"' style='--gc:"+g.c+"'><span class='gi'>"+esc(sigla(g))+"</span><b>"+esc(g.g)+"</b><small>"+esc(SUB[g.k]||"")+"</small><span class='go'>Abrir<i>→</i></span></button>").join("");
   function abrir(k){
@@ -129,8 +132,12 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
     document.documentElement.setAttribute("data-g",k);document.documentElement.style.setProperty("--gc",g.c);
     $("home").hidden=true;$("grupo").hidden=false;
     $("gIc").textContent=sigla(g);$("gTit").textContent=g.g;$("gSub").textContent=SUB[k]||"";
-    const L=LINKS[k]||[];
-    const cardPg=it=>"<a class='tile' href='"+it[0]+".html'><span class='ic'>"+(MC.ICO[it[1]]||"")+"</span><span><b>"+esc(it[1])+"</b><br><small>"+esc(MC.DESC[it[0]]||"")+"</small></span></a>";
+    /* 17/11/2026: módulo B3 ou Forex: escolhe o mercado aqui; cada um tem as suas páginas e dados */
+    const gm=$("gMk");gm.hidden=k!=="b3";
+    if(k==="b3"){gm.innerHTML=[["b3","B3","R$"],["fx","Forex","US$"]].map(x=>"<button type='button' data-mk='"+x[0]+"' class='"+(mk()===x[0]?"on":"")+"' aria-pressed='"+(mk()===x[0])+"'>"+x[1]+" <small>"+x[2]+"</small></button>").join("");
+      gm.querySelectorAll("button").forEach(b=>b.onclick=()=>{try{localStorage.setItem("mc.mercado",b.dataset.mk)}catch(e){}abrir("b3")})}
+    const L=(LINKS[k]||[]).map(l=>k==="b3"&&mk()==="fx"?[l[0].replace("analise-b3","analise-fx"),l[1],l[2].replace("B3","Forex"),l[3].replace("analiseB3","analiseFX"),l[4]]:l);
+    const cardPg=it=>{const id=hrefPg(it[0]);return "<a class='tile' href='"+id+".html'><span class='ic'>"+(MC.ICO[it[1]]||"")+"</span><span><b>"+esc(it[1])+"</b><br><small>"+esc(MC.DESC[id]||MC.DESC[it[0]]||"")+"</small></span></a>"};
     const cardLk=l=>{let u=l[0],ext=/^https?:/.test(u),sp=l[2];
       if(l[3]){let s="";try{s=localStorage.getItem(l[3])||""}catch(e){}if(s){u=s;ext=true}else sp="Configure na Análise de entrada"}
       return "<a class='tile lk' href='"+esc(u)+"'"+(ext?" target='_blank' rel='noopener'":"")+"><span class='ic'>"+(LICO[l[1]]||"")+"</span><span><b>"+esc(l[1])+"</b><br><small>"+esc(sp)+"</small></span><span class='ar'>"+(ext?"↗":"→")+"</span></a>"};

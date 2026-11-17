@@ -67,11 +67,12 @@
     document.documentElement.setAttribute("data-page", file);
     var GROUPS = [
       { g: "Opções binárias", s: "OB", k: "ob", c: "#2563EB", items: [["checklist-ob", "Check-list"], ["diario-ob", "Diário"], ["manual-ob", "Manual"], ["progresso-ob", "Progresso"], ["dopamina", "Dopamina"], ["ir-ob", "IR"], ["analise-ob", "Análise"], ["lucro-ob", "Lucro"]] },
-      { g: "B3", s: "B3", k: "b3", c: "#0F766E", items: [["checklist-b3", "Check-list"], ["diario-b3", "Diário"], ["manual-b3", "Manual"], ["progresso-b3", "Progresso"], ["dopamina-b3", "Dopamina"], ["ir-b3", "IR"], ["analise-b3", "Análise"], ["lucro-b3", "Lucro"]] },
+      { g: "B3 ou Forex", s: "B3 · Forex", k: "b3", c: "#0F766E", items: [["checklist-b3", "Check-list"], ["diario-b3", "Diário"], ["manual-b3", "Manual"], ["progresso-b3", "Progresso"], ["dopamina-b3", "Dopamina"], ["ir-b3", "IR"], ["analise-b3", "Análise"], ["lucro-b3", "Lucro"]] },
       { g: "Pessoal", s: "Pessoal", k: "pes", c: "#7C3AED", items: [["salario", "Salário"], ["oracao", "Oração"], ["receitas", "Receitas"], ["limpeza", "Limpeza de peças"], ["compras", "Compras"], ["consorcio", "Consórcios"], ["exercicios", "Exercícios"], ["notas", "Notas"]] }
     ];
     var DESC = { "checklist-ob": "Uma vez por dia", "diario-ob": "5 sessões por dia", "manual-ob": "Os 5 operacionais", "progresso-ob": "Escada e simulador", "dopamina": "Acertei ou errei", "ir-ob": "Resultado mensal", "analise-ob": "Print e seta na vela", "lucro-ob": "Excel da Quotex",
       "checklist-b3": "Uma vez por dia", "diario-b3": "Operações em R$", "manual-b3": "M2 · stop e alvo 2x", "progresso-b3": "Contratos e simulador", "dopamina-b3": "Acertei ou errei", "ir-b3": "Day trade · DARF", "analise-b3": "Print e seta na vela", "lucro-b3": "Extrato · com taxas",
+      "checklist-fx": "Uma vez por dia", "diario-fx": "Operações em US$", "manual-fx": "M2 · stop e alvo 2x", "progresso-fx": "Lote e simulador", "dopamina-fx": "Acertei ou errei", "ir-fx": "15% ao ano", "analise-fx": "Print e seta na vela", "lucro-fx": "Dia a dia em US$ e R$",
       "salario": "Danrlei e Cristiane", "oracao": "Noite e consagração", "receitas": "Caderno de receitas", "limpeza": "Lotes e valor", "consorcio": "Simular e acompanhar", "exercicios": "5 degraus", "compras": "Marcar o que pegou", "notas": "Bloco de anotações" };
     var P = function (d) { return "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>" + d + "</svg>"; };
     var ICO = { "Check-list": P("<rect x='4' y='3' width='16' height='18' rx='3'/><path d='M8.5 12l2.5 2.5 4.5-5'/>"), "Diário": P("<path d='M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z'/><path d='M5 17a3 3 0 013-3h11M9 8h6'/>"),
@@ -90,8 +91,15 @@
       else if (m === "pers" && o.lista) { var pos = function (k) { var i = o.lista.indexOf("p:" + k); return i < 0 ? 999 : i; }; it.sort(function (a, b) { return pos(a.x[0]) - pos(b.x[0]) || a.i - b.i; }); }
       return it.map(function (y) { return y.x; });
     }
+    /* 17/11/2026: módulo "B3 ou Forex". Cada página -b3 tem a gêmea -fx (dados separados). O menu abre o último mercado usado. */
+    var MK = /-(b3|fx)$/.test(file) ? file.slice(-2) : null;
+    if (MK) { try { localStorage.setItem("mc.mercado", MK); } catch (e) {} }
+    var mercado = function () { try { return localStorage.getItem("mc.mercado") === "fx" ? "fx" : "b3"; } catch (e) { return "b3"; } };
+    var mcHref = function (id) { return (/-b3$/.test(id) && mercado() === "fx") ? id.replace(/-b3$/, "-fx") : id; };
+    window.__mcHref = mcHref;
+    var fileK = MK === "fx" ? file.replace(/-fx$/, "-b3") : file;
     var cur = null;
-    GROUPS.forEach(function (g) { g.items.forEach(function (it) { if (it[0] === file) cur = { g: g, it: it }; }); });
+    GROUPS.forEach(function (g) { g.items.forEach(function (it) { if (it[0] === fileK) cur = { g: g, it: it }; }); });
     if (cur) { document.documentElement.setAttribute("data-group", cur.g.k); document.documentElement.style.setProperty("--gc", cur.g.c); }
     var css =
       /* cores do módulo (OB azul, B3 verde-azulado, Pessoal roxo) no fundo, no título e no logo */
@@ -166,11 +174,9 @@
       "@media (max-width:900px){.kpi .big{font-size:1.3rem!important;word-break:keep-all}}" +
       /* títulos de cartões nunca quebram de linha */
       ".kpi .lbl,.card>.lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:100%}" +
-      /* calendários no celular: só seg–sex (fim de semana já é travado), células mais largas */
-      "@media (max-width:640px){.month .dow{grid-template-columns:repeat(5,minmax(0,1fr))!important}.month .dow>span:first-child,.month .dow>span:last-child{display:none}" +
-        ".month .grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:6px!important}.month .grid>.day.we{display:none!important}.month .grid>.day.blank:first-child{display:none!important}.month .grid>.fds-col{display:none!important}" +
-        ".month .day .v{font-size:.72rem!important;letter-spacing:-.02em}.month .day .dots{gap:2px!important;flex-wrap:wrap}.month .day .dot{width:6px!important;height:6px!important}" +
-        ".legend .we-l,.legend span:has(>i.we){display:none}" +
+      /* 17/11/2026: calendários com domingo e sábado também no celular (travados quando o mercado fecha) */
+      "@media (max-width:640px){.month .grid,.month .dow{gap:4px!important}" +
+        ".month .day .v{font-size:.62rem!important;letter-spacing:-.03em}.month .day .dots{gap:2px!important;flex-wrap:wrap}.month .day .dot{width:5px!important;height:5px!important}" +
         /* períodos (2026 · jan–mar · abr–jun) numa linha só, rolando para o lado */
         ".per,#per.chips{flex-wrap:nowrap!important;max-width:calc(100vw - 32px);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.per::-webkit-scrollbar,#per.chips::-webkit-scrollbar{display:none}.per>*,#per.chips>*{flex:none}}" +
       ".day.we,.legend i.we{background-image:repeating-linear-gradient(135deg,transparent 0 5px,rgba(120,135,170,.22) 5px 6.5px)!important}" +
@@ -242,7 +248,7 @@
       inn.appendChild(crumb);
       if (cur) {
         var q = el("nav", "site-quick"); q.setAttribute("aria-label", cur.g.g); q.style.setProperty("--gc", cur.g.c);
-        ordemItens(cur.g).forEach(function (it) { var a = el("a", it[0] === file ? "on" : "", esc(it[1])); a.href = it[0] + ".html"; if (it[0] === file) a.setAttribute("aria-current", "page"); q.appendChild(a); });
+        ordemItens(cur.g).forEach(function (it) { var a = el("a", it[0] === fileK ? "on" : "", esc(it[1])); a.href = mcHref(it[0]) + ".html"; if (it[0] === fileK) a.setAttribute("aria-current", "page"); q.appendChild(a); });
         inn.appendChild(q);
       }
       var mp = el("a", "site-btn site-mp", "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 10.5 12 3l9 7.5'/><path d='M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5'/></svg><span class='t'>Menu principal</span>");
@@ -258,7 +264,7 @@
         var col = el("section", "site-g"); col.style.setProperty("--gc", g.c);
         col.appendChild(el("div", "site-gh", "<span class='gi'>" + esc(g.s === "Pessoal" ? "EU" : g.s) + "</span><span><b>" + esc(g.g) + "</b></span>"));
         var its = el("div", "site-its");
-        ordemItens(g).forEach(function (it) { var a = el("a", "site-it" + (it[0] === file ? " on" : ""), "<span class='ic'>" + (ICO[it[1]] || "") + "</span><span class='tx'><b>" + esc(it[1]) + "</b><small>" + esc(DESC[it[0]] || "") + "</small></span>"); a.href = it[0] + ".html"; if (it[0] === file) a.setAttribute("aria-current", "page"); a.addEventListener("click", function () { goTab(g.k); }); its.appendChild(a); });
+        ordemItens(g).forEach(function (it) { var a = el("a", "site-it" + (it[0] === file ? " on" : ""), "<span class='ic'>" + (ICO[it[1]] || "") + "</span><span class='tx'><b>" + esc(it[1]) + "</b><small>" + esc(DESC[it[0]] || "") + "</small></span>"); a.href = mcHref(it[0]) + ".html"; if (it[0] === fileK) a.setAttribute("aria-current", "page"); a.addEventListener("click", function () { goTab(g.k); }); its.appendChild(a); });
         col.appendChild(its); di.appendChild(col);
       });
       /* conta (e-mail e Sair) dentro do menu */
@@ -570,7 +576,7 @@
     var base = "users/" + uid + "/apps/" + APP + "/";
     return { doc: function (p) { return fs.doc(base + p); }, collection: function (p) { return fs.collection(base + p); },
       // ler outro controle da mesma conta (ex.: o Diário lendo as Metas do Progresso)
-      app: function (name) { var b2 = "users/" + uid + "/apps/" + name + "/"; return { doc: function (p) { return fs.doc(b2 + p); } }; } };
+      app: function (name) { var b2 = "users/" + uid + "/apps/" + name + "/"; return { doc: function (p) { return fs.doc(b2 + p); }, collection: function (p) { return fs.collection(b2 + p); } }; } };
   }
 
   function showLogin() {
@@ -611,7 +617,9 @@
     "compras": ["itens"], "consorcio": ["propostas", "config/propostas"], "diario-b3n": ["dias", "config/geral"], "diario-ob3": ["dias", "config/geral"],
     "dopamina-b3n": ["dias"], "dopamina-ob3": ["dias"], "exercicios2": ["dias", "config/geral"], "ir-b3n": ["meses"], "ir-ob3": ["meses"],
     "limpeza": ["lotes"], "lucro-b3": ["dias"], "lucro-ob2": ["meses"], "notas": ["notas", "blocos"], "oracao": ["consagracoes"],
-    "progresso-b3m": ["estado/progresso", "estado/simulador"], "progresso-ob2": ["estado/progresso", "estado/simulador"], "receitas": ["receitas"], "salario": ["meses"]
+    "progresso-b3m": ["estado/progresso", "estado/simulador"], "progresso-ob2": ["estado/progresso", "estado/simulador"], "receitas": ["receitas"], "salario": ["meses"],
+    "analise-fx": ["analises2"], "checklist-fx": ["dias"], "diario-fx": ["dias", "config/geral"], "dopamina-fx": ["dias"], "lucro-fx": ["dias"], "ir-fx": ["config/geral"],
+    "progresso-fx": ["estado/progresso", "estado/simulador"]
   };
   function backup(uid, btn) {
     var txt = btn ? btn.textContent : ""; if (btn) { btn.disabled = true; btn.textContent = "Baixando…"; }
@@ -659,21 +667,31 @@
   });
 })();
 
-/* Calendários: marca as casas de sábado/domingo pela coluna (inclui dias passados/antes do início),
-   para que no celular (seg–sex) nenhum dia saia da coluna certa. */
+/* 17/11/2026: abas B3 | Forex no topo das páginas do módulo "B3 ou Forex" (cada mercado com seus dados). */
 (function () {
-  function marca() {
-    document.querySelectorAll(".month .grid").forEach(function (g) {
-      var k = 0;
-      Array.prototype.forEach.call(g.children, function (c) {
-        if (!c.classList || !c.classList.contains("day")) return;
-        var col = k % 7; k++;
-        c.classList.toggle("fds-col", col === 0 || col === 6);
-      });
+  var file = (decodeURIComponent(location.pathname).split("/").pop() || "").replace(/\.html?$/i, "");
+  var m = file.match(/^(.*)-(b3|fx)$/); if (!m) return;
+  var base = m[1], mk = m[2];
+  function liga() {
+    var wrap = document.querySelector(".wrap"); if (!wrap || wrap.querySelector(".mkt-tabs")) return;
+    var st = document.createElement("style");
+    st.textContent = ".mkt-tabs{display:flex;margin-bottom:10px;gap:4px;padding:4px;border-radius:12px;background:var(--surface,#fff);border:1px solid var(--line,#DDE4F2);justify-self:start;width:max-content;max-width:100%}" +
+      ".mkt-tabs a{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:9px;font:600 .9rem 'IBM Plex Sans',system-ui,sans-serif;color:var(--muted,#58668A);text-decoration:none;white-space:nowrap}" +
+      ".mkt-tabs a.on{background:var(--accent,#0F766E);color:#fff;box-shadow:0 6px 14px -8px var(--accent,#0F766E)}" +
+      ".mkt-tabs a:not(.on):hover{color:var(--fg,#13203B);background:var(--bg,#EEF3FC)}" +
+      ".mkt-tabs small{font-weight:500;opacity:.8;font-size:.72rem}";
+    document.head.appendChild(st);
+    var nav = document.createElement("nav"); nav.className = "mkt-tabs"; nav.setAttribute("aria-label", "Mercado");
+    [["b3", "B3", "R$"], ["fx", "Forex", "US$"]].forEach(function (x) {
+      var a = document.createElement("a"); a.href = base + "-" + x[0] + ".html"; a.className = x[0] === mk ? "on" : "";
+      a.innerHTML = x[1] + " <small>" + x[2] + "</small>"; if (x[0] === mk) a.setAttribute("aria-current", "page");
+      a.addEventListener("click", function () { try { localStorage.setItem("mc.mercado", x[0]); } catch (e) {} });
+      nav.appendChild(a);
     });
+    // fica dentro do cabeçalho da página (em cima do título), sem mexer no layout das colunas
+    var top = wrap.querySelector(".top"), alvo = top ? (top.firstElementChild || top) : wrap;
+    alvo.insertBefore(nav, alvo.firstChild);
   }
-  var t = null;
-  function agenda() { if (t) return; t = setTimeout(function () { t = null; marca(); }, 0); }
-  function liga() { marca(); new MutationObserver(agenda).observe(document.body, { childList: true, subtree: true }); }
-  if (document.body) liga(); else document.addEventListener("DOMContentLoaded", liga);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", liga); else liga();
 })();
+
