@@ -172,11 +172,16 @@
       "@media (prefers-reduced-motion:reduce){.site-drop,.site-g,.site-veil{animation:none}}" +
       ".site-crumb,.site-crumb *{text-transform:none!important;letter-spacing:normal!important}" +
       "@media (max-width:900px){.kpi .big{font-size:1.3rem!important;word-break:keep-all}}" +
+      /* 17/11/2026: Diário — casas do calendário sempre do mesmo tamanho: bolinhas em até 2 linhas de 5 (máx. 10 entradas) e valor curto */
+      "html[data-page^=diario] .month .day{height:60px;min-height:0!important;overflow:hidden}" +
+      "html[data-page^=diario] .month .day .dots{display:grid!important;grid-template-columns:repeat(5,5px);grid-auto-rows:5px;gap:2px!important;height:12px;overflow:hidden;flex-wrap:nowrap}" +
+      "html[data-page^=diario] .month .day .dot{width:5px!important;height:5px!important}" +
+      "html[data-page^=diario] .month .day .v{text-overflow:clip!important;white-space:nowrap;line-height:1}" +
       /* títulos de cartões nunca quebram de linha */
       ".kpi .lbl,.card>.lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:100%}" +
       /* 17/11/2026: calendários com domingo e sábado também no celular (travados quando o mercado fecha) */
       "@media (max-width:640px){.month .grid,.month .dow{gap:4px!important}" +
-        ".month .day .v{font-size:.62rem!important;letter-spacing:-.03em}.month .day .dots{gap:2px!important;flex-wrap:wrap}.month .day .dot{width:5px!important;height:5px!important}" +
+        ".month .day .v{font-size:.62rem!important;letter-spacing:-.03em}" +
         /* períodos (2026 · jan–mar · abr–jun) numa linha só, rolando para o lado */
         ".per,#per.chips{flex-wrap:nowrap!important;max-width:calc(100vw - 32px);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.per::-webkit-scrollbar,#per.chips::-webkit-scrollbar{display:none}.per>*,#per.chips>*{flex:none}}" +
       ".day.we,.legend i.we{background-image:repeating-linear-gradient(135deg,transparent 0 5px,rgba(120,135,170,.22) 5px 6.5px)!important}" +

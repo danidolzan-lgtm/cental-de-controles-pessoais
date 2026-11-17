@@ -280,7 +280,7 @@ function renderKpis(){
   $("kAprTxt").innerHTML="Empate <b class='num'>"+(beA*100).toLocaleString("pt-BR",{maximumFractionDigits:1})+"%</b> · meta <b class='num'>50%</b>"+(ses?" · "+cheia+" com meta cheia":"");
 }
 // valor curto no calendário: até 100 com centavos, acima disso sem centavos, acima de 10 mil em "k"
-const nCal=v=>{const a=Math.abs(v),sg=v<0?"-":v>0?"+":"";if(a>=10000)return sg+(a/1000).toLocaleString("pt-BR",{maximumFractionDigits:1})+"k";if(a>=100)return sg+Math.round(a).toLocaleString("pt-BR");return sg+a.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})};
+const nCal=v=>{const a=Math.abs(v),sg=v<0?"-":v>0?"+":"";/* 17/11/2026: valor curto para caber na casa do calendário (sem cortar com "…"); o valor exato fica no toque/na dica */if(a>=1000)return sg+(a/1000).toLocaleString("pt-BR",{maximumFractionDigits:a>=10000?0:1})+"k";if(a>=10)return sg+Math.round(a);return sg+a.toLocaleString("pt-BR",{maximumFractionDigits:1})};
 function renderCal(){
   const cal=$("cal");cal.innerHTML="";const t=todayStr();
   const s=new Date(START+"T12:00:00"),e=new Date(END+"T12:00:00");
