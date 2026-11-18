@@ -326,6 +326,17 @@ function fimDrag(){
 }
 document.addEventListener("pointerup",fimDrag);document.addEventListener("pointercancel",fimDrag);
 
+/* 18/11/2026: tópicos automáticos — linha que começa com "- " (ou "• ", "* ", "1. ") continua no Enter; Enter numa linha vazia de tópico encerra a lista */
+function topico(e){
+  if(e.inputType!=="insertLineBreak"&&e.inputType!=="insertParagraph")return;
+  const t=e.target,v=t.value,p=t.selectionStart;if(p!==t.selectionEnd)return;
+  const ini=v.lastIndexOf("\n",p-1)+1,linha=v.slice(ini,p);
+  const m=linha.match(/^(\s*)([-•*]|(\d+)([.)]))\s+/);if(!m)return;
+  e.preventDefault();
+  if(linha.trim()===m[0].trim()){t.setRangeText("",ini,p,"end")} // tópico vazio: sai da lista
+  else{const mk=m[3]?m[1]+(+m[3]+1)+m[4]+" ":m[1]+m[2]+" ";t.setRangeText("\n"+mk,p,p,"end")}
+  t.dispatchEvent(new Event("input",{bubbles:true}));
+}
 /* ---------- editor ---------- */
 let edT=null;
 function abrir(id,novaNota){
@@ -346,7 +357,7 @@ function abrir(id,novaNota){
   const salvar=()=>{clearTimeout(edT);edT=setTimeout(()=>{salvarNota(n);$("eInfo").textContent="Salvo"},450);$("eInfo").textContent="…"};
   const corpo=()=>{
     const c=$("eCorpo");
-    if(n.tipo!=="lista"){c.innerHTML="<textarea class='ex' id='eTx' placeholder='Escreva aqui…'>"+esc(n.texto||"")+"</textarea>";const t=$("eTx");const ag=()=>{t.style.height="auto";t.style.height=Math.max(t.scrollHeight,innerHeight*.42)+"px"};ag();t.oninput=()=>{n.texto=t.value;ag();salvar()};return}
+    if(n.tipo!=="lista"){c.innerHTML="<textarea class='ex' id='eTx' placeholder='Escreva aqui…'>"+esc(n.texto||"")+"</textarea>";const t=$("eTx");const ag=()=>{t.style.height="auto";t.style.height=Math.max(t.scrollHeight,innerHeight*.42)+"px"};ag();t.oninput=()=>{n.texto=t.value;ag();salvar()};t.addEventListener("beforeinput",topico);return}
     const its=n.itens=n.itens||[], ab=its.filter(x=>!x.ok), fe=its.filter(x=>x.ok);
     const li=(x)=>"<div class='li"+(x.ok?" ok":"")+"' data-it='"+esc(x.id)+"'><input type='checkbox'"+(x.ok?" checked":"")+" aria-label='Feito'><input type='text' value='"+esc(x.t)+"' aria-label='Item'>"+
       (x.ok?"":"<button type='button' class='mini' data-mv='-1' title='Subir'>↑</button><button type='button' class='mini' data-mv='1' title='Descer'>↓</button>")+(x.ok?"<span></span><span></span>":"")+"<button type='button' class='mini' data-rm='1' title='Remover'>✕</button></div>";

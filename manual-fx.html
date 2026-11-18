@@ -455,7 +455,7 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
     <p>Coloque o tamanho do stop em pips e veja quanto você arrisca e quanto ganha no alvo, em dólar. Os valores vêm do seu Progresso Forex.</p>
     <div class="calc">
       <label>Par<select id="rAtivo"><option value="EURUSD">EURUSD</option><option value="GBPUSD">GBPUSD</option><option value="USDJPY">USDJPY</option><option value="AUDUSD">AUDUSD</option><option value="NZDUSD">NZDUSD</option><option value="USDCAD">USDCAD</option><option value="USDCHF">USDCHF</option><option value="EURGBP">EURGBP</option><option value="EURJPY">EURJPY</option><option value="GBPJPY">GBPJPY</option><option value="XAUUSD">XAUUSD</option></select></label>
-      <label>Lote<input id="rCt" type="number" inputmode="decimal" value="0.01" min="0.01" step="0.01"></label>
+      <label>Lote<input id="rCt" type="number" inputmode="decimal" value="0.3" min="0.01" step="0.01"></label>
       <label>Stop (pips)<input id="rStop" type="number" inputmode="decimal" value="8" min="0" step="0.5"></label>
       <label>Alvo (x o stop)<input id="rMult" type="number" inputmode="decimal" value="2" min="0.5" step="0.1"></label>
     </div>
@@ -490,7 +490,7 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <li>Volte no gráfico M2 e anote <b>50 a 100 sinais de cada setup</b> nos horários das sessões, sem pular nenhum.</li>
       <li>Para cada sinal, veja se o preço bateu primeiro o <b>alvo</b> ou o <b>stop</b>.</li>
       <li>Com alvo de 2x, o empate é em <b>33%</b> de acerto. Fique com os setups que passarem de <b>40%</b> no papel.</li>
-      <li>Depois, opere 2 semanas com 0,01 lote antes de subir.</li>
+      <li>Depois, opere 2 semanas com o lote mínimo (0,01) antes de usar o lote da escada.</li>
     </ol>
     <div class="note">Anote cada par separado. O mesmo setup pode funcionar num e não no outro.</div>
   </section>
@@ -643,12 +643,12 @@ function risco(){
 }
 /* par, lote, stop e alvo vêm do Progresso Forex (escada + simulador), como no Diário e no Manual OB.
    Mudar aqui é só para testar: não salva. */
-const PLV3=[100,200,600,1000,1400,2000,2400,3000,4000,5000,6000,7000,8000,10000,12000,14000,16000,18000,20000];
-const PCT3=[0.01,0.02,0.03,0.05,0.07,0.1,0.12,0.15,0.2,0.25,0.3,0.35,0.4,0.5,0.6,0.7,0.8,0.9,1];
+const PLV3=[500,1000,3000,5000,7000,10000,12000,15000,20000,25000,30000,35000,40000,50000,60000,70000,80000,90000,100000];
+const PCT3=[0.3,0.6,0.9,1.5,2.1,3,3.6,4.5,6,7.5,9,10.5,12,15,18,21,24,27,30];
 let pgSt=null,pgSim=null;
 function rDoProg(){
   const out={};
-  if(pgSt){const c=new Set(pgSt.conquistados||[]);let last=-1;PLV3.forEach((v,i)=>{if(c.has(i))last=i});out.rCt=last>=0?PCT3[last]:0.01}
+  if(pgSt){const c=new Set(pgSt.conquistados||[]);let last=-1;PLV3.forEach((v,i)=>{if(c.has(i))last=i});out.rCt=last>=0?PCT3[last]:0.3}
   if(pgSim){if(PV[pgSim.ativo])out.rAtivo=pgSim.ativo;if(+pgSim.stopPts>0)out.rStop=+pgSim.stopPts;if(+pgSim.mult>0)out.rMult=+pgSim.mult}
   const a=document.activeElement;Object.keys(out).forEach(k=>{if(a!==$(k))$(k).value=out[k]});
   const h=$("rProg");if(h)h.textContent=(pgSt||pgSim)?"Puxa do Progresso Forex: "+$("rAtivo").value+", "+(+$("rCt").value).toLocaleString("pt-BR",{minimumFractionDigits:2})+" lote, stop "+num(+$("rStop").value||0)+" pips, alvo "+num(+$("rMult").value||0)+"x. Mudar aqui é só teste (não salva).":"";
