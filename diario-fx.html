@@ -92,6 +92,13 @@ td:first-child{font-family:var(--f-body);white-space:normal}
 .seg button.stop.on{background:var(--loss);border-color:var(--loss);color:var(--surface)}
 .ro button[data-a]:not([data-a=close]):not([data-a=sess]),.ro input,.ro select{pointer-events:none}
 .stabs{display:flex;gap:6px}
+.lcalc{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:10px;align-items:end;padding:10px;border:1px dashed var(--line);border-radius:8px;background:color-mix(in srgb,var(--accent) 5%,var(--surface))}
+.lcalc label{display:grid;gap:4px;white-space:nowrap;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.lcalc input{font:inherit;font-family:var(--f-num);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%}
+.lres{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);min-height:38px}
+.lres b{font-family:var(--f-num);font-size:1.15rem;color:var(--accent)}
+.lres button{appearance:none;font:inherit;font-weight:600;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:6px;padding:6px 10px;cursor:pointer}
+@media (max-width:520px){.lcalc{grid-template-columns:1fr}}
 .seg select.par{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;padding:8px 10px;min-width:110px}
 .stabs button{flex:1;appearance:none;font:inherit;font-weight:600;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:8px;padding:8px 10px;cursor:pointer;display:grid;gap:1px}
 .stabs button small{font-family:var(--f-num);font-weight:400;font-size:.75rem;opacity:.85}
@@ -194,7 +201,7 @@ document.getElementById("fHoje").addEventListener("click",()=>{FREF=_hj;fGo()});
 fUI();
 const OPS=[{id:"respiro",nome:"Respiro"},{id:"virada",nome:"Virada"},{id:"muralha",nome:"Muralha"},{id:"giro",nome:"Giro"},{id:"armadilha",nome:"Armadilha"}];
 const opNome=id=>(OPS.find(o=>o.id===(id==="muralhaEng"?"muralha":id))||{nome:id||"Sem operacional"}).nome;
-const ATIVOS={EURUSD:{nome:"EURUSD",pt:10},GBPUSD:{nome:"GBPUSD",pt:10},USDJPY:{nome:"USDJPY",pt:6.5},AUDUSD:{nome:"AUDUSD",pt:10},NZDUSD:{nome:"NZDUSD",pt:10},USDCAD:{nome:"USDCAD",pt:7.2},USDCHF:{nome:"USDCHF",pt:12.5},EURGBP:{nome:"EURGBP",pt:13},EURJPY:{nome:"EURJPY",pt:6.5},GBPJPY:{nome:"GBPJPY",pt:6.5},XAUUSD:{nome:"XAUUSD",pt:10}};
+const ATIVOS={EURUSD:{nome:"EURUSD",pt:10},GBPUSD:{nome:"GBPUSD",pt:10},USDJPY:{nome:"USDJPY",pt:6.3},AUDUSD:{nome:"AUDUSD",pt:10},NZDUSD:{nome:"NZDUSD",pt:10},USDCAD:{nome:"USDCAD",pt:7.2},USDCHF:{nome:"USDCHF",pt:12.7},EURGBP:{nome:"EURGBP",pt:13.4},EURJPY:{nome:"EURJPY",pt:6.3},GBPJPY:{nome:"GBPJPY",pt:6.3},AUDJPY:{nome:"AUDJPY",pt:6.3},EURCHF:{nome:"EURCHF",pt:12.7},EURAUD:{nome:"EURAUD",pt:7},GBPCHF:{nome:"GBPCHF",pt:12.7},EURCAD:{nome:"EURCAD",pt:7.2},XAUUSD:{nome:"XAUUSD",pt:10}};
 let days={}, cfg={ct:0.03}, db=null;
 const $=id=>document.getElementById(id);
 const brl=v=>(v<0?"-":"")+"US$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -304,6 +311,7 @@ function drawModal(){
       h+="<div class='lbl'>Operacional</div><div class='seg'>"+OPS.map(x=>"<button type='button' data-a='opr' data-i='"+i+"' data-v='"+x.id+"' class='"+(o.operacional===x.id?"on":"")+"'>"+x.nome+"</button>").join("")+"</div>";
       h+="<div class='seg'><select class='par' data-par='"+i+"' aria-label='Par'>"+Object.keys(ATIVOS).map(k=>"<option value='"+k+"'"+(o.ativo===k?" selected":"")+">"+k+"</option>").join("")+"</select>"+
         "<button type='button' data-a='dir' data-i='"+i+"' data-v='C' class='"+(o.direcao==="C"?"on":"")+"'>Compra ▲</button><button type='button' data-a='dir' data-i='"+i+"' data-v='V' class='"+(o.direcao==="V"?"on":"")+"'>Venda ▼</button></div>";
+      h+="<div class='lcalc'><label for='sp"+i+"'>Stop da entrada (pips)<input id='sp"+i+"' type='number' min='0.5' step='0.5' inputmode='decimal' data-f='stopPips' data-i='"+i+"' value='"+(o.stopPips??"")+"' placeholder='ex.: 8'></label><div class='lres' id='lr"+i+"'>"+loteTxt(o,i)+"</div></div>";
       h+="<div class='seg big2'><button type='button' data-a='tipo' data-i='"+i+"' data-v='meta' class='meta"+(o.tipo==="meta"?" on":"")+"'>Meta ✓</button><button type='button' data-a='tipo' data-i='"+i+"' data-v='stop' class='stop"+(o.tipo==="stop"?" on":"")+"'>Stop ✕</button></div>";
       h+="<div class='fields'><label for='vl"+i+"'>Valor (US$)<input id='vl"+i+"' type='number' min='0' step='0.01' inputmode='decimal' data-f='valor' data-i='"+i+"' value='"+(o.valor??"")+"' placeholder='0,00'></label>"+
         "<label for='ct"+i+"'>Lote<input id='ct"+i+"' type='number' min='0.01' step='0.01' inputmode='decimal' data-f='contratos' data-i='"+i+"' value='"+(o.contratos??"")+"'></label></div>";
@@ -330,7 +338,7 @@ function softUpdate(i){
   const net=dayNet(draft), mn=$("mNet"); mn.textContent=n2(net); mn.className="num "+(net>0?"pos":net<0?"neg":"");
 }
 /* par escolhido na lista */
-$("modal").addEventListener("change",e=>{const s=e.target.closest("select[data-par]");if(!s||ro)return;const o=draft.ops[+s.dataset.par];if(o)o.ativo=s.value});
+$("modal").addEventListener("change",e=>{const s=e.target.closest("select[data-par]");if(!s||ro)return;const o=draft.ops[+s.dataset.par];if(o){o.ativo=s.value;const r=$("lr"+s.dataset.par);if(r)r.innerHTML=loteTxt(o,+s.dataset.par)}});
 $("modal").addEventListener("click",e=>{
   const b=e.target.closest("button[data-a]");if(!b)return;
   const a=b.dataset.a;
@@ -347,6 +355,7 @@ $("modal").addEventListener("click",e=>{
   if(a==="opr")o.operacional=b.dataset.v;
   if(a==="tipo"){o.tipo=b.dataset.v;o.resultado=calcRes(o);const so=curOps();if(so[0]===o&&o.resultado<0&&so.length>1){so.slice(1).forEach(x=>draft.ops.splice(draft.ops.indexOf(x),1))}}
   if(a==="dir")o.direcao=b.dataset.v;
+  if(a==="usaLote"){const L=loteSug(o);if(L){o.contratos=L.lot;window.ui&&ui.toast("✓ Usando "+ctT(L.lot))}}
   drawModal();
 });
 $("modal").addEventListener("input",onField);
@@ -356,6 +365,7 @@ function onField(e){
   const i=+el.dataset.i,o=draft.ops[i],f=el.dataset.f;
   const v=parseFloat(el.value), n=isNaN(v)?null:v;
   if(f==="contratos")o.contratos=n;
+  if(f==="stopPips"){o.stopPips=n;const r=$("lr"+i);if(r)r.innerHTML=loteTxt(o,i)}
   if(f==="valor"){o.valor=n==null?null:Math.abs(n);o.resultado=calcRes(o)}
   softUpdate(i);
   // só troca a área de "próxima operação" se ela mudou (redesenhar tudo no meio do toque perdia o clique)
@@ -390,8 +400,23 @@ lsLoad();$("cCt").value=cfg.ct;render();setStatus("Conectando…");
 const PLV=[50,100,200,300,500,700,1000,1500,2000,2500,3000,4000,5000,6000,7000,8000,10000];
 const PCT=[0.03,0.06,0.13,0.19,0.31,0.44,0.63,0.94,1.25,1.56,1.88,2.5,3.13,3.75,4.38,5,6.25];
 const PROG="progresso-fx", PLS="progressoFX.v1";
+/* 18/11/2026: lote sugerido na operação: risco = meta da semana ÷ (operações × (2·acerto − erro)), igual à aba "Lote por par" do Progresso */
+const FX_QDEF={EURUSD:1.16,GBPUSD:1.34,AUDUSD:0.70,NZDUSD:0.58,USDJPY:158,USDCAD:1.38,USDCHF:0.79,XAUUSD:4300};
+function fxUSD(c,q){return {USD:1,EUR:q.EURUSD,GBP:q.GBPUSD,AUD:q.AUDUSD,NZD:q.NZDUSD,JPY:1/q.USDJPY,CAD:1/q.USDCAD,CHF:1/q.USDCHF}[c]||1}
+function fxPip(par,q){if(par==="XAUUSD")return 10;const b=par.slice(3);return 100000*(b==="JPY"?0.01:0.0001)*fxUSD(b,q)}
+function fxNoc(par,q){if(par==="XAUUSD")return 100*q.XAUUSD;return 100000*fxUSD(par.slice(0,3),q)}
+function loteCfg(){let lp={};try{lp=JSON.parse(localStorage.getItem("loteParFX.v1")||"null")||{}}catch(e){}
+  let dias=5;try{const s=JSON.parse(localStorage.getItem("simuladorFX.v1")||"null");if(s&&+s.dias>0)dias=+s.dias}catch(e){}
+  const ac=Math.min(95,Math.max(34,+lp.ac||60))/100, meta=(+lp.meta||40)/100, ops=dias*2, rp=meta/(ops*(2*ac-(1-ac)));
+  const pm=window._pm||{}, banca=(lp.banca!=null&&+lp.banca>0)?+lp.banca:(pm.banca||pm.nivel||PLV[0]);
+  return {rp,banca,alav:+lp.alav>0?+lp.alav:500,q:Object.assign({},FX_QDEF,lp.q||{})}}
+function loteSug(o){const st=+o.stopPips;if(!(st>0))return null;const c=loteCfg(),pip=fxPip(o.ativo||"EURUSD",c.q),R=c.banca*c.rp;
+  let lot=Math.floor(R/(st*pip)*100+1e-9)/100;const min=lot<0.01;if(min)lot=0.01;const mg=lot*fxNoc(o.ativo||"EURUSD",c.q)/c.alav;return {lot,risco:lot*st*pip,R,rp:c.rp,banca:c.banca,min,mg,ok:mg>c.banca?"✕ margem maior que a banca":mg>c.banca*.5?"⚠ margem aperta":"✓ corretora deixa"}}
+function loteTxt(o,i){const L=loteSug(o);
+  if(!L)return "Digite o stop em pips e aparece o lote para arriscar "+(loteCfg().rp*100).toLocaleString("pt-BR",{maximumFractionDigits:1})+"% da banca.";
+  return "<span>Lote: <b>"+L.lot.toLocaleString("pt-BR",{minimumFractionDigits:2})+"</b></span><span>risco −US$ "+L.risco.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+" ("+(L.risco/L.banca*100).toLocaleString("pt-BR",{maximumFractionDigits:1})+"% de US$ "+L.banca.toLocaleString("pt-BR")+")"+(L.min?" · lote mínimo":"")+"</span><span>margem US$ "+L.mg.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+" · "+L.ok+"</span>"+(ro?"":"<button type='button' data-a='usaLote' data-i='"+i+"'>Usar</button>")}
 const ctT=n=>(+n).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+" lote";
-function ctDoProg(d){const c=new Set((d&&d.conquistados)||[]);let last=-1;PLV.forEach((v,i)=>{if(c.has(i))last=i});return {idx:last,ct:last>=0?PCT[last]:0.03,nivel:last>=0?PLV[last]:null}}
+function ctDoProg(d){const c=new Set((d&&d.conquistados)||[]);let last=-1;PLV.forEach((v,i)=>{if(c.has(i))last=i});return {idx:last,ct:last>=0?PCT[last]:0.03,nivel:last>=0?PLV[last]:null,banca:d&&+d.banca>0?+d.banca:null}}
 $("cNivel").innerHTML="<option value='-1'>Início · 0,03 lote</option>"+PLV.map((v,i)=>"<option value='"+i+"'>"+String(i+1).padStart(2,"0")+" · US$ "+v.toLocaleString("pt-BR")+" · "+ctT(PCT[i])+"</option>").join("");
 function aplicaMetas(p){if(!p)return;const mudou=window._pm&&window._pm.ct!==p.ct;window._pm=p;cfg.ct=p.ct;
   $("cCt").value=cfg.ct;if(document.activeElement!==$("cNivel"))$("cNivel").value=String(p.idx);metasTxt();if(mudou)window.ui&&ui.toast("Lote pela escada: "+ctT(p.ct))}

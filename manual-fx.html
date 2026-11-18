@@ -116,7 +116,7 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
     <h2>Base de tudo</h2>
     <div class="kpis">
       <div class="kpi"><span class="lbl">Tempo gráfico</span><b>M2</b></div>
-      <div class="kpi"><span class="lbl">Pares</span><b>11 pares e ouro</b></div>
+      <div class="kpi"><span class="lbl">Pares</span><b>15 pares e ouro</b></div>
       <div class="kpi"><span class="lbl">Médias (EMA)</span><b>9 · 21 · 50</b></div>
       <div class="kpi"><span class="lbl">Entrada</span><b>Abertura da vela seguinte</b></div>
       <div class="kpi"><span class="lbl">Alvo</span><b>2x o stop</b></div>
@@ -143,7 +143,7 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
         <li><b>Dólar contra:</b> o DXY (índice do dólar) está indo forte contra a sua entrada (veja abaixo como cada par anda com o dólar).</li>
       </ul>
     </div>
-    <div class="note"><b>Par × DXY (índice do dólar).</b> <b>EURUSD, GBPUSD, AUDUSD, NZDUSD e ouro (XAUUSD)</b> andam ao contrário do dólar: para comprar, o DXY no M2 tem que estar caindo ou de lado; DXY subindo forte, fique de fora. <b>USDJPY, USDCAD e USDCHF</b> andam junto com o dólar: para comprar, o DXY tem que estar subindo ou de lado. Nos <b>cruzados (EURGBP, EURJPY, GBPJPY)</b> o DXY não conta. Vale o mesmo, ao contrário, para a venda. É filtro, não sinal de entrada.</div>
+    <div class="note"><b>Par × DXY (índice do dólar).</b> <b>EURUSD, GBPUSD, AUDUSD, NZDUSD e ouro (XAUUSD)</b> andam ao contrário do dólar: para comprar, o DXY no M2 tem que estar caindo ou de lado; DXY subindo forte, fique de fora. <b>USDJPY, USDCAD e USDCHF</b> andam junto com o dólar: para comprar, o DXY tem que estar subindo ou de lado. Nos <b>cruzados, sem dólar (EURGBP, EURJPY, GBPJPY, AUDJPY, EURCHF, EURAUD, GBPCHF e EURCAD)</b> o DXY não conta. Vale o mesmo, ao contrário, para a venda. É filtro, não sinal de entrada.</div>
   </section>
 
   <!-- RESPIRO -->
@@ -454,7 +454,7 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
     <h2>Risco por operação</h2>
     <p>Coloque o tamanho do stop em pips e veja quanto você arrisca e quanto ganha no alvo, em dólar. Os valores vêm do seu Progresso Forex.</p>
     <div class="calc">
-      <label>Par<select id="rAtivo"><option value="EURUSD">EURUSD</option><option value="GBPUSD">GBPUSD</option><option value="USDJPY">USDJPY</option><option value="AUDUSD">AUDUSD</option><option value="NZDUSD">NZDUSD</option><option value="USDCAD">USDCAD</option><option value="USDCHF">USDCHF</option><option value="EURGBP">EURGBP</option><option value="EURJPY">EURJPY</option><option value="GBPJPY">GBPJPY</option><option value="XAUUSD">XAUUSD</option></select></label>
+      <label>Par<select id="rAtivo"><option value="EURUSD">EURUSD</option><option value="GBPUSD">GBPUSD</option><option value="USDJPY">USDJPY</option><option value="AUDUSD">AUDUSD</option><option value="NZDUSD">NZDUSD</option><option value="USDCAD">USDCAD</option><option value="USDCHF">USDCHF</option><option value="EURGBP">EURGBP</option><option value="EURJPY">EURJPY</option><option value="GBPJPY">GBPJPY</option><option value="AUDJPY">AUDJPY</option><option value="EURCHF">EURCHF</option><option value="EURAUD">EURAUD</option><option value="GBPCHF">GBPCHF</option><option value="EURCAD">EURCAD</option><option value="XAUUSD">XAUUSD</option></select></label>
       <label>Lote<input id="rCt" type="number" inputmode="decimal" value="0.03" min="0.01" step="0.01"></label>
       <label>Stop (pips)<input id="rStop" type="number" inputmode="decimal" value="8" min="0" step="0.5"></label>
       <label>Alvo (x o stop)<input id="rMult" type="number" inputmode="decimal" value="2" min="0.5" step="0.1"></label>
@@ -467,7 +467,7 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
     </div>
     <p class="hint" id="rProg"></p>
     <h3>Pares, valor do pip e stop máximo</h3>
-    <div class="tblp"><table class="pares"><thead><tr><th>Par</th><th>Pip (1 lote)</th><th>Stop máx.</th></tr></thead><tbody><tr><td><b>EURUSD</b><small> · Euro × dólar</small></td><td>≈ US$ 10</td><td>8 pips</td></tr><tr><td><b>GBPUSD</b><small> · Libra × dólar</small></td><td>≈ US$ 10</td><td>10 pips</td></tr><tr><td><b>USDJPY</b><small> · Dólar × iene</small></td><td>≈ US$ 6,5</td><td>10 pips</td></tr><tr><td><b>AUDUSD</b><small> · Dólar australiano</small></td><td>≈ US$ 10</td><td>8 pips</td></tr><tr><td><b>NZDUSD</b><small> · Dólar neozelandês</small></td><td>≈ US$ 10</td><td>8 pips</td></tr><tr><td><b>USDCAD</b><small> · Dólar × dólar canadense</small></td><td>≈ US$ 7,2</td><td>10 pips</td></tr><tr><td><b>USDCHF</b><small> · Dólar × franco suíço</small></td><td>≈ US$ 12,5</td><td>8 pips</td></tr><tr><td><b>EURGBP</b><small> · Euro × libra</small></td><td>≈ US$ 13</td><td>6 pips</td></tr><tr><td><b>EURJPY</b><small> · Euro × iene</small></td><td>≈ US$ 6,5</td><td>12 pips</td></tr><tr><td><b>GBPJPY</b><small> · Libra × iene</small></td><td>≈ US$ 6,5</td><td>15 pips</td></tr><tr><td><b>XAUUSD</b><small> · Ouro</small></td><td>≈ US$ 10</td><td>30 pips</td></tr></tbody></table></div>
+    <div class="tblp"><table class="pares"><thead><tr><th>Par</th><th>Pip (1 lote)</th><th>Stop máx.</th></tr></thead><tbody><tr><td><b>EURUSD</b><small> · Euro × dólar</small></td><td>≈ US$ 10</td><td>8 pips</td></tr><tr><td><b>GBPUSD</b><small> · Libra × dólar</small></td><td>≈ US$ 10</td><td>10 pips</td></tr><tr><td><b>USDJPY</b><small> · Dólar × iene</small></td><td>≈ US$ 6,3</td><td>10 pips</td></tr><tr><td><b>AUDUSD</b><small> · Dólar australiano</small></td><td>≈ US$ 10</td><td>8 pips</td></tr><tr><td><b>NZDUSD</b><small> · Dólar neozelandês</small></td><td>≈ US$ 10</td><td>8 pips</td></tr><tr><td><b>USDCAD</b><small> · Dólar × canadense</small></td><td>≈ US$ 7,2</td><td>10 pips</td></tr><tr><td><b>USDCHF</b><small> · Dólar × franco suíço</small></td><td>≈ US$ 12,7</td><td>8 pips</td></tr><tr><td><b>EURGBP</b><small> · Euro × libra</small></td><td>≈ US$ 13,4</td><td>6 pips</td></tr><tr><td><b>EURJPY</b><small> · Euro × iene</small></td><td>≈ US$ 6,3</td><td>12 pips</td></tr><tr><td><b>GBPJPY</b><small> · Libra × iene</small></td><td>≈ US$ 6,3</td><td>15 pips</td></tr><tr><td><b>AUDJPY</b><small> · Australiano × iene</small></td><td>≈ US$ 6,3</td><td>10 pips</td></tr><tr><td><b>EURCHF</b><small> · Euro × franco suíço</small></td><td>≈ US$ 12,7</td><td>6 pips</td></tr><tr><td><b>EURAUD</b><small> · Euro × australiano</small></td><td>≈ US$ 7</td><td>12 pips</td></tr><tr><td><b>GBPCHF</b><small> · Libra × franco suíço</small></td><td>≈ US$ 12,7</td><td>12 pips</td></tr><tr><td><b>EURCAD</b><small> · Euro × canadense</small></td><td>≈ US$ 7,2</td><td>10 pips</td></tr><tr><td><b>XAUUSD</b><small> · Ouro</small></td><td>≈ US$ 10</td><td>30 pips</td></tr></tbody></table></div>
     <p class="hint">O valor do pip é aproximado: nos pares com USD no fim (EURUSD, GBPUSD, AUDUSD, NZDUSD) e no ouro ele é fixo; nos outros muda com a cotação. A plataforma mostra o valor exato.</p>
     <p class="hint" id="rAviso"></p>
     <div class="box no">
@@ -477,7 +477,7 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
         <li>A tarde começa do zero, com o mesmo lote. Stop de manhã não se recupera à tarde com mão maior.</li>
         <li>Lote pela sua tabela de progresso da banca. Nunca aumente para recuperar um loss.</li>
         <li>Stop e alvo entram junto com a ordem. Nunca afaste o stop depois de entrar.</li>
-        <li><b>Uma operação aberta por vez.</b> Nunca dois pares ao mesmo tempo: muitos andam juntos (EURUSD e GBPUSD, ou os pares com iene), é a mesma aposta duas vezes e, se virar, são dois stops de uma vez.</li>
+        <li><b>Uma operação aberta por vez.</b> Nunca dois pares ao mesmo tempo: muitos andam juntos (EURUSD e GBPUSD, ou os pares com iene, ou com franco suíço), é a mesma aposta duas vezes e, se virar, são dois stops de uma vez.</li>
         <li>O spread e a comissão não estão na conta acima. Eles pesam mais com stop curto: com stop de 8 pips, 1 pip de spread já é 12% do risco.</li>
       </ul>
     </div>
@@ -628,7 +628,7 @@ function prepAnim(el){
 document.querySelectorAll("[data-chart]").forEach(el=>{draw(el);prepAnim(el)});
 
 // ---- calculadora de risco ----
-const PV={EURUSD:10,GBPUSD:10,USDJPY:6.5,AUDUSD:10,NZDUSD:10,USDCAD:7.2,USDCHF:12.5,EURGBP:13,EURJPY:6.5,GBPJPY:6.5,XAUUSD:10}, LIM={EURUSD:8,GBPUSD:10,USDJPY:10,AUDUSD:8,NZDUSD:8,USDCAD:10,USDCHF:8,EURGBP:6,EURJPY:12,GBPJPY:15,XAUUSD:30}, DEF={EURUSD:8,GBPUSD:10,USDJPY:10,AUDUSD:8,NZDUSD:8,USDCAD:10,USDCHF:8,EURGBP:6,EURJPY:12,GBPJPY:15,XAUUSD:30}; // valor do pip aproximado
+const PV={EURUSD:10,GBPUSD:10,USDJPY:6.3,AUDUSD:10,NZDUSD:10,USDCAD:7.2,USDCHF:12.7,EURGBP:13.4,EURJPY:6.3,GBPJPY:6.3,AUDJPY:6.3,EURCHF:12.7,EURAUD:7,GBPCHF:12.7,EURCAD:7.2,XAUUSD:10}, LIM={EURUSD:8,GBPUSD:10,USDJPY:10,AUDUSD:8,NZDUSD:8,USDCAD:10,USDCHF:8,EURGBP:6,EURJPY:12,GBPJPY:15,AUDJPY:10,EURCHF:6,EURAUD:12,GBPCHF:12,EURCAD:10,XAUUSD:30}, DEF={EURUSD:8,GBPUSD:10,USDJPY:10,AUDUSD:8,NZDUSD:8,USDCAD:10,USDCHF:8,EURGBP:6,EURJPY:12,GBPJPY:15,AUDJPY:10,EURCHF:6,EURAUD:12,GBPCHF:12,EURCAD:10,XAUUSD:30}; // valor do pip aproximado
 const brl=v=>"US$ "+v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
 const num=v=>v.toLocaleString("pt-BR",{maximumFractionDigits:1});
 const $=id=>document.getElementById(id), LS="manualFX.risco.v1";
