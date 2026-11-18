@@ -455,7 +455,7 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
     <p>Coloque o tamanho do stop em pips e veja quanto você arrisca e quanto ganha no alvo, em dólar. Os valores vêm do seu Progresso Forex.</p>
     <div class="calc">
       <label>Par<select id="rAtivo"><option value="EURUSD">EURUSD</option><option value="GBPUSD">GBPUSD</option><option value="USDJPY">USDJPY</option><option value="AUDUSD">AUDUSD</option><option value="NZDUSD">NZDUSD</option><option value="USDCAD">USDCAD</option><option value="USDCHF">USDCHF</option><option value="EURGBP">EURGBP</option><option value="EURJPY">EURJPY</option><option value="GBPJPY">GBPJPY</option><option value="XAUUSD">XAUUSD</option></select></label>
-      <label>Lote<input id="rCt" type="number" inputmode="decimal" value="0.02" min="0.01" step="0.01"></label>
+      <label>Lote<input id="rCt" type="number" inputmode="decimal" value="0.03" min="0.01" step="0.01"></label>
       <label>Stop (pips)<input id="rStop" type="number" inputmode="decimal" value="8" min="0" step="0.5"></label>
       <label>Alvo (x o stop)<input id="rMult" type="number" inputmode="decimal" value="2" min="0.5" step="0.1"></label>
     </div>
@@ -644,11 +644,11 @@ function risco(){
 /* par, lote, stop e alvo vêm do Progresso Forex (escada + simulador), como no Diário e no Manual OB.
    Mudar aqui é só para testar: não salva. */
 const PLV3=[50,100,200,300,500,700,1000,1500,2000,2500,3000,4000,5000,6000,7000,8000,10000];
-const PCT3=[0.02,0.03,0.06,0.09,0.15,0.21,0.3,0.45,0.6,0.75,0.9,1.2,1.5,1.8,2.1,2.4,3];
+const PCT3=[0.03,0.06,0.13,0.19,0.31,0.44,0.63,0.94,1.25,1.56,1.88,2.5,3.13,3.75,4.38,5,6.25];
 let pgSt=null,pgSim=null;
 function rDoProg(){
   const out={};
-  if(pgSt){const c=new Set(pgSt.conquistados||[]);let last=-1;PLV3.forEach((v,i)=>{if(c.has(i))last=i});out.rCt=last>=0?PCT3[last]:0.02}
+  if(pgSt){const c=new Set(pgSt.conquistados||[]);let last=-1;PLV3.forEach((v,i)=>{if(c.has(i))last=i});out.rCt=last>=0?PCT3[last]:0.03}
   if(pgSim){if(PV[pgSim.ativo])out.rAtivo=pgSim.ativo;if(+pgSim.stopPts>0)out.rStop=+pgSim.stopPts;if(+pgSim.mult>0)out.rMult=+pgSim.mult}
   const a=document.activeElement;Object.keys(out).forEach(k=>{if(a!==$(k))$(k).value=out[k]});
   const h=$("rProg");if(h)h.textContent=(pgSt||pgSim)?"Puxa do Progresso Forex: "+$("rAtivo").value+", "+(+$("rCt").value).toLocaleString("pt-BR",{minimumFractionDigits:2})+" lote, stop "+num(+$("rStop").value||0)+" pips, alvo "+num(+$("rMult").value||0)+"x. Mudar aqui é só teste (não salva).":"";
