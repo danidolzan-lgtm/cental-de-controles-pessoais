@@ -120,7 +120,7 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
   const LINKS={
     ob:[["https://quotex.com/pt/trade","Quotex","Corretora · operar","","checklist-ob"],["https://br.investing.com/economic-calendar","Notícias","Calendário econômico","","checklist-ob"],["analise-ob.html#cfgBox","Claude","Conversa OB · prints e dúvidas","analiseOB.claudeUrl",""]],
     b3:[["https://br.investing.com/economic-calendar","Notícias","Calendário econômico","","checklist-b3"],["analise-b3.html#cfgBox","Claude","Conversa B3 · prints e dúvidas","analiseB3.claudeUrl",""]],
-    fx:[["https://my.exness.com/pa/trading/accounts","Exness","Corretora · operar","","checklist-b3"],["https://br.investing.com/economic-calendar","Notícias","Calendário econômico","","checklist-b3"],["analise-fx.html#cfgBox","Claude","Conversa Forex · prints e dúvidas","analiseFX.claudeUrl",""]]};
+    fx:[["https://my.exness.com/webtrading/","Exness","Corretora · operar","","checklist-b3"],["https://br.investing.com/economic-calendar","Notícias","Calendário econômico","","checklist-b3"],["analise-fx.html#cfgBox","Claude","Conversa Forex · prints e dúvidas","analiseFX.claudeUrl",""]]};
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const sigla=g=>g.s==="Pessoal"?"EU":g.k==="b3"?"B3":g.s;
   const mk=()=>{try{return localStorage.getItem("mc.mercado")==="fx"?"fx":"b3"}catch(e){return "b3"}};
