@@ -50,6 +50,27 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline
 .hint{font-size:.8rem;color:var(--muted)}
 .wrap>*{min-width:0}
 .tabs{display:flex;gap:6px}
+#tabPar[hidden]{display:none!important}
+.lp-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.lp-f label{display:grid;gap:4px;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.lp-f input,.lp-f select{font:inherit;font-family:var(--f-num);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;text-transform:none;letter-spacing:0}
+.lp-k{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:620px){.lp-k{grid-template-columns:1fr}}
+.tw{overflow-x:auto}
+.lp-t{width:100%;border-collapse:collapse;font-size:.88rem}
+.lp-t th,.lp-t td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-family:var(--f-num)}
+.lp-t th{font-family:var(--f-body);font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+.lp-t td:first-child,.lp-t th:first-child{text-align:left;font-family:var(--f-body)}
+.lp-t td.lt{font-weight:700;font-size:1rem;color:var(--accent)}
+.lp-t input{width:64px;font:inherit;font-family:var(--f-num);text-align:right;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:4px 6px}
+.lp-t .ok{color:var(--win)}.lp-t .av{color:#B45309}.lp-t .no{color:var(--loss)}
+.lp-t small{display:block;font-size:.68rem;color:var(--muted);font-family:var(--f-body);font-weight:400}
+.lp-c summary{cursor:pointer;font-weight:600}
+.lp-t .mb{display:none}
+@media (max-width:620px){.lp-t th:nth-child(4),.lp-t td:nth-child(4),.lp-t th:nth-child(5),.lp-t td:nth-child(5){display:none}.lp-t .dk{display:none}.lp-t .mb{display:block}.lp-t td:last-child{white-space:normal;font-size:.78rem;max-width:72px}.lp-t td:first-child .mb{line-height:1.35;margin-top:2px}.lp-t td.lt .mb{white-space:normal;max-width:90px;margin-left:auto}.lp-t input{width:50px}.lp-t th,.lp-t td{padding:8px 4px}}
+.lp-q{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin:10px 0}
+.lp-q label{display:grid;gap:3px;font-size:.72rem;font-weight:600;color:var(--muted)}
+.lp-q input{font:inherit;font-family:var(--f-num);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 7px;width:100%}
 .tabs button{appearance:none;font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:8px;padding:9px 16px;cursor:pointer;flex:1}
 .tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .sim{display:grid;gap:14px}
@@ -83,7 +104,7 @@ img,svg{max-width:100%}
     <div><h1>Progresso Forex</h1><div class="sub">Lote por banca e simulador · pares de moedas e ouro · conta em dólar</div></div>
     <div class="status" id="status">Carregando…</div>
   </div>
-  <div class="tabs" role="tablist"><button type="button" class="on" data-tab="metas">Metas</button><button type="button" data-tab="sim">Simulador</button></div>
+  <div class="tabs" role="tablist"><button type="button" class="on" data-tab="metas">Metas</button><button type="button" data-tab="sim">Simulador</button><button type="button" data-tab="par">Lote por par</button></div>
   <div id="tabMetas" style="display:grid;gap:16px">
   <div class="panel goal">
     <div class="row">
@@ -98,6 +119,29 @@ img,svg{max-width:100%}
     <div class="bar" aria-hidden="true"><i id="gBar"></i></div>
   </div>
   <div class="ladder" id="ladder"></div>
+  </div>
+  <div id="tabPar" hidden style="display:grid;gap:16px">
+    <div class="panel" style="display:grid;gap:12px">
+      <h2 style="margin:0">Lote de cada par para a sua banca</h2>
+      <div class="lp-f">
+        <label>Banca (US$)<input id="lpBanca" type="number" min="0" step="0.01" inputmode="decimal"></label>
+        <label>Alavancagem da corretora<select id="lpAlav"><option value="30">1:30</option><option value="100">1:100</option><option value="200">1:200</option><option value="300">1:300</option><option value="400">1:400</option><option value="500" selected>1:500</option><option value="1000">1:1000</option><option value="2000">1:2000</option></select></label>
+        <label>Meta da semana (%)<input id="lpMeta" type="number" min="1" max="200" step="1" value="40" inputmode="numeric"></label>
+        <label>Acerto (%)<input id="lpAc" type="number" min="34" max="95" step="1" value="60" inputmode="numeric"></label>
+      </div>
+      <div class="lp-k">
+        <div class="card"><span class="lbl">Risco por operação</span><span class="v" id="lpRisco">-</span><span class="hint" id="lpRisco1"></span></div>
+        <div class="card g"><span class="lbl">Gain (alvo 2x)</span><span class="v" id="lpGain">-</span><span class="hint">2x o risco</span></div>
+        <div class="card g"><span class="lbl">Semana na meta</span><span class="v" id="lpSem">-</span><span class="hint" id="lpSem1"></span></div>
+      </div>
+      <details class="lp-c"><summary>Entenda a conta</summary><p class="hint" id="lpTxt" style="margin:8px 0 0"></p></details>
+    </div>
+    <div class="panel" style="display:grid;gap:10px">
+      <div class="tw"><table class="lp-t"><thead><tr><th>Par</th><th>Stop (pips)</th><th>Lote</th><th>Risco</th><th>Margem</th><th>Corretora</th></tr></thead><tbody id="lpBody"></tbody></table></div>
+      <p class="hint" style="margin:0">✓ cabe com folga · ⚠ cabe, mas usa mais da metade da banca · ✕ a corretora não deixa abrir</p>
+      <details class="lp-c"><summary>Entenda a tabela</summary><p class="hint" style="margin:8px 0 0">O stop já vem com o máximo do Manual; troque pelo stop da sua entrada e o lote se ajusta. <b>Margem</b> é quanto a corretora segura para abrir a operação com a alavancagem escolhida: se passar da banca, ela não deixa abrir. O valor do pip é aproximado nos pares sem USD no fim; a plataforma mostra o exato.</p></details>
+      <details class="lp-c"><summary>Cotações usadas na conta</summary><div class="lp-q" id="lpQ"></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button type="button" class="btn" id="lpAtual">Atualizar cotações</button><span class="hint" id="lpQmsg"></span></div></details>
+    </div>
   </div>
   <div id="tabSim" class="sim" hidden>
     <div class="panel sim">
@@ -258,11 +302,55 @@ $("sPull").addEventListener("click",()=>{puxarMetas(true);window.ui&&ui.toast("�
 $("sModo").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;sim.modo=b.dataset.m;fillSim();calcSim();saveSim()});
 document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
   document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b));
-  $("tabMetas").hidden=b.dataset.tab!=="metas";$("tabSim").hidden=b.dataset.tab!=="sim";
+  $("tabMetas").hidden=b.dataset.tab!=="metas";$("tabSim").hidden=b.dataset.tab!=="sim";$("tabPar").hidden=b.dataset.tab!=="par";if(b.dataset.tab==="par")lpCalc();
   try{sessionStorage.setItem("progressoFX.tab",b.dataset.tab)}catch(e){}
   if(b.dataset.tab==="sim"){fillSim();calcSim()}});
-try{if(sessionStorage.getItem("progressoFX.tab")==="sim")document.querySelector('[data-tab=sim]').click()}catch(e){}
+try{const t=sessionStorage.getItem("progressoFX.tab");if(t==="sim"||t==="par")document.querySelector("[data-tab="+t+"]").click()}catch(e){}
 fillSim();calcSim();
+/* ---------- Lote por par ----------
+   Semana: 2 operações por dia × dias da semana do simulador, alvo 2x o stop e o acerto escolhido.
+   Resultado da semana = ops × (2·acerto − erro) × risco  →  risco = meta ÷ (ops × (2·acerto − erro)). Com 10 ops, 60% e 40%: 5% por operação. */
+const LP_PARES=[["EURUSD","Euro × dólar"],["GBPUSD","Libra × dólar"],["USDJPY","Dólar × iene"],["AUDUSD","Dólar australiano"],["NZDUSD","Dólar neozelandês"],["USDCAD","Dólar × canadense"],["USDCHF","Dólar × franco suíço"],["EURGBP","Euro × libra"],["EURJPY","Euro × iene"],["GBPJPY","Libra × iene"],["XAUUSD","Ouro"]];
+const LP_QDEF={EURUSD:1.16,GBPUSD:1.34,AUDUSD:0.70,NZDUSD:0.58,USDJPY:158,USDCAD:1.38,USDCHF:0.79,XAUUSD:4300};
+const LP_LS="loteParFX.v1";
+let lp={alav:500,meta:40,ac:60,stop:{},q:Object.assign({},LP_QDEF),banca:null};
+try{const r=JSON.parse(localStorage.getItem(LP_LS)||"null");if(r){lp=Object.assign(lp,r);lp.q=Object.assign({},LP_QDEF,r.q||{})}}catch(e){}
+const lpSave=()=>{try{localStorage.setItem(LP_LS,JSON.stringify(lp))}catch(e){}};
+/* valor do pip (US$ por 1,00 lote) e valor da posição de 1,00 lote em US$ (para a margem) */
+function lpPip(par){const q=lp.q;switch(par){case"USDJPY":case"EURJPY":case"GBPJPY":return 1000/q.USDJPY;case"USDCAD":return 10/q.USDCAD;case"USDCHF":return 10/q.USDCHF;case"EURGBP":return 10*q.GBPUSD;default:return 10}}
+function lpNoc(par){const q=lp.q;switch(par){case"EURUSD":case"EURGBP":case"EURJPY":return 100000*q.EURUSD;case"GBPUSD":case"GBPJPY":return 100000*q.GBPUSD;case"AUDUSD":return 100000*q.AUDUSD;case"NZDUSD":return 100000*q.NZDUSD;case"XAUUSD":return 100*q.XAUUSD;default:return 100000}}
+function lpCalc(){
+  const fb=daMetas().banca;if(document.activeElement!==$("lpBanca"))$("lpBanca").value=lp.banca!=null?lp.banca:fb;
+  const banca=parseFloat($("lpBanca").value)||0, ac=Math.min(95,Math.max(34,+lp.ac||60))/100, meta=(+lp.meta||40)/100;
+  const dias=+sim.dias||5, ops=dias*2, fator=ops*(ac*2-(1-ac));
+  const rp=fator>0?meta/fator:0, R=banca*rp;
+  $("lpAlav").value=String(lp.alav);if(document.activeElement!==$("lpMeta"))$("lpMeta").value=lp.meta;if(document.activeElement!==$("lpAc"))$("lpAc").value=lp.ac;
+  $("lpRisco").textContent=brl2(r2(R));$("lpRisco1").textContent=pc(rp)+" da banca no stop";
+  $("lpGain").textContent="+"+brl2(r2(2*R));
+  const g=Math.round(ops*ac),l=ops-g;
+  $("lpSem").textContent="+"+brl2(r2(banca*meta));$("lpSem1").textContent=ops+" operações ("+dias+" dias × 2): "+g+" gains e "+l+" losses";
+  $("lpTxt").textContent="Conta: "+g+" gains × 2 − "+l+" losses = "+nf(g*2-l)+" vezes o risco na semana. Para a semana dar "+pc(meta)+", cada operação arrisca "+pc(rp)+" da banca. O lote é arredondado para baixo, para nunca passar do risco.";
+  $("lpBody").innerHTML=LP_PARES.map(([par,nome])=>{
+    const st=+lp.stop[par]||STOPDEF[par], pip=lpPip(par);
+    let lot=st>0&&pip>0?Math.floor(R/(st*pip)*100+1e-9)/100:0, aviso="";
+    if(lot<0.01){lot=0.01;aviso="lote mínimo: arrisca "+pc((0.01*st*pip)/(banca||1))}
+    const risco=lot*st*pip, marg=lot*lpNoc(par)/(+lp.alav||500);
+    const cls=marg>banca?"no":marg>banca*0.5?"av":"ok", txt=marg>banca?"✕ não deixa":marg>banca*0.5?"⚠ aperta":"✓ cabe";
+    return "<tr><td><b>"+par+"</b><small class='dk'>"+nome+"</small><small class='mb'>risco −"+brl2(r2(risco))+"<br>margem "+brl2(r2(marg))+"</small></td><td><input type='number' min='1' step='0.5' inputmode='decimal' data-st='"+par+"' value='"+st+"'></td><td class='lt'>"+lot.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+"<small class='dk'>"+(aviso||"≈ US$ "+nf(pip)+"/pip por lote")+"</small><small class='mb'>"+(aviso||"")+"</small></td><td>−"+brl2(r2(risco))+"</td><td>"+brl2(r2(marg))+"</td><td class='"+cls+"'>"+txt+"</td></tr>"}).join("");
+  $("lpQ").innerHTML=Object.keys(LP_QDEF).map(k=>"<label>"+k+"<input type='number' step='any' inputmode='decimal' data-q='"+k+"' value='"+lp.q[k]+"'></label>").join("");
+}
+$("lpBanca").addEventListener("input",()=>{const v=parseFloat($("lpBanca").value);lp.banca=isNaN(v)?null:v;lpSave();lpCalc()});
+$("lpAlav").addEventListener("change",()=>{lp.alav=+$("lpAlav").value;lpSave();lpCalc()});
+$("lpMeta").addEventListener("change",()=>{lp.meta=+$("lpMeta").value||40;lpSave();lpCalc()});
+$("lpAc").addEventListener("change",()=>{lp.ac=+$("lpAc").value||60;lpSave();lpCalc()});
+$("tabPar").addEventListener("change",e=>{const s=e.target.closest("[data-st]"),q=e.target.closest("[data-q]");
+  if(s){const v=parseFloat(s.value);if(v>0)lp.stop[s.dataset.st]=v;else delete lp.stop[s.dataset.st];lpSave();lpCalc()}
+  if(q){const v=parseFloat(q.value);if(v>0)lp.q[q.dataset.q]=v;lpSave();lpCalc()}});
+$("lpAtual").addEventListener("click",async()=>{const m=$("lpQmsg");m.textContent="Buscando…";
+  try{const r=await fetch("https://open.er-api.com/v6/latest/USD");const j=await r.json();const x=j&&j.rates;if(!x)throw 0;
+    lp.q.EURUSD=+(1/x.EUR).toFixed(5);lp.q.GBPUSD=+(1/x.GBP).toFixed(5);lp.q.AUDUSD=+(1/x.AUD).toFixed(5);lp.q.NZDUSD=+(1/x.NZD).toFixed(5);lp.q.USDJPY=+x.JPY.toFixed(3);lp.q.USDCAD=+x.CAD.toFixed(5);lp.q.USDCHF=+x.CHF.toFixed(5);
+    lpSave();lpCalc();m.textContent="Moedas atualizadas. O ouro (XAUUSD) confira na plataforma."}
+  catch(e){m.textContent="Não deu para buscar daqui. Digite as cotações da plataforma."}});
 
 (async()=>{
   try{db=window.claude?await window.claude.use("db"):null}catch(e){db=null}
