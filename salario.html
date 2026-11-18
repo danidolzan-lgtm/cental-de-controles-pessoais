@@ -118,7 +118,7 @@ function personPanel(who,nome,editableKey){
   let h="<h2>"+nome+"</h2><div class='f2'><label for='sal-"+who+"'>Salário líquido (R$)<input id='sal-"+who+"' type='number' step='0.01' inputmode='decimal' data-f='salario' data-w='"+editableKey+"' value='"+(P.salario??"")+"'></label>";
   if(who!=="cris"){
     h+="<label for='pct-"+who+"'>Comissão (%)<input id='pct-"+who+"' type='number' step='0.01' inputmode='decimal' data-f='comPct' data-w='"+editableKey+"' value='"+(P.comPct??"")+"'></label></div>";
-    h+="<div class='f2'><label for='cb-"+who+"'>Base da comissão (vale p/ os dois)<input id='cb-"+who+"' type='number' step='0.01' inputmode='decimal' data-f='comBase' data-w='"+editableKey+"' value='"+(P.comBase??"")+"'></label><div class='com'>Comissão calculada<br><b id='com-"+who+"'>"+brl((+P.comBase||0)*(+P.comPct||0)/100)+"</b><br>só cálculo, não entra no saldo</div></div>";
+    h+="<div class='f2'><label for='cb-"+who+"'>Base da comissão<input id='cb-"+who+"' type='number' step='0.01' inputmode='decimal' data-f='comBase' data-w='"+editableKey+"' value='"+(P.comBase??"")+"'></label><div class='com'>Comissão calculada<br><b id='com-"+who+"'>"+brl((+P.comBase||0)*(+P.comPct||0)/100)+"</b><br>só cálculo, não entra no saldo</div></div>";
   } else h+="<div></div></div>";
   h+="<div class='list'>";
   const gs=gastosDe(who);

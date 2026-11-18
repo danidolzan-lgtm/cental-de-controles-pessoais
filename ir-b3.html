@@ -86,10 +86,10 @@ td.tx{color:var(--warn)}
   </div>
   <div class="years" id="years"></div>
   <div class="kpis">
-    <div class="panel"><div class="lbl">Resultado líquido do ano</div><div class="big" id="kRes">R$ 0,00</div><div class="hint" id="kResSub"></div></div>
+    <div class="panel"><div class="lbl">Resultado líquido</div><div class="big" id="kRes">R$ 0,00</div><div class="hint" id="kResSub"></div></div>
     <div class="panel"><div class="lbl">DARFs do ano</div><div class="big" id="kIR">R$ 0,00</div><div class="hint" id="kAberto"></div></div>
-    <div class="panel"><div class="lbl">Prejuízo day trade a compensar</div><div class="big" id="kPdt">R$ 0,00</div></div>
-    <div class="panel"><div class="lbl">Prejuízo swing a compensar</div><div class="big" id="kPsw">R$ 0,00</div></div>
+    <div class="panel"><div class="lbl">Prejuízo day trade</div><div class="big" id="kPdt">R$ 0,00</div></div>
+    <div class="panel"><div class="lbl">Prejuízo swing</div><div class="big" id="kPsw">R$ 0,00</div></div>
   </div>
   <div class="panel ib">
     <h2>Subir notas de corretagem ou extrato</h2>
@@ -162,7 +162,7 @@ function cardHTML(k){
     "<div class='mh'><h2>"+nome(k)+"</h2><span class='darf' data-out='darf'></span></div>"+
     "<div class='st' data-out='st'></div>"+
     "<div class='brk' data-out='brk'></div>"+
-    "<div class='f'><label for='op-"+k+"'>Operações: ganho ou perda (R$)<input id='op-"+k+"' type='number' step='0.01' inputmode='decimal' data-f='dtOp' value='"+(opOf(r)??"")+"' placeholder='+ ganho  /  − perda'></label>"+
+    "<div class='f'><label for='op-"+k+"'>Ganho ou perda (R$)<input id='op-"+k+"' type='number' step='0.01' inputmode='decimal' data-f='dtOp' value='"+(opOf(r)??"")+"' placeholder='+ ganho  /  − perda'></label>"+
     "<label for='tx-"+k+"'>Taxas e custos (R$)<input id='tx-"+k+"' type='number' step='0.01' min='0' inputmode='decimal' data-f='dtTx' value='"+(txOf(r)??"")+"' placeholder='0,00'></label>"+
     "<label for='dti-"+k+"'>IRRF retido 1% (R$)<input id='dti-"+k+"' type='number' step='0.01' min='0' inputmode='decimal' data-f='dtIrrf' value='"+val(k,"dtIrrf")+"' placeholder='0,00'></label></div>"+
     "<details"+(swOpen?" open":"")+"><summary>Swing trade (operações que passaram de um dia)</summary><div class='f'>"+

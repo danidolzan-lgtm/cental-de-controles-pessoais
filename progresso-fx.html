@@ -104,7 +104,7 @@ img,svg{max-width:100%}
     <div><h1>Progresso Forex</h1><div class="sub">Lote por banca e simulador · pares de moedas e ouro · conta em dólar</div></div>
     <div class="status" id="status">Carregando…</div>
   </div>
-  <div class="tabs" role="tablist"><button type="button" class="on" data-tab="metas">Metas</button><button type="button" data-tab="sim">Simulador</button><button type="button" data-tab="par">Lote por par</button></div>
+  <div class="tabs" role="tablist"><button type="button" class="on" data-tab="metas">Metas</button><button type="button" data-tab="sim">Simulador</button><button type="button" data-tab="par">Por par</button></div>
   <div id="tabMetas" style="display:grid;gap:16px">
   <div class="panel goal">
     <div class="row">
@@ -124,7 +124,7 @@ img,svg{max-width:100%}
     <div class="panel" style="display:grid;gap:12px">
       <h2 style="margin:0">Lote de cada par para a sua banca</h2>
       <div class="lp-f">
-        <label>Banca (US$) · <span id="lpBancaH" style="text-transform:none;letter-spacing:0">do Progresso</span><input id="lpBanca" type="number" min="0" step="0.01" inputmode="decimal"></label>
+        <label>Banca (US$)<input id="lpBanca" type="number" min="0" step="0.01" inputmode="decimal"></label>
         <label>Alavancagem da corretora<select id="lpAlav"><option value="30">1:30</option><option value="100">1:100</option><option value="200">1:200</option><option value="300">1:300</option><option value="400">1:400</option><option value="500" selected>1:500</option><option value="1000">1:1000</option><option value="2000">1:2000</option></select></label>
         <label>Meta da semana (%)<input id="lpMeta" type="number" min="1" max="200" step="1" value="40" inputmode="numeric"></label>
         <label>Acerto (%)<input id="lpAc" type="number" min="34" max="95" step="1" value="60" inputmode="numeric"></label>
@@ -152,7 +152,7 @@ img,svg{max-width:100%}
         <label>Lote<input id="sCt" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="pela escada"></label>
         <label>Stop (pips)<input id="sStopPts" type="number" min="0" step="0.5" inputmode="decimal"></label>
         <label>Alvo (x o stop)<input id="sMult" type="number" min="0.5" step="0.1" inputmode="decimal"></label>
-        <label>Custo por lote (US$)<input id="sCusto" type="number" min="0" step="0.01" inputmode="decimal" placeholder="comissão ida e volta"></label>
+        <label>Custo/lote (US$)<input id="sCusto" type="number" min="0" step="0.01" inputmode="decimal" placeholder="comissão ida e volta"></label>
       </div>
       <div class="hint" id="sCtTxt">Lote em branco = o degrau da escada para essa banca.</div>
       <div class="pull"><span class="hint" id="sPullTxt"></span><button type="button" class="btn2" id="sPull">↺ Puxar das Metas</button></div>
@@ -182,7 +182,7 @@ img,svg{max-width:100%}
     </div>
     <div class="panel sim">
       <h2>Por mês (4 semanas)</h2>
-      <div class="seg" id="sModo"><button type="button" data-m="fixo" class="on">Lote fixo (semana × 4)</button><button type="button" data-m="re">Subir o lote pela escada</button></div>
+      <div class="seg" id="sModo"><button type="button" data-m="fixo" class="on">Fixo (semana × 4)</button><button type="button" data-m="re">Subir pela escada</button></div>
       <div class="hint">Valores em US$.</div><div class="tw"><table><thead><tr><th>Sem.</th><th>Banca início</th><th>Lote</th><th>Resultado</th><th>Banca fim</th></tr></thead><tbody id="tMes"></tbody><tfoot id="fMes"></tfoot></table></div>
       <div class="cards">
         <div class="card" id="cMes"><span class="lbl">Resultado do mês</span><span class="v" id="oMes">–</span><span class="hint" id="oMes1">–</span></div>
@@ -328,12 +328,12 @@ const lpSave=()=>{try{localStorage.setItem(LP_LS,JSON.stringify(lp))}catch(e){}i
 function lpPip(par){return fxPip(par,lp.q)}
 function lpNoc(par){return fxNoc(par,lp.q)}
 function lpCalc(){
-  const fb=daMetas().banca;if(document.activeElement!==$("lpBanca"))$("lpBanca").value=lpTeste!=null?lpTeste:fb;$("lpBancaH").textContent=lpTeste!=null?"teste, não salva":"do Progresso";
+  const fb=daMetas().banca;if(document.activeElement!==$("lpBanca"))$("lpBanca").value=lpTeste!=null?lpTeste:fb;
   const banca=parseFloat($("lpBanca").value)||0, ac=Math.min(95,Math.max(34,+lp.ac||60))/100, meta=(+lp.meta||40)/100;
   const dias=+sim.dias||5, ops=dias*2, fator=ops*(ac*2-(1-ac));
   const rp=fator>0?meta/fator:0, R=banca*rp;
   $("lpAlav").value=String(lp.alav);if(document.activeElement!==$("lpMeta"))$("lpMeta").value=lp.meta;if(document.activeElement!==$("lpAc"))$("lpAc").value=lp.ac;
-  $("lpRisco").textContent=brl2(r2(R));$("lpRisco1").textContent=pc(rp)+" da banca no stop";
+  $("lpRisco").textContent=brl2(r2(R));$("lpRisco1").textContent=pc(rp)+(lpTeste!=null?" da banca de teste (não salva)":" da banca do Progresso");
   $("lpGain").textContent="+"+brl2(r2(2*R));
   const g=Math.round(ops*ac),l=ops-g;
   $("lpSem").textContent="+"+brl2(r2(banca*meta));$("lpSem1").textContent=ops+" operações ("+dias+" dias × 2): "+g+" gains e "+l+" losses";

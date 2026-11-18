@@ -108,7 +108,7 @@ img,svg{max-width:100%}
         <label>Contratos<input id="sCt" type="number" min="1" step="1" inputmode="numeric" placeholder="pela escada"></label>
         <label>Stop (pontos)<input id="sStopPts" type="number" min="0" step="0.5" inputmode="decimal"></label>
         <label>Alvo (x o stop)<input id="sMult" type="number" min="0.5" step="0.1" inputmode="decimal"></label>
-        <label>Custo por contrato (R$)<input id="sCusto" type="number" min="0" step="0.01" inputmode="decimal" placeholder="ida e volta"></label>
+        <label>Custo/contrato (R$)<input id="sCusto" type="number" min="0" step="0.01" inputmode="decimal" placeholder="ida e volta"></label>
       </div>
       <div class="hint" id="sCtTxt">Contratos em branco = o degrau da escada para essa banca.</div>
       <div class="pull"><span class="hint" id="sPullTxt"></span><button type="button" class="btn2" id="sPull">↺ Puxar das Metas</button></div>
@@ -138,7 +138,7 @@ img,svg{max-width:100%}
     </div>
     <div class="panel sim">
       <h2>Por mês (4 semanas)</h2>
-      <div class="seg" id="sModo"><button type="button" data-m="fixo" class="on">Contratos fixos (semana × 4)</button><button type="button" data-m="re">Subir contratos pela escada</button></div>
+      <div class="seg" id="sModo"><button type="button" data-m="fixo" class="on">Fixos (semana × 4)</button><button type="button" data-m="re">Subir pela escada</button></div>
       <div class="hint">Valores em R$.</div><div class="tw"><table><thead><tr><th>Sem.</th><th>Banca início</th><th>Contr.</th><th>Resultado</th><th>Banca fim</th></tr></thead><tbody id="tMes"></tbody><tfoot id="fMes"></tfoot></table></div>
       <div class="cards">
         <div class="card" id="cMes"><span class="lbl">Resultado do mês</span><span class="v" id="oMes">–</span><span class="hint" id="oMes1">–</span></div>

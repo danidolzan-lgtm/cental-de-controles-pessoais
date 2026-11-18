@@ -124,7 +124,7 @@ function cardHTML(p){
     <div class="fields">
       ${F(p,"credito","Crédito (R$)")}${F(p,"prazo","Prazo (meses)")}
       ${F(p,"parcela","Parcela (R$)")}${F(p,"parcRed","Parcela reduzida (R$)")}
-      ${F(p,"qtdDif","Parcelas com valor diferente (qtd)")}${F(p,"parcDif","Valor delas (R$)")}
+      ${F(p,"qtdDif","Parcelas diferentes (qtd)")}${F(p,"parcDif","Valor delas (R$)")}
       ${F(p,"taxa","Taxa de adm. (%)")}
       <label>Taxa informada<select data-f="taxaTipo"><option value="total"${p.taxaTipo!=="mes"?" selected":""}>total do plano</option><option value="mes"${p.taxaTipo==="mes"?" selected":""}>ao mês</option></select></label>
       ${F(p,"fr","Fundo de reserva (%)")}${F(p,"seguro","Seguro","text")}
