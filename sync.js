@@ -505,11 +505,11 @@
     if (ios && !window.MSStream) setInst("ios");
   })();
 
-  /* Quotex no Android: abre no Chrome (no app instalado ele abria dentro do próprio app). PC fica igual. */
+  /* Quotex e Exness no Android: abre no Chrome (no app instalado ele abria dentro do próprio app). PC fica igual. */
   (function () {
     if (!/Android/i.test(navigator.userAgent)) return;
     function fix() {
-      document.querySelectorAll('a[href*="quotex.com"]').forEach(function (a) {
+      document.querySelectorAll('a[href*="quotex.com"],a[href*="exness.com"]').forEach(function (a) {
         if (a.dataset.chrome) return; a.dataset.chrome = "1";
         var u = a.href;
         a.href = "intent://" + u.replace(/^https?:\/\//, "") + "#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=" + encodeURIComponent(u) + ";end";
