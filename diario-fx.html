@@ -201,7 +201,7 @@ document.getElementById("fHoje").addEventListener("click",()=>{FREF=_hj;fGo()});
 fUI();
 const OPS=[{id:"respiro",nome:"Respiro"},{id:"virada",nome:"Virada"},{id:"muralha",nome:"Muralha"},{id:"giro",nome:"Giro"},{id:"armadilha",nome:"Armadilha"}];
 const opNome=id=>(OPS.find(o=>o.id===(id==="muralhaEng"?"muralha":id))||{nome:id||"Sem operacional"}).nome;
-const ATIVOS={EURUSD:{nome:"EURUSD",pt:10},GBPUSD:{nome:"GBPUSD",pt:10},USDJPY:{nome:"USDJPY",pt:6.3},AUDUSD:{nome:"AUDUSD",pt:10},NZDUSD:{nome:"NZDUSD",pt:10},USDCAD:{nome:"USDCAD",pt:7.2},USDCHF:{nome:"USDCHF",pt:12.7},EURGBP:{nome:"EURGBP",pt:13.4},EURJPY:{nome:"EURJPY",pt:6.3},GBPJPY:{nome:"GBPJPY",pt:6.3},AUDJPY:{nome:"AUDJPY",pt:6.3},EURCHF:{nome:"EURCHF",pt:12.7},EURAUD:{nome:"EURAUD",pt:7},GBPCHF:{nome:"GBPCHF",pt:12.7},EURCAD:{nome:"EURCAD",pt:7.2},XAUUSD:{nome:"XAUUSD",pt:10}};
+const ATIVOS={EURUSD:{nome:"EURUSD",pt:10},GBPUSD:{nome:"GBPUSD",pt:10},USDJPY:{nome:"USDJPY",pt:6.3},AUDUSD:{nome:"AUDUSD",pt:10},NZDUSD:{nome:"NZDUSD",pt:10},USDCAD:{nome:"USDCAD",pt:7.2},USDCHF:{nome:"USDCHF",pt:12.7},EURGBP:{nome:"EURGBP",pt:13.4},EURJPY:{nome:"EURJPY",pt:6.3},GBPJPY:{nome:"GBPJPY",pt:6.3},AUDJPY:{nome:"AUDJPY",pt:6.3},EURCHF:{nome:"EURCHF",pt:12.7},EURAUD:{nome:"EURAUD",pt:7},GBPCHF:{nome:"GBPCHF",pt:12.7},EURCAD:{nome:"EURCAD",pt:7.2},XAUUSD:{nome:"XAUUSD",pt:1}};
 let days={}, cfg={ct:0.03}, db=null;
 const $=id=>document.getElementById(id);
 const brl=v=>(v<0?"-":"")+"US$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -403,22 +403,23 @@ const PROG="progresso-fx", PLS="progressoFX.v1";
 /* 18/11/2026: lote sugerido na operação: risco = meta da semana ÷ (operações × (2·acerto − erro)), igual à aba "Lote por par" do Progresso */
 const FX_QDEF={EURUSD:1.16,GBPUSD:1.34,AUDUSD:0.70,NZDUSD:0.58,USDJPY:158,USDCAD:1.38,USDCHF:0.79,XAUUSD:4300};
 function fxUSD(c,q){return {USD:1,EUR:q.EURUSD,GBP:q.GBPUSD,AUD:q.AUDUSD,NZD:q.NZDUSD,JPY:1/q.USDJPY,CAD:1/q.USDCAD,CHF:1/q.USDCHF}[c]||1}
-function fxPip(par,q){if(par==="XAUUSD")return 10;const b=par.slice(3);return 100000*(b==="JPY"?0.01:0.0001)*fxUSD(b,q)}
+function fxPip(par,q){if(par==="XAUUSD")return 1;const b=par.slice(3);return 100000*(b==="JPY"?0.01:0.0001)*fxUSD(b,q)}
 function fxNoc(par,q){if(par==="XAUUSD")return 100*q.XAUUSD;return 100000*fxUSD(par.slice(0,3),q)}
 function loteCfg(){let lp={};try{lp=JSON.parse(localStorage.getItem("loteParFX.v1")||"null")||{}}catch(e){}
   let dias=5;try{const s=JSON.parse(localStorage.getItem("simuladorFX.v1")||"null");if(s&&+s.dias>0)dias=+s.dias}catch(e){}
   const ac=Math.min(95,Math.max(34,+lp.ac||60))/100, meta=(+lp.meta||40)/100, ops=dias*2, rp=meta/(ops*(2*ac-(1-ac)));
-  const pm=window._pm||{}, banca=(lp.banca!=null&&+lp.banca>0)?+lp.banca:(pm.banca||pm.nivel||PLV[0]);
+  const pm=window._pm||{}, banca=pm.banca||pm.nivel||PLV[0];
   return {rp,banca,alav:+lp.alav>0?+lp.alav:500,q:Object.assign({},FX_QDEF,lp.q||{})}}
 function loteSug(o){const st=+o.stopUsd,ref=+o.stopRef>0?+o.stopRef:0.01;if(!(st>0))return null;const c=loteCfg(),R=c.banca*c.rp,porLote=st/ref;
   let lot=Math.floor(R/porLote*100+1e-9)/100;const min=lot<0.01;if(min)lot=0.01;const mg=lot*fxNoc(o.ativo||"EURUSD",c.q)/c.alav;return {lot,risco:lot*porLote,R,rp:c.rp,banca:c.banca,min,mg,ok:mg>c.banca?"✕ margem maior que a banca":mg>c.banca*.5?"⚠ margem aperta":"✓ corretora deixa"}}
+function lrAll(){if(draft)draft.ops.forEach((o,i)=>{const r=$("lr"+i);if(r)r.innerHTML=loteTxt(o,i)})}
 function loteTxt(o,i){const L=loteSug(o);
   if(!L){const c=loteCfg();return "Na corretora, com 0,01 lote, puxe o stop até o ponto do gráfico e digite aqui o valor que ela mostra. O lote sai para arriscar "+(c.rp*100).toLocaleString("pt-BR",{maximumFractionDigits:1})+"% da banca (US$ "+(c.banca*c.rp).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+")."}
   return "<span>Lote: <b>"+L.lot.toLocaleString("pt-BR",{minimumFractionDigits:2})+"</b></span><span>na corretora o stop vai mostrar −US$ "+L.risco.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+" ("+(L.risco/L.banca*100).toLocaleString("pt-BR",{maximumFractionDigits:1})+"% de US$ "+L.banca.toLocaleString("pt-BR")+")"+(L.min?" · lote mínimo":"")+"</span><span>margem US$ "+L.mg.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+" · "+L.ok+"</span>"+(ro?"":"<button type='button' data-a='usaLote' data-i='"+i+"'>Usar</button>")}
 const ctT=n=>(+n).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+" lote";
 function ctDoProg(d){const c=new Set((d&&d.conquistados)||[]);let last=-1;PLV.forEach((v,i)=>{if(c.has(i))last=i});return {idx:last,ct:last>=0?PCT[last]:0.03,nivel:last>=0?PLV[last]:null,banca:d&&+d.banca>0?+d.banca:null}}
 $("cNivel").innerHTML="<option value='-1'>Início · 0,03 lote</option>"+PLV.map((v,i)=>"<option value='"+i+"'>"+String(i+1).padStart(2,"0")+" · US$ "+v.toLocaleString("pt-BR")+" · "+ctT(PCT[i])+"</option>").join("");
-function aplicaMetas(p){if(!p)return;const mudou=window._pm&&window._pm.ct!==p.ct;window._pm=p;cfg.ct=p.ct;
+function aplicaMetas(p){if(!p)return;const mudou=window._pm&&window._pm.ct!==p.ct;window._pm=p;lrAll();cfg.ct=p.ct;
   $("cCt").value=cfg.ct;if(document.activeElement!==$("cNivel"))$("cNivel").value=String(p.idx);metasTxt();if(mudou)window.ui&&ui.toast("Lote pela escada: "+ctT(p.ct))}
 function metasTxt(){$("cMetas").textContent=window._pm?"O lote vem da escada, a mesma do Progresso. Trocou o degrau aqui, muda lá também (e no celular).":""}
 async function gravaProg(o){
@@ -430,6 +431,7 @@ try{aplicaMetas(ctDoProg(JSON.parse(localStorage.getItem(PLS)||"null")||{}))}cat
   try{db=window.claude?await window.claude.use("db"):null}catch(e){db=null}
   if(!db){setStatus("Salvando neste aparelho");return}
   db.doc("config/geral").onSnapshot(s=>{if(s.exists){cfg=Object.assign(cfg,s.data());if(window._pm)aplicaMetas(window._pm);else $("cCt").value=cfg.ct}},()=>{});
+  if(db.app)db.app(PROG).doc("estado/lotepar").onSnapshot(s=>{if(s.exists){try{localStorage.setItem("loteParFX.v1",JSON.stringify(s.data()))}catch(e){}lrAll()}},()=>{});
   if(db.app)db.app(PROG).doc("estado/progresso").onSnapshot(s=>{const d=s.exists?s.data():null;try{if(d)localStorage.setItem(PLS,JSON.stringify(d))}catch(e){}aplicaMetas(ctDoProg(d))},()=>{});
   db.collection("dias").onSnapshot(q=>{const m={};q.docs.forEach(d=>{m[d.id]=d.data()});days=m;lsSave();render();setStatus("Sincronizado")},()=>setStatus("Sem conexão com o salvamento"));
 })();

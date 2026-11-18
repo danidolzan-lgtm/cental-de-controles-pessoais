@@ -124,7 +124,7 @@ img,svg{max-width:100%}
     <div class="panel" style="display:grid;gap:12px">
       <h2 style="margin:0">Lote de cada par para a sua banca</h2>
       <div class="lp-f">
-        <label>Banca (US$)<input id="lpBanca" type="number" min="0" step="0.01" inputmode="decimal"></label>
+        <label>Banca (US$) · <span id="lpBancaH" style="text-transform:none;letter-spacing:0">do Progresso</span><input id="lpBanca" type="number" min="0" step="0.01" inputmode="decimal"></label>
         <label>Alavancagem da corretora<select id="lpAlav"><option value="30">1:30</option><option value="100">1:100</option><option value="200">1:200</option><option value="300">1:300</option><option value="400">1:400</option><option value="500" selected>1:500</option><option value="1000">1:1000</option><option value="2000">1:2000</option></select></label>
         <label>Meta da semana (%)<input id="lpMeta" type="number" min="1" max="200" step="1" value="40" inputmode="numeric"></label>
         <label>Acerto (%)<input id="lpAc" type="number" min="34" max="95" step="1" value="60" inputmode="numeric"></label>
@@ -235,10 +235,10 @@ function render(){
   }
   [...L.children].forEach((b,i)=>{b.className="step"+(done.has(i)?" done":"")+(i===nextI?" next":"");b.setAttribute("aria-pressed",done.has(i))});
 }
-$("banca").addEventListener("change",e=>{const v=parseFloat(e.target.value),n=isNaN(v)?null:v;if(n===st.banca)return;st.banca=n;render();save();puxarMetas();window.ui&&ui.toast("✓ Banca salva")});
+$("banca").addEventListener("change",e=>{const v=parseFloat(e.target.value),n=isNaN(v)?null:v;if(n===st.banca)return;st.banca=n;render();save();lpTeste=null;lpCalc();puxarMetas();window.ui&&ui.toast("✓ Banca salva")});
 load(); if(st.banca!=null) $("banca").value=st.banca; render(); $("status").textContent="Conectando…";
 /* ---------- Simulador Forex (valor do pip: US$ 10 por lote 1,00 em EURUSD e GBPUSD) ---------- */
-const PT={EURUSD:10,GBPUSD:10,USDJPY:6.3,AUDUSD:10,NZDUSD:10,USDCAD:7.2,USDCHF:12.7,EURGBP:13.4,EURJPY:6.3,GBPJPY:6.3,AUDJPY:6.3,EURCHF:12.7,EURAUD:7,GBPCHF:12.7,EURCAD:7.2,XAUUSD:10}, STOPDEF={EURUSD:8,GBPUSD:10,USDJPY:10,AUDUSD:8,NZDUSD:8,USDCAD:10,USDCHF:8,EURGBP:6,EURJPY:12,GBPJPY:15,AUDJPY:10,EURCHF:6,EURAUD:12,GBPCHF:12,EURCAD:10,XAUUSD:30}, LIM={EURUSD:8,GBPUSD:10,USDJPY:10,AUDUSD:8,NZDUSD:8,USDCAD:10,USDCHF:8,EURGBP:6,EURJPY:12,GBPJPY:15,AUDJPY:10,EURCHF:6,EURAUD:12,GBPCHF:12,EURCAD:10,XAUUSD:30}; // valor do pip aproximado (pares com USD na frente e cruzados variam com a cotação)
+const PT={EURUSD:10,GBPUSD:10,USDJPY:6.3,AUDUSD:10,NZDUSD:10,USDCAD:7.2,USDCHF:12.7,EURGBP:13.4,EURJPY:6.3,GBPJPY:6.3,AUDJPY:6.3,EURCHF:12.7,EURAUD:7,GBPCHF:12.7,EURCAD:7.2,XAUUSD:1}, STOPDEF={EURUSD:8,GBPUSD:10,USDJPY:10,AUDUSD:8,NZDUSD:8,USDCAD:10,USDCHF:8,EURGBP:6,EURJPY:12,GBPJPY:15,AUDJPY:10,EURCHF:6,EURAUD:12,GBPCHF:12,EURCAD:10,XAUUSD:300}, LIM={EURUSD:8,GBPUSD:10,USDJPY:10,AUDUSD:8,NZDUSD:8,USDCAD:10,USDCHF:8,EURGBP:6,EURJPY:12,GBPJPY:15,AUDJPY:10,EURCHF:6,EURAUD:12,GBPCHF:12,EURCAD:10,XAUUSD:300}; // valor do pip aproximado (pares com USD na frente e cruzados variam com a cotação)
 const SLS="simuladorFX.v1", DEF={banca:null,ativo:"EURUSD",ct:null,stopPts:8,mult:2,custo:0,dias:5,gain:6,loss:4,modo:"fixo"};
 let sim=Object.assign({},DEF), sref=null;
 try{const r=JSON.parse(localStorage.getItem(SLS)||"null");if(r)sim=Object.assign({},DEF,r)}catch(e){}
@@ -313,18 +313,22 @@ fillSim();calcSim();
 const LP_PARES=[["EURUSD", "Euro × dólar"], ["GBPUSD", "Libra × dólar"], ["USDJPY", "Dólar × iene"], ["AUDUSD", "Dólar australiano"], ["NZDUSD", "Dólar neozelandês"], ["USDCAD", "Dólar × canadense"], ["USDCHF", "Dólar × franco suíço"], ["EURGBP", "Euro × libra"], ["EURJPY", "Euro × iene"], ["GBPJPY", "Libra × iene"], ["AUDJPY", "Australiano × iene"], ["EURCHF", "Euro × franco suíço"], ["EURAUD", "Euro × australiano"], ["GBPCHF", "Libra × franco suíço"], ["EURCAD", "Euro × canadense"], ["XAUUSD", "Ouro"]];
 const FX_QDEF={EURUSD:1.16,GBPUSD:1.34,AUDUSD:0.70,NZDUSD:0.58,USDJPY:158,USDCAD:1.38,USDCHF:0.79,XAUUSD:4300};
 function fxUSD(c,q){return {USD:1,EUR:q.EURUSD,GBP:q.GBPUSD,AUD:q.AUDUSD,NZD:q.NZDUSD,JPY:1/q.USDJPY,CAD:1/q.USDCAD,CHF:1/q.USDCHF}[c]||1}
-function fxPip(par,q){if(par==="XAUUSD")return 10;const b=par.slice(3);return 100000*(b==="JPY"?0.01:0.0001)*fxUSD(b,q)}
+function fxPip(par,q){if(par==="XAUUSD")return 1;const b=par.slice(3);return 100000*(b==="JPY"?0.01:0.0001)*fxUSD(b,q)}
 function fxNoc(par,q){if(par==="XAUUSD")return 100*q.XAUUSD;return 100000*fxUSD(par.slice(0,3),q)}
 const LP_QDEF=FX_QDEF;
 const LP_LS="loteParFX.v1";
 let lp={alav:500,meta:40,ac:60,stop:{},q:Object.assign({},LP_QDEF),banca:null};
 try{const r=JSON.parse(localStorage.getItem(LP_LS)||"null");if(r){lp=Object.assign(lp,r);lp.q=Object.assign({},LP_QDEF,r.q||{})}}catch(e){}
-const lpSave=()=>{try{localStorage.setItem(LP_LS,JSON.stringify(lp))}catch(e){}};
+/* 18/11/2026: ouro passou a contar o pip como a corretora (0,01 = 1 pip, US$ 1 por lote): stop salvo no jeito antigo vira ×10 */
+if(!lp.ouroCent){if(lp.stop&&+lp.stop.XAUUSD>0)lp.stop.XAUUSD=+lp.stop.XAUUSD*10;lp.ouroCent=1;try{localStorage.setItem(LP_LS,JSON.stringify(lp))}catch(e){}}
+/* 18/11/2026: banca sempre a do Progresso (Banca atual); mudar aqui é só teste. Os ajustes desta aba vão para a conta, e o Diário usa os mesmos */
+delete lp.banca;let lpTeste=null;
+const lpSave=()=>{try{localStorage.setItem(LP_LS,JSON.stringify(lp))}catch(e){}if(typeof db!=="undefined"&&db)db.doc("estado/lotepar").set(JSON.parse(JSON.stringify(lp))).catch(()=>{})};
 /* valor do pip (US$ por 1,00 lote) e valor da posição de 1,00 lote em US$ (para a margem) */
 function lpPip(par){return fxPip(par,lp.q)}
 function lpNoc(par){return fxNoc(par,lp.q)}
 function lpCalc(){
-  const fb=daMetas().banca;if(document.activeElement!==$("lpBanca"))$("lpBanca").value=lp.banca!=null?lp.banca:fb;
+  const fb=daMetas().banca;if(document.activeElement!==$("lpBanca"))$("lpBanca").value=lpTeste!=null?lpTeste:fb;$("lpBancaH").textContent=lpTeste!=null?"teste, não salva":"do Progresso";
   const banca=parseFloat($("lpBanca").value)||0, ac=Math.min(95,Math.max(34,+lp.ac||60))/100, meta=(+lp.meta||40)/100;
   const dias=+sim.dias||5, ops=dias*2, fator=ops*(ac*2-(1-ac));
   const rp=fator>0?meta/fator:0, R=banca*rp;
@@ -343,7 +347,7 @@ function lpCalc(){
     return "<tr><td><b>"+par+"</b><small class='dk'>"+nome+"</small><small class='mb'>risco −"+brl2(r2(risco))+"<br>margem "+brl2(r2(marg))+"</small></td><td><input type='number' min='1' step='0.5' inputmode='decimal' data-st='"+par+"' value='"+st+"'></td><td class='lt'>"+lot.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+"<small class='dk'>"+(aviso||"≈ US$ "+nf(pip)+"/pip por lote")+"</small><small class='mb'>"+(aviso||"")+"</small></td><td>−"+brl2(r2(risco))+"</td><td>"+brl2(r2(marg))+"</td><td class='"+cls+"'>"+txt+"</td></tr>"}).join("");
   $("lpQ").innerHTML=Object.keys(LP_QDEF).map(k=>"<label>"+k+"<input type='number' step='any' inputmode='decimal' data-q='"+k+"' value='"+lp.q[k]+"'></label>").join("");
 }
-$("lpBanca").addEventListener("input",()=>{const v=parseFloat($("lpBanca").value);lp.banca=isNaN(v)?null:v;lpSave();lpCalc()});
+$("lpBanca").addEventListener("input",()=>{const v=parseFloat($("lpBanca").value);lpTeste=isNaN(v)?null:v;lpCalc()});
 $("lpAlav").addEventListener("change",()=>{lp.alav=+$("lpAlav").value;lpSave();lpCalc()});
 $("lpMeta").addEventListener("change",()=>{lp.meta=+$("lpMeta").value||40;lpSave();lpCalc()});
 $("lpAc").addEventListener("change",()=>{lp.ac=+$("lpAc").value||60;lpSave();lpCalc()});
@@ -361,12 +365,13 @@ $("lpAtual").addEventListener("click",async()=>{const m=$("lpQmsg");m.textConten
   if(!db){$("status").textContent="Salvando neste aparelho";return}
   ref=db.doc("estado/progresso");
   sref=db.doc("estado/simulador");
+  db.doc("estado/lotepar").onSnapshot(s=>{if(s.exists){const d=s.data();delete d.banca;lp=Object.assign(lp,d);lp.q=Object.assign({},LP_QDEF,d.q||{});try{localStorage.setItem(LP_LS,JSON.stringify(lp))}catch(e){}lpCalc()}else lpSave()},()=>{});
   sref.onSnapshot(s=>{if(s.exists){sim=Object.assign({},DEF,s.data());fillSim();calcSim()}else if(localStorage.getItem(SLS)){sref.set(sim).catch(()=>{})}},()=>{});
   ref.onSnapshot(s=>{
     if(s.exists){const d=s.data(); st={conquistados:[...(d.conquistados||[])],banca:d.banca??null};
       if(document.activeElement!==$("banca")) $("banca").value=st.banca??"";}
     else st={conquistados:[],banca:null};
-    render(); fillSim(); calcSim(); $("status").textContent="Sincronizado";
+    render(); fillSim(); calcSim(); lpTeste=null; lpCalc(); $("status").textContent="Sincronizado";
   },()=>{$("status").textContent="Sem conexão com o salvamento"});
 })();
 </script>
