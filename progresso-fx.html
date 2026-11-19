@@ -316,9 +316,9 @@ $("sModo").addEventListener("click",e=>{const b=e.target.closest("button");if(!b
 document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
   document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b));
   $("tabMetas").hidden=b.dataset.tab!=="metas";$("tabSim").hidden=b.dataset.tab!=="sim";$("tabPar").hidden=b.dataset.tab!=="par";if(b.dataset.tab==="par")lpCalc();
-  try{sessionStorage.setItem("progressoFX.tab",b.dataset.tab)}catch(e){}
+  try{localStorage.setItem("progressoFX.tab",b.dataset.tab)}catch(e){}
   if(b.dataset.tab==="sim"){fillSim();calcSim()}});
-try{const t=sessionStorage.getItem("progressoFX.tab");if(t==="sim"||t==="par")document.querySelector("[data-tab="+t+"]").click()}catch(e){}
+try{const t=localStorage.getItem("progressoFX.tab");if(t==="sim"||t==="par")document.querySelector("[data-tab="+t+"]").click()}catch(e){}
 /* ---------- Calculadora (lote por par) ----------
    Semana: 2 operações por dia × dias da semana do simulador, alvo 2x o stop e o acerto escolhido.
    Resultado da semana = ops × (2·acerto − erro) × risco  →  risco = meta ÷ (ops × (2·acerto − erro)). Com 10 ops, 60% e 40%: 5% por operação. */

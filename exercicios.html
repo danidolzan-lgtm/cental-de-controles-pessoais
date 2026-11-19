@@ -130,11 +130,13 @@ details summary{cursor:pointer;font-weight:600}
 const PER=[{y:"2026",a:"2026-11-03",b:"2026-12-17",t:"03/11 a 17/12/2026"},{y:"jan–mar/27",a:"2027-01-11",b:"2027-03-31",t:"11/01 a 31/03/2027"},{y:"abr–jun/27",a:"2027-04-01",b:"2027-06-30",t:"01/04 a 30/06/2027"}];
 const _hj=(()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")})();
 let PI=PER.findIndex(p=>_hj<=p.b);if(PI<0)PI=PER.length-1;
+/* 19/11/2026: lembra o período escolhido mesmo depois de fechar o site/app */
+const PKEY="mc.per."+((location.pathname.split("/").pop()||"index").replace(".html",""));try{const s=localStorage.getItem(PKEY);if(s!=null&&PER[+s])PI=+s}catch(e){}
 let START=PER[PI].a, END=PER[PI].b;
 const LS="exercicios2.v1";
 try{localStorage.removeItem("exercicios.v1")}catch(e){}
 function perUI(){const box=document.getElementById("per");if(!box)return;box.innerHTML=PER.map((p,i)=>"<button type='button' data-i='"+i+"' class='"+(i===PI?"on":"")+"'><b>"+p.y+"</b> · "+p.t.slice(0,13)+"</button>").join("");
-  box.querySelectorAll("button").forEach(b=>b.onclick=()=>{PI=+b.dataset.i;START=PER[PI].a;END=PER[PI].b;const t=today();sel=t<START?START:t>END?END:t;perUI();render()})}
+  box.querySelectorAll("button").forEach(b=>b.onclick=()=>{PI=+b.dataset.i;START=PER[PI].a;END=PER[PI].b;try{localStorage.setItem(PKEY,PI)}catch(e){}const t=today();sel=t<START?START:t>END?END:t;perUI();render()})}
 /* ---------- os exercícios (peso do corpo, sem equipamento; mochila com livros como carga) ---------- */
 const SESS=[{id:"s1",nome:"Sessão 1",foco:"Pernas e glúteos"},{id:"s2",nome:"Sessão 2",foco:"Peito, costas e braços"},{id:"s3",nome:"Sessão 3",foco:"Abdômen e condicionamento"}];
 const AQ={s1:"Marcha no lugar 1 min · rotação de quadril e joelhos 1 min · 10 agachamentos leves",s2:"Círculos de braço 1 min · rotação de ombros e punhos 1 min · 10 flexões na parede",s3:"Polichinelo leve 1 min · rotação de tronco 1 min · 10 elevações de joelho"};

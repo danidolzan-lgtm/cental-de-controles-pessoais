@@ -138,10 +138,12 @@ img,svg{max-width:100%}
 const PER=[{y:"2026",a:"2026-10-29",b:"2026-12-17",t:"29/10 a 17/12/2026"},{y:"jan–mar/27",a:"2027-01-11",b:"2027-03-31",t:"11/01 a 31/03/2027"},{y:"abr–jun/27",a:"2027-04-01",b:"2027-06-30",t:"01/04 a 30/06/2027"}];
 const _hj=(()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")})();
 let PI=PER.findIndex(p=>_hj<=p.b);if(PI<0)PI=PER.length-1;
+/* 19/11/2026: lembra o período escolhido mesmo depois de fechar o site/app */
+const PKEY="mc.per."+((location.pathname.split("/").pop()||"index").replace(".html",""));try{const s=localStorage.getItem(PKEY);if(s!=null&&PER[+s])PI=+s}catch(e){}
 let START=PER[PI].a, END=PER[PI].b;
 const inPer=ds=>ds>=START&&ds<=END;
 const usDst=ds=>ds<"2026-11-02"||(ds>="2027-03-14"&&ds<"2027-11-07"); // horário de verão dos EUA
-function perUI(cb){const box=document.getElementById("per");if(box){box.innerHTML=PER.map((p,i)=>"<button type='button' data-i='"+i+"' class='"+(i===PI?"on":"")+"' aria-pressed='"+(i===PI)+"'><b>"+p.y+"</b> · "+p.t.slice(0,13)+"</button>").join("");box.querySelectorAll("button").forEach(b=>b.onclick=()=>{PI=+b.dataset.i;START=PER[PI].a;END=PER[PI].b;perUI(cb);cb()})}const s=document.getElementById("perSub");if(s)s.textContent=PER[PI].t+" · segunda a sexta"}
+function perUI(cb){const box=document.getElementById("per");if(box){box.innerHTML=PER.map((p,i)=>"<button type='button' data-i='"+i+"' class='"+(i===PI?"on":"")+"' aria-pressed='"+(i===PI)+"'><b>"+p.y+"</b> · "+p.t.slice(0,13)+"</button>").join("");box.querySelectorAll("button").forEach(b=>b.onclick=()=>{PI=+b.dataset.i;START=PER[PI].a;END=PER[PI].b;try{localStorage.setItem(PKEY,PI)}catch(e){}perUI(cb);cb()})}const s=document.getElementById("perSub");if(s)s.textContent=PER[PI].t+" · segunda a sexta"}
 perUI(()=>{const t=today();sel=lastWd(t<START?START:(t>END?END:t));if(sel<START)sel=START;draft=marks[sel]||null;render()});
 try{localStorage.removeItem("dopaminaB3m.v1");}catch(e){} // dados antigos (zerado em 29/10/2026)
 const LS="dopaminaB3n.v1";
