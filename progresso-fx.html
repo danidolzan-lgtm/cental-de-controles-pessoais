@@ -104,7 +104,7 @@ img,svg{max-width:100%}
     <div><h1>Progresso Forex</h1><div class="sub">Lote por banca e simulador · pares de moedas e ouro · conta em dólar</div></div>
     <div class="status" id="status">Carregando…</div>
   </div>
-  <div class="tabs" role="tablist"><button type="button" class="on" data-tab="metas">Metas</button><button type="button" data-tab="sim">Simulador</button><button type="button" data-tab="par">Por par</button></div>
+  <div class="tabs" role="tablist"><button type="button" class="on" data-tab="metas">Metas</button><button type="button" data-tab="sim">Simulador</button><button type="button" data-tab="par">Calculadora</button></div>
   <div id="tabMetas" style="display:grid;gap:16px">
   <div class="panel goal">
     <div class="row">
@@ -122,7 +122,7 @@ img,svg{max-width:100%}
   </div>
   <div id="tabPar" hidden style="display:grid;gap:16px">
     <div class="panel" style="display:grid;gap:12px">
-      <h2 style="margin:0">Lote de cada par para a sua banca</h2>
+      <h2 style="margin:0">Calculadora: lote de cada par para a sua banca</h2>
       <div class="lp-f">
         <label>Banca (US$)<input id="lpBanca" type="number" min="0" step="0.01" inputmode="decimal"></label>
         <label>Alavancagem da corretora<select id="lpAlav"><option value="30">1:30</option><option value="100">1:100</option><option value="200">1:200</option><option value="300">1:300</option><option value="400">1:400</option><option value="500" selected>1:500</option><option value="1000">1:1000</option><option value="2000">1:2000</option></select></label>
@@ -149,12 +149,12 @@ img,svg{max-width:100%}
       <div class="fields">
         <label>Banca (US$)<input id="sBanca" type="number" min="0" step="0.01" inputmode="decimal"></label>
         <label>Ativo<select id="sAtivo" style="font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%"><option value="EURUSD">EURUSD</option><option value="GBPUSD">GBPUSD</option><option value="USDJPY">USDJPY</option><option value="AUDUSD">AUDUSD</option><option value="NZDUSD">NZDUSD</option><option value="USDCAD">USDCAD</option><option value="USDCHF">USDCHF</option><option value="EURGBP">EURGBP</option><option value="EURJPY">EURJPY</option><option value="GBPJPY">GBPJPY</option><option value="AUDJPY">AUDJPY</option><option value="EURCHF">EURCHF</option><option value="EURAUD">EURAUD</option><option value="GBPCHF">GBPCHF</option><option value="EURCAD">EURCAD</option><option value="XAUUSD">XAUUSD</option></select></label>
-        <label>Lote<input id="sCt" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="pela escada"></label>
+        <label>Lote<input id="sCt" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="da Calculadora"></label>
         <label>Stop (pips)<input id="sStopPts" type="number" min="0" step="0.5" inputmode="decimal"></label>
         <label>Alvo (x o stop)<input id="sMult" type="number" min="0.5" step="0.1" inputmode="decimal"></label>
         <label>Custo/lote (US$)<input id="sCusto" type="number" min="0" step="0.01" inputmode="decimal" placeholder="comissão ida e volta"></label>
       </div>
-      <div class="hint" id="sCtTxt">Lote em branco = o degrau da escada para essa banca.</div>
+      <div class="hint" id="sCtTxt">Lote e stop vêm da Calculadora para o par escolhido.</div>
       <div class="pull"><span class="hint" id="sPullTxt"></span><button type="button" class="btn2" id="sPull">↺ Puxar das Metas</button></div>
     </div>
     <div class="panel sim">
@@ -182,7 +182,7 @@ img,svg{max-width:100%}
     </div>
     <div class="panel sim">
       <h2>Por mês (4 semanas)</h2>
-      <div class="seg" id="sModo"><button type="button" data-m="fixo" class="on">Fixo (semana × 4)</button><button type="button" data-m="re">Subir pela escada</button></div>
+      <div class="seg" id="sModo"><button type="button" data-m="fixo" class="on">Fixo (semana × 4)</button><button type="button" data-m="re">Recalcular semanal</button></div>
       <div class="hint">Valores em US$.</div><div class="tw"><table><thead><tr><th>Sem.</th><th>Banca início</th><th>Lote</th><th>Resultado</th><th>Banca fim</th></tr></thead><tbody id="tMes"></tbody><tfoot id="fMes"></tfoot></table></div>
       <div class="cards">
         <div class="card" id="cMes"><span class="lbl">Resultado do mês</span><span class="v" id="oMes">–</span><span class="hint" id="oMes1">–</span></div>
@@ -242,7 +242,7 @@ const PT={EURUSD:10,GBPUSD:10,USDJPY:6.3,AUDUSD:10,NZDUSD:10,USDCAD:7.2,USDCHF:1
 const SLS="simuladorFX.v1", DEF={banca:null,ativo:"EURUSD",ct:null,stopPts:8,mult:2,custo:0,dias:5,gain:6,loss:4,modo:"fixo"};
 let sim=Object.assign({},DEF), sref=null;
 try{const r=JSON.parse(localStorage.getItem(SLS)||"null");if(r)sim=Object.assign({},DEF,r)}catch(e){}
-const F={sBanca:"banca",sCt:"ct",sStopPts:"stopPts",sMult:"mult",sCusto:"custo",sDias:"dias",sGain:"gain",sLoss:"loss"};
+const F={sBanca:"banca",sCt:"ct",sMult:"mult",sCusto:"custo",sDias:"dias",sGain:"gain",sLoss:"loss"};
 const brl2=v=>"US$ "+v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}), r2=v=>Math.round(v*100)/100, pc=v=>(v*100).toLocaleString("pt-BR",{maximumFractionDigits:1})+"%";
 const n2=v=>v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}), sgn=v=>(v>0?"+":v<0?"−":"")+n2(Math.abs(r2(v)));
 const sg=v=>(v>0?"+":v<0?"−":"")+brl2(Math.abs(r2(v)));
@@ -255,16 +255,21 @@ function daMetas(){const done=new Set(st.conquistados);let last=-1;LV.forEach((v
 // 29/10/2026: banca e contratos do simulador vêm SEMPRE da escada (Metas), em todos os aparelhos. Mudar à mão aqui é só para testar: não salva.
 let simManual=false;
 function puxarMetas(quiet){simManual=false;fillSim();calcSim()}
+/* lote da Calculadora: risco por operação = meta da semana ÷ (operações × (2·acerto − erro)) */
+function simStop(){return +lp.stop[sim.ativo]||STOPDEF[sim.ativo]}
+function calcLote(banca){const ac=Math.min(95,Math.max(34,+lp.ac||60))/100,meta=(+lp.meta||40)/100,f=(+sim.dias||5)*2*(ac*2-(1-ac)),rp=f>0?meta/f:0;
+  let lot=Math.floor(banca*rp/(simStop()*lpPip(sim.ativo))*100+1e-9)/100;return lot<0.01?0.01:lot}
 function fillSim(){
-  if(!simManual){const m=daMetas();sim.banca=m.banca;sim.ct=m.ct}
+  if(!simManual){const m=daMetas();sim.banca=m.banca;sim.ct=null}
+  sim.stopPts=simStop();if(document.activeElement!==$("sStopPts"))$("sStopPts").value=sim.stopPts;
   for(const id in F){if(document.activeElement!==$(id))$(id).value=sim[F[id]]??""}
   if(document.activeElement!==$("sAtivo"))$("sAtivo").value=sim.ativo;
-  const m=daMetas(), igual=Math.abs((+sim.banca||0)-m.banca)<.005&&(+sim.ct||0)===m.ct;
-  $("sPullTxt").textContent=igual?"✓ Usando as Metas: banca "+brl2(m.banca)+" · "+ctTxt(m.ct)+".":"Teste à mão (não salva). Nas Metas: banca "+brl2(m.banca)+" · "+ctTxt(m.ct)+".";
+  const m=daMetas(), igual=Math.abs((+sim.banca||0)-m.banca)<.005&&!sim.ct;
+  $("sPullTxt").textContent=igual?"✓ Banca das Metas ("+brl2(m.banca)+") e lote da Calculadora.":"Teste à mão (não salva). Nas Metas: banca "+brl2(m.banca)+", lote da Calculadora.";
   $("sPull").hidden=igual;
   [...$("sModo").children].forEach(b=>b.classList.toggle("on",b.dataset.m===sim.modo))}
 function semana(banca,ctFix){
-  const ct=ctFix||(+sim.ct||ctDaBanca(banca)), risco=(+sim.stopPts||0)*PT[sim.ativo]*ct, custo=(+sim.custo||0)*ct;
+  const ct=ctFix||(+sim.ct||calcLote(banca)), risco=(+sim.stopPts||0)*lpPip(sim.ativo)*ct, custo=(+sim.custo||0)*ct;
   const g=risco*(+sim.mult||0)-custo, l=risco+custo;
   return {ct,g,l,res:(+sim.gain||0)*g-(+sim.loss||0)*l};
 }
@@ -272,8 +277,8 @@ function calcSim(){
   const banca=parseFloat($("sBanca").value);
   if(!(banca>0)||!(+sim.stopPts>0)){["oCt","oAlvoPts","oG","oL","oSem","oMes","oFim"].forEach(i=>$(i).textContent="–");$("tMes").innerHTML="";$("fMes").innerHTML="";$("oPaga").textContent="Informe a banca e o stop em pips.";return}
   const w=semana(banca), m=+sim.mult||0;
-  $("sCtTxt").textContent=sim.ct?"Usando "+ctTxt(+sim.ct)+" (teste à mão; ↺ volta para a escada).":"Pela escada, a banca de "+brl2(banca)+" usa "+ctTxt(ctDaBanca(banca))+".";
-  $("oCt").textContent=ctTxt(w.ct);if(!PT[sim.ativo]){sim.ativo="EURUSD"} $("oCt1").textContent=sim.ativo+" · "+(sim.ct?"definido por você":"pela escada");
+  $("sCtTxt").textContent=sim.ct?"Usando "+ctTxt(+sim.ct)+" (teste à mão; ↺ volta para a Calculadora).":"Pela Calculadora, com "+brl2(banca)+" e stop de "+nf(simStop())+" pips o "+sim.ativo+" usa "+ctTxt(calcLote(banca))+". O stop aqui é o mesmo da Calculadora.";
+  $("oCt").textContent=ctTxt(w.ct);if(!PT[sim.ativo]){sim.ativo="EURUSD"} $("oCt1").textContent=sim.ativo+" · "+(sim.ct?"definido por você":"da Calculadora");
   $("oAlvoPts").textContent=nf((+sim.stopPts)*m)+" pips"; $("oAlvoPts1").textContent="stop de "+nf(+sim.stopPts)+" pips × "+nf(m)+(+sim.stopPts>LIM[sim.ativo]?" · stop acima do limite do manual ("+LIM[sim.ativo]+" pips)":"");
   $("oG").textContent=sg(w.g); $("oG1").textContent=pc(w.g/banca)+" da banca"+(+sim.custo?" · já tirando o custo":"");
   $("oL").textContent=sg(-w.l); $("oL1").textContent=pc(w.l/banca)+" da banca"+(+sim.custo?" · com o custo":"");
@@ -290,7 +295,9 @@ function calcSim(){
   $("oMes").textContent=sg(tot); $("oMes1").textContent=pc(tot/banca)+" sobre a banca inicial"; $("cMes").className="card "+(tot>0?"g":tot<0?"r":"");
   $("oFim").textContent=brl2(Math.max(0,b));
 }
-$("sAtivo").addEventListener("change",e=>{sim.ativo=e.target.value;sim.stopPts=STOPDEF[sim.ativo];fillSim();calcSim();saveSim()});
+$("sAtivo").addEventListener("change",e=>{sim.ativo=e.target.value;fillSim();calcSim();saveSim()});
+$("sStopPts").addEventListener("input",e=>{const v=parseFloat(e.target.value);if(v>0){lp.stop[sim.ativo]=v;sim.stopPts=v;calcSim()}});
+$("sStopPts").addEventListener("change",()=>{lpSave();lpCalc();fillSim();calcSim()});
 let simT=null;
 function saveSim(quiet){clearTimeout(simT);simT=setTimeout(async()=>{
   const o=Object.assign({},sim);delete o.banca;delete o.ct; // banca e contratos ficam na escada
@@ -306,8 +313,7 @@ document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.cl
   try{sessionStorage.setItem("progressoFX.tab",b.dataset.tab)}catch(e){}
   if(b.dataset.tab==="sim"){fillSim();calcSim()}});
 try{const t=sessionStorage.getItem("progressoFX.tab");if(t==="sim"||t==="par")document.querySelector("[data-tab="+t+"]").click()}catch(e){}
-fillSim();calcSim();
-/* ---------- Lote por par ----------
+/* ---------- Calculadora (lote por par) ----------
    Semana: 2 operações por dia × dias da semana do simulador, alvo 2x o stop e o acerto escolhido.
    Resultado da semana = ops × (2·acerto − erro) × risco  →  risco = meta ÷ (ops × (2·acerto − erro)). Com 10 ops, 60% e 40%: 5% por operação. */
 const LP_PARES=[["EURUSD", "Euro × dólar"], ["GBPUSD", "Libra × dólar"], ["USDJPY", "Dólar × iene"], ["AUDUSD", "Dólar australiano"], ["NZDUSD", "Dólar neozelandês"], ["USDCAD", "Dólar × canadense"], ["USDCHF", "Dólar × franco suíço"], ["EURGBP", "Euro × libra"], ["EURJPY", "Euro × iene"], ["GBPJPY", "Libra × iene"], ["AUDJPY", "Australiano × iene"], ["EURCHF", "Euro × franco suíço"], ["EURAUD", "Euro × australiano"], ["GBPCHF", "Libra × franco suíço"], ["EURCAD", "Euro × canadense"], ["XAUUSD", "Ouro"]];
@@ -327,7 +333,7 @@ const lpSave=()=>{try{localStorage.setItem(LP_LS,JSON.stringify(lp))}catch(e){}i
 /* valor do pip (US$ por 1,00 lote) e valor da posição de 1,00 lote em US$ (para a margem) */
 function lpPip(par){return fxPip(par,lp.q)}
 function lpNoc(par){return fxNoc(par,lp.q)}
-function lpCalc(){
+function lpCalc(){if(typeof sim!=="undefined"&&!$("tabSim").hidden){fillSim();calcSim()}
   const fb=daMetas().banca;if(document.activeElement!==$("lpBanca"))$("lpBanca").value=lpTeste!=null?lpTeste:fb;
   const banca=parseFloat($("lpBanca").value)||0, ac=Math.min(95,Math.max(34,+lp.ac||60))/100, meta=(+lp.meta||40)/100;
   const dias=+sim.dias||5, ops=dias*2, fator=ops*(ac*2-(1-ac));
@@ -360,6 +366,7 @@ $("lpAtual").addEventListener("click",async()=>{const m=$("lpQmsg");m.textConten
     lpSave();lpCalc();m.textContent="Moedas atualizadas. O ouro (XAUUSD) confira na plataforma."}
   catch(e){m.textContent="Não deu para buscar daqui. Digite as cotações da plataforma."}});
 
+fillSim();calcSim();lpCalc();
 (async()=>{
   try{db=window.claude?await window.claude.use("db"):null}catch(e){db=null}
   if(!db){$("status").textContent="Salvando neste aparelho";return}
