@@ -38,7 +38,7 @@ input{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--l
 input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .ladder{display:grid;gap:6px}
 /* 16/11/2026: no PC a escada fica em colunas (de cima para baixo), sem linhas compridas e vazias */
-@media (min-width:900px){.ladder{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(7,auto);grid-auto-flow:column;column-gap:10px}}
+@media (min-width:900px){.ladder{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(5,auto);grid-auto-flow:column;column-gap:10px}}
 .step{appearance:none;font:inherit;color:var(--fg);text-align:left;cursor:pointer;display:grid;grid-template-columns:2rem 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:11px 12px}
 .step .n{font-family:var(--f-num);font-size:.8rem;color:var(--muted)}
 .step .b{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
@@ -194,16 +194,19 @@ img,svg{max-width:100%}
   </div>
 </div>
 <script>
-/* Forex: conta em dólar. Escada de US$ 50 a US$ 20.000. Lote = banca × 0,000625: no stop máximo do EURUSD (8 pips) cada loss é 5% da banca e um gain 10%; numa semana de 6 gains e 4 losses dá cerca de 40%, como na B3. */
-const LV=[50,100,200,300,500,700,1000,1500,2000,2500,3000,4000,5000,6000,7000,8000,10000,15000,20000];
-const CT=[0.03,0.06,0.13,0.19,0.31,0.44,0.63,0.94,1.25,1.56,1.88,2.5,3.13,3.75,4.38,5,6.25,9.38,12.5];
+/* Forex: conta em dólar. Escada de US$ 100 a US$ 20.000. Lote = banca × 0,000625: no stop máximo do EURUSD (8 pips) cada loss é 5% da banca e um gain 10%; numa semana de 6 gains e 4 losses dá cerca de 40%, como na B3. */
+const LV=[100,200,300,500,700,1000,1500,2000,3000,4000,5000,7000,10000,15000,20000];
+const CT=[0.06,0.13,0.19,0.31,0.44,0.63,0.94,1.25,1.88,2.5,3.13,4.38,6.25,9.38,12.5];
 const ctTxt=n=>(+n).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+" lote";
 const ctDaBanca=b=>{let c=0.03;LV.forEach((v,i)=>{if(b>=v)c=CT[i]});return c};
 let st={conquistados:[],banca:null}, db=null, ref=null;
 const LS="progressoFX.v1";
+const FX_LV_ANT=[50,100,200,300,500,700,1000,1500,2000,2500,3000,4000,5000,6000,7000,8000,10000,15000,20000]; /* 19/11/2026: escada encurtada (sem 50, 2.500, 6.000, 8.000); degraus marcados na escada antiga são convertidos pelo valor */
+function fxMigraC(d,LVN){const c=(d&&d.conquistados)||[];if(!d||d.esc===2)return [...c];return [...new Set(c.map(i=>LVN.indexOf(FX_LV_ANT[i])).filter(i=>i>=0))].sort((a,b)=>a-b)}
+
 const $=id=>document.getElementById(id);
 const brl=v=>"US$ "+v.toLocaleString("pt-BR",{minimumFractionDigits:0,maximumFractionDigits:2});
-function load(){try{const r=JSON.parse(localStorage.getItem(LS)||"null");if(r)st=r}catch(e){}}
+function load(){try{const r=JSON.parse(localStorage.getItem(LS)||"null");if(r){st=r;st.conquistados=fxMigraC(r,LV);st.esc=2}}catch(e){}}
 async function save(){
   if(ref){try{await ref.set(st);$("status").textContent="Salvo"}catch(e){$("status").textContent="Não salvou. Tente de novo."}}
   else{try{localStorage.setItem(LS,JSON.stringify(st))}catch(e){}$("status").textContent="Salvo neste aparelho"}
@@ -383,7 +386,7 @@ fillSim();calcSim();lpCalc();
   db.doc("estado/lotepar").onSnapshot(s=>{if(s.exists){const d=s.data();delete d.banca;lp=Object.assign(lp,d);lp.q=Object.assign({},LP_QDEF,d.q||{});try{localStorage.setItem(LP_LS,JSON.stringify(lp))}catch(e){}lpCalc()}else lpSave()},()=>{});
   sref.onSnapshot(s=>{if(s.exists){sim=Object.assign({},DEF,s.data());fillSim();calcSim()}else if(localStorage.getItem(SLS)){sref.set(sim).catch(()=>{})}},()=>{});
   ref.onSnapshot(s=>{
-    if(s.exists){const d=s.data(); st={conquistados:[...(d.conquistados||[])],banca:d.banca??null};
+    if(s.exists){const d=s.data(); st={conquistados:fxMigraC(d,LV),banca:d.banca??null,esc:2}; if(d.esc!==2)save();
       if(document.activeElement!==$("banca")) $("banca").value=st.banca??"";}
     else st={conquistados:[],banca:null};
     render(); fillSim(); calcSim(); lpTeste=null; lpCalc(); $("status").textContent="Sincronizado";

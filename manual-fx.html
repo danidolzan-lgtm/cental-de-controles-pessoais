@@ -644,12 +644,14 @@ function risco(){
 }
 /* par, lote, stop e alvo vêm do Progresso Forex (escada + simulador), como no Diário e no Manual OB.
    Mudar aqui é só para testar: não salva. */
-const PLV3=[50,100,200,300,500,700,1000,1500,2000,2500,3000,4000,5000,6000,7000,8000,10000,15000,20000];
-const PCT3=[0.03,0.06,0.13,0.19,0.31,0.44,0.63,0.94,1.25,1.56,1.88,2.5,3.13,3.75,4.38,5,6.25,9.38,12.5];
+const FX_LV_ANT=[50,100,200,300,500,700,1000,1500,2000,2500,3000,4000,5000,6000,7000,8000,10000,15000,20000]; /* 19/11/2026: escada encurtada (sem 50, 2.500, 6.000, 8.000); degraus marcados na escada antiga são convertidos pelo valor */
+function fxMigraC(d,LVN){const c=(d&&d.conquistados)||[];if(!d||d.esc===2)return [...c];return [...new Set(c.map(i=>LVN.indexOf(FX_LV_ANT[i])).filter(i=>i>=0))].sort((a,b)=>a-b)}
+const PLV3=[100,200,300,500,700,1000,1500,2000,3000,4000,5000,7000,10000,15000,20000];
+const PCT3=[0.06,0.13,0.19,0.31,0.44,0.63,0.94,1.25,1.88,2.5,3.13,4.38,6.25,9.38,12.5];
 let pgSt=null,pgSim=null;
 function rDoProg(){
   const out={};
-  if(pgSt){const c=new Set(pgSt.conquistados||[]);let last=-1;PLV3.forEach((v,i)=>{if(c.has(i))last=i});out.rCt=last>=0?PCT3[last]:0.03}
+  if(pgSt){const c=new Set(fxMigraC(pgSt,PLV3));let last=-1;PLV3.forEach((v,i)=>{if(c.has(i))last=i});out.rCt=last>=0?PCT3[last]:0.03}
   if(pgSim){if(PV[pgSim.ativo])out.rAtivo=pgSim.ativo;if(+pgSim.stopPts>0)out.rStop=+pgSim.stopPts;if(+pgSim.mult>0)out.rMult=+pgSim.mult}
   const a=document.activeElement;Object.keys(out).forEach(k=>{if(a!==$(k))$(k).value=out[k]});
   const h=$("rProg");if(h)h.textContent=(pgSt||pgSim)?"Puxa do Progresso Forex: "+$("rAtivo").value+", "+(+$("rCt").value).toLocaleString("pt-BR",{minimumFractionDigits:2})+" lote, stop "+num(+$("rStop").value||0)+" pips, alvo "+num(+$("rMult").value||0)+"x. Mudar aqui é só teste (não salva).":"";

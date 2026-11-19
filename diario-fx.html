@@ -397,8 +397,10 @@ function doSave(){
 lsLoad();$("cCt").value=cfg.ct;render();setStatus("Conectando…");
 /* 29/10/2026: os contratos vêm SEMPRE da escada, a mesma do Progresso B3 e do simulador.
    Trocar o degrau aqui grava no Progresso e todos se adaptam (PC e celular). */
-const PLV=[50,100,200,300,500,700,1000,1500,2000,2500,3000,4000,5000,6000,7000,8000,10000,15000,20000];
-const PCT=[0.03,0.06,0.13,0.19,0.31,0.44,0.63,0.94,1.25,1.56,1.88,2.5,3.13,3.75,4.38,5,6.25,9.38,12.5];
+const FX_LV_ANT=[50,100,200,300,500,700,1000,1500,2000,2500,3000,4000,5000,6000,7000,8000,10000,15000,20000]; /* 19/11/2026: escada encurtada (sem 50, 2.500, 6.000, 8.000); degraus marcados na escada antiga são convertidos pelo valor */
+function fxMigraC(d,LVN){const c=(d&&d.conquistados)||[];if(!d||d.esc===2)return [...c];return [...new Set(c.map(i=>LVN.indexOf(FX_LV_ANT[i])).filter(i=>i>=0))].sort((a,b)=>a-b)}
+const PLV=[100,200,300,500,700,1000,1500,2000,3000,4000,5000,7000,10000,15000,20000];
+const PCT=[0.06,0.13,0.19,0.31,0.44,0.63,0.94,1.25,1.88,2.5,3.13,4.38,6.25,9.38,12.5];
 const PROG="progresso-fx", PLS="progressoFX.v1";
 /* 18/11/2026: lote sugerido na operação: risco = meta da semana ÷ (operações × (2·acerto − erro)), igual à aba "Lote por par" do Progresso */
 const FX_QDEF={EURUSD:1.16,GBPUSD:1.34,AUDUSD:0.7,NZDUSD:0.58,USDJPY:158,USDCAD:1.38,USDCHF:0.79,XAUUSD:4300,USDMXN:18.3,USDZAR:17.3,USDTRY:42.5,USDSEK:9.5,USDNOK:10.1,USDDKK:6.43,USDSGD:1.3,USDHKD:7.78,USDPLN:3.65,USDCNH:7.12,USDHUF:335,USDCZK:20.9};
@@ -417,7 +419,7 @@ function loteTxt(o,i){const L=loteSug(o);
   if(!L){const c=loteCfg();return "Na corretora, com 0,01 lote, puxe o stop até o ponto do gráfico e digite aqui o valor que ela mostra. O lote sai para arriscar "+(c.rp*100).toLocaleString("pt-BR",{maximumFractionDigits:1})+"% da banca (US$ "+(c.banca*c.rp).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+")."}
   return "<span>Lote: <b>"+L.lot.toLocaleString("pt-BR",{minimumFractionDigits:2})+"</b></span><span>na corretora o stop vai mostrar −US$ "+L.risco.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+" ("+(L.risco/L.banca*100).toLocaleString("pt-BR",{maximumFractionDigits:1})+"% de US$ "+L.banca.toLocaleString("pt-BR")+")"+(L.min?" · lote mínimo":"")+"</span><span>margem US$ "+L.mg.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+" · "+L.ok+"</span>"+(ro?"":"<button type='button' data-a='usaLote' data-i='"+i+"'>Usar</button>")}
 const ctT=n=>(+n).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+" lote";
-function ctDoProg(d){const c=new Set((d&&d.conquistados)||[]);let last=-1;PLV.forEach((v,i)=>{if(c.has(i))last=i});return {idx:last,ct:last>=0?PCT[last]:0.03,nivel:last>=0?PLV[last]:null,banca:d&&+d.banca>0?+d.banca:null}}
+function ctDoProg(d){const c=new Set(fxMigraC(d,PLV));let last=-1;PLV.forEach((v,i)=>{if(c.has(i))last=i});return {idx:last,ct:last>=0?PCT[last]:0.03,nivel:last>=0?PLV[last]:null,banca:d&&+d.banca>0?+d.banca:null}}
 $("cNivel").innerHTML="<option value='-1'>Início · 0,03 lote</option>"+PLV.map((v,i)=>"<option value='"+i+"'>"+String(i+1).padStart(2,"0")+" · US$ "+v.toLocaleString("pt-BR")+" · "+ctT(PCT[i])+"</option>").join("");
 function aplicaMetas(p){if(!p)return;const mudou=window._pm&&window._pm.ct!==p.ct;window._pm=p;lrAll();cfg.ct=p.ct;
   $("cCt").value=cfg.ct;if(document.activeElement!==$("cNivel"))$("cNivel").value=String(p.idx);metasTxt();if(mudou)window.ui&&ui.toast("Lote pela escada: "+ctT(p.ct))}
