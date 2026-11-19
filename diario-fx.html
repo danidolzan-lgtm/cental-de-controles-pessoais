@@ -201,7 +201,7 @@ document.getElementById("fHoje").addEventListener("click",()=>{FREF=_hj;fGo()});
 fUI();
 const OPS=[{id:"respiro",nome:"Respiro"},{id:"virada",nome:"Virada"},{id:"muralha",nome:"Muralha"},{id:"giro",nome:"Giro"},{id:"armadilha",nome:"Armadilha"}];
 const opNome=id=>(OPS.find(o=>o.id===(id==="muralhaEng"?"muralha":id))||{nome:id||"Sem operacional"}).nome;
-const ATIVOS={EURUSD:{nome:"EURUSD",pt:10},GBPUSD:{nome:"GBPUSD",pt:10},USDJPY:{nome:"USDJPY",pt:6.3},AUDUSD:{nome:"AUDUSD",pt:10},NZDUSD:{nome:"NZDUSD",pt:10},USDCAD:{nome:"USDCAD",pt:7.2},USDCHF:{nome:"USDCHF",pt:12.7},EURGBP:{nome:"EURGBP",pt:13.4},EURJPY:{nome:"EURJPY",pt:6.3},GBPJPY:{nome:"GBPJPY",pt:6.3},AUDJPY:{nome:"AUDJPY",pt:6.3},EURCHF:{nome:"EURCHF",pt:12.7},EURAUD:{nome:"EURAUD",pt:7},GBPCHF:{nome:"GBPCHF",pt:12.7},EURCAD:{nome:"EURCAD",pt:7.2},XAUUSD:{nome:"XAUUSD",pt:1}};
+const ATIVOS={EURUSD:{nome:"EURUSD",pt:10},GBPUSD:{nome:"GBPUSD",pt:10},USDJPY:{nome:"USDJPY",pt:6.3},AUDUSD:{nome:"AUDUSD",pt:10},NZDUSD:{nome:"NZDUSD",pt:10},USDCAD:{nome:"USDCAD",pt:7.2},USDCHF:{nome:"USDCHF",pt:12.7},EURGBP:{nome:"EURGBP",pt:13.4},EURJPY:{nome:"EURJPY",pt:6.3},GBPJPY:{nome:"GBPJPY",pt:6.3},AUDJPY:{nome:"AUDJPY",pt:6.3},EURCHF:{nome:"EURCHF",pt:12.7},EURAUD:{nome:"EURAUD",pt:7},GBPCHF:{nome:"GBPCHF",pt:12.7},EURCAD:{nome:"EURCAD",pt:7.2},GBPAUD:{nome:"GBPAUD",pt:7},GBPNZD:{nome:"GBPNZD",pt:5.8},GBPCAD:{nome:"GBPCAD",pt:7.2},AUDCAD:{nome:"AUDCAD",pt:7.2},AUDCHF:{nome:"AUDCHF",pt:12.7},AUDNZD:{nome:"AUDNZD",pt:5.8},NZDJPY:{nome:"NZDJPY",pt:6.3},NZDCAD:{nome:"NZDCAD",pt:7.2},NZDCHF:{nome:"NZDCHF",pt:12.7},CADJPY:{nome:"CADJPY",pt:6.3},CADCHF:{nome:"CADCHF",pt:12.7},CHFJPY:{nome:"CHFJPY",pt:6.3},EURNZD:{nome:"EURNZD",pt:5.8},USDMXN:{nome:"USDMXN",pt:0.55},USDZAR:{nome:"USDZAR",pt:0.58},USDTRY:{nome:"USDTRY",pt:0.24},USDSEK:{nome:"USDSEK",pt:1.1},USDNOK:{nome:"USDNOK",pt:0.99},USDDKK:{nome:"USDDKK",pt:1.6},USDSGD:{nome:"USDSGD",pt:7.7},USDHKD:{nome:"USDHKD",pt:1.3},USDPLN:{nome:"USDPLN",pt:2.7},USDCNH:{nome:"USDCNH",pt:1.4},USDHUF:{nome:"USDHUF",pt:3},USDCZK:{nome:"USDCZK",pt:0.48},EURNOK:{nome:"EURNOK",pt:0.99},EURSEK:{nome:"EURSEK",pt:1.1},EURPLN:{nome:"EURPLN",pt:2.7},EURTRY:{nome:"EURTRY",pt:0.24},EURHUF:{nome:"EURHUF",pt:3},EURCZK:{nome:"EURCZK",pt:0.48},EURDKK:{nome:"EURDKK",pt:1.6},EURMXN:{nome:"EURMXN",pt:0.55},EURZAR:{nome:"EURZAR",pt:0.58},EURSGD:{nome:"EURSGD",pt:7.7},XAUUSD:{nome:"XAUUSD",pt:1}};
 let days={}, cfg={ct:0.03}, db=null;
 const $=id=>document.getElementById(id);
 const brl=v=>(v<0?"-":"")+"US$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -401,9 +401,9 @@ const PLV=[50,100,200,300,500,700,1000,1500,2000,2500,3000,4000,5000,6000,7000,8
 const PCT=[0.03,0.06,0.13,0.19,0.31,0.44,0.63,0.94,1.25,1.56,1.88,2.5,3.13,3.75,4.38,5,6.25];
 const PROG="progresso-fx", PLS="progressoFX.v1";
 /* 18/11/2026: lote sugerido na operação: risco = meta da semana ÷ (operações × (2·acerto − erro)), igual à aba "Lote por par" do Progresso */
-const FX_QDEF={EURUSD:1.16,GBPUSD:1.34,AUDUSD:0.70,NZDUSD:0.58,USDJPY:158,USDCAD:1.38,USDCHF:0.79,XAUUSD:4300};
-function fxUSD(c,q){return {USD:1,EUR:q.EURUSD,GBP:q.GBPUSD,AUD:q.AUDUSD,NZD:q.NZDUSD,JPY:1/q.USDJPY,CAD:1/q.USDCAD,CHF:1/q.USDCHF}[c]||1}
-function fxPip(par,q){if(par==="XAUUSD")return 1;const b=par.slice(3);return 100000*(b==="JPY"?0.01:0.0001)*fxUSD(b,q)}
+const FX_QDEF={EURUSD:1.16,GBPUSD:1.34,AUDUSD:0.7,NZDUSD:0.58,USDJPY:158,USDCAD:1.38,USDCHF:0.79,XAUUSD:4300,USDMXN:18.3,USDZAR:17.3,USDTRY:42.5,USDSEK:9.5,USDNOK:10.1,USDDKK:6.43,USDSGD:1.3,USDHKD:7.78,USDPLN:3.65,USDCNH:7.12,USDHUF:335,USDCZK:20.9};
+function fxUSD(c,q){if(c==="USD")return 1;if(q[c+"USD"])return q[c+"USD"];if(q["USD"+c])return 1/q["USD"+c];return 1}
+function fxPip(par,q){if(par==="XAUUSD")return 1;const b=par.slice(3);return 100000*(b==="JPY"||b==="HUF"?0.01:0.0001)*fxUSD(b,q)}
 function fxNoc(par,q){if(par==="XAUUSD")return 100*q.XAUUSD;return 100000*fxUSD(par.slice(0,3),q)}
 function loteCfg(){let lp={};try{lp=JSON.parse(localStorage.getItem("loteParFX.v1")||"null")||{}}catch(e){}
   let dias=5;try{const s=JSON.parse(localStorage.getItem("simuladorFX.v1")||"null");if(s&&+s.dias>0)dias=+s.dias}catch(e){}

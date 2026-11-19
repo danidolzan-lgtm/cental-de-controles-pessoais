@@ -57,6 +57,7 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline
 .lp-k{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 @media (max-width:620px){.lp-k{grid-template-columns:1fr}}
 .tw{overflow-x:auto}
+.lp-busca{display:flex;gap:10px;align-items:center;margin:4px 0 6px}.lp-busca input{flex:1;min-width:0;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px}.lp-busca .hint{white-space:nowrap;margin:0}
 .lp-t{width:100%;border-collapse:collapse;font-size:.88rem}
 .lp-t th,.lp-t td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-family:var(--f-num)}
 .lp-t th{font-family:var(--f-body);font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
@@ -122,7 +123,7 @@ img,svg{max-width:100%}
   </div>
   <div id="tabPar" hidden style="display:grid;gap:16px">
     <div class="panel" style="display:grid;gap:12px">
-      <h2 style="margin:0">Calculadora: lote de cada par para a sua banca</h2>
+      <h2 style="margin:0">Calculadora de lote</h2>
       <div class="lp-f">
         <label>Banca (US$)<input id="lpBanca" type="number" min="0" step="0.01" inputmode="decimal"></label>
         <label>Alavancagem da corretora<select id="lpAlav"><option value="30">1:30</option><option value="100">1:100</option><option value="200">1:200</option><option value="300">1:300</option><option value="400">1:400</option><option value="500" selected>1:500</option><option value="1000">1:1000</option><option value="2000">1:2000</option></select></label>
@@ -137,6 +138,7 @@ img,svg{max-width:100%}
       <details class="lp-c"><summary>Entenda a conta</summary><p class="hint" id="lpTxt" style="margin:8px 0 0"></p></details>
     </div>
     <div class="panel" style="display:grid;gap:10px">
+      <div class="lp-busca"><input id="lpBusca" type="search" placeholder="Buscar par: EUR, JPY, ouro, lira…" autocomplete="off" aria-label="Buscar par"><span class="hint" id="lpConta"></span></div>
       <div class="tw"><table class="lp-t"><thead><tr><th>Par</th><th>Stop (pips)</th><th>Lote</th><th>Risco</th><th>Margem</th><th>Corretora</th></tr></thead><tbody id="lpBody"></tbody></table></div>
       <p class="hint" style="margin:0">✓ cabe com folga · ⚠ cabe, mas usa mais da metade da banca · ✕ a corretora não deixa abrir</p>
       <details class="lp-c"><summary>Entenda a tabela</summary><p class="hint" style="margin:8px 0 0">O stop já vem com o máximo do Manual; troque pelo stop da sua entrada e o lote se ajusta. <b>Margem</b> é quanto a corretora segura para abrir a operação com a alavancagem escolhida: se passar da banca, ela não deixa abrir. O valor do pip é aproximado nos pares sem USD no fim; a plataforma mostra o exato.</p></details>
@@ -148,7 +150,7 @@ img,svg{max-width:100%}
       <h2>Seus números</h2>
       <div class="fields">
         <label>Banca (US$)<input id="sBanca" type="number" min="0" step="0.01" inputmode="decimal"></label>
-        <label>Ativo<select id="sAtivo" style="font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%"><option value="EURUSD">EURUSD</option><option value="GBPUSD">GBPUSD</option><option value="USDJPY">USDJPY</option><option value="AUDUSD">AUDUSD</option><option value="NZDUSD">NZDUSD</option><option value="USDCAD">USDCAD</option><option value="USDCHF">USDCHF</option><option value="EURGBP">EURGBP</option><option value="EURJPY">EURJPY</option><option value="GBPJPY">GBPJPY</option><option value="AUDJPY">AUDJPY</option><option value="EURCHF">EURCHF</option><option value="EURAUD">EURAUD</option><option value="GBPCHF">GBPCHF</option><option value="EURCAD">EURCAD</option><option value="XAUUSD">XAUUSD</option></select></label>
+        <label>Ativo<select id="sAtivo" style="font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%"><option value="EURUSD">EURUSD</option><option value="GBPUSD">GBPUSD</option><option value="USDJPY">USDJPY</option><option value="AUDUSD">AUDUSD</option><option value="NZDUSD">NZDUSD</option><option value="USDCAD">USDCAD</option><option value="USDCHF">USDCHF</option><option value="EURGBP">EURGBP</option><option value="EURJPY">EURJPY</option><option value="GBPJPY">GBPJPY</option><option value="AUDJPY">AUDJPY</option><option value="EURCHF">EURCHF</option><option value="EURAUD">EURAUD</option><option value="GBPCHF">GBPCHF</option><option value="EURCAD">EURCAD</option><option value="GBPAUD">GBPAUD</option><option value="GBPNZD">GBPNZD</option><option value="GBPCAD">GBPCAD</option><option value="AUDCAD">AUDCAD</option><option value="AUDCHF">AUDCHF</option><option value="AUDNZD">AUDNZD</option><option value="NZDJPY">NZDJPY</option><option value="NZDCAD">NZDCAD</option><option value="NZDCHF">NZDCHF</option><option value="CADJPY">CADJPY</option><option value="CADCHF">CADCHF</option><option value="CHFJPY">CHFJPY</option><option value="EURNZD">EURNZD</option><option value="USDMXN">USDMXN</option><option value="USDZAR">USDZAR</option><option value="USDTRY">USDTRY</option><option value="USDSEK">USDSEK</option><option value="USDNOK">USDNOK</option><option value="USDDKK">USDDKK</option><option value="USDSGD">USDSGD</option><option value="USDHKD">USDHKD</option><option value="USDPLN">USDPLN</option><option value="USDCNH">USDCNH</option><option value="USDHUF">USDHUF</option><option value="USDCZK">USDCZK</option><option value="EURNOK">EURNOK</option><option value="EURSEK">EURSEK</option><option value="EURPLN">EURPLN</option><option value="EURTRY">EURTRY</option><option value="EURHUF">EURHUF</option><option value="EURCZK">EURCZK</option><option value="EURDKK">EURDKK</option><option value="EURMXN">EURMXN</option><option value="EURZAR">EURZAR</option><option value="EURSGD">EURSGD</option><option value="XAUUSD">XAUUSD</option></select></label>
         <label>Lote<input id="sCt" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="da Calculadora"></label>
         <label>Stop (pips)<input id="sStopPts" type="number" min="0" step="0.5" inputmode="decimal"></label>
         <label>Alvo (x o stop)<input id="sMult" type="number" min="0.5" step="0.1" inputmode="decimal"></label>
@@ -238,7 +240,7 @@ function render(){
 $("banca").addEventListener("change",e=>{const v=parseFloat(e.target.value),n=isNaN(v)?null:v;if(n===st.banca)return;st.banca=n;render();save();lpTeste=null;lpCalc();puxarMetas();window.ui&&ui.toast("✓ Banca salva")});
 load(); if(st.banca!=null) $("banca").value=st.banca; render(); $("status").textContent="Conectando…";
 /* ---------- Simulador Forex (valor do pip: US$ 10 por lote 1,00 em EURUSD e GBPUSD) ---------- */
-const PT={EURUSD:10,GBPUSD:10,USDJPY:6.3,AUDUSD:10,NZDUSD:10,USDCAD:7.2,USDCHF:12.7,EURGBP:13.4,EURJPY:6.3,GBPJPY:6.3,AUDJPY:6.3,EURCHF:12.7,EURAUD:7,GBPCHF:12.7,EURCAD:7.2,XAUUSD:1}, STOPDEF={EURUSD:8,GBPUSD:10,USDJPY:10,AUDUSD:8,NZDUSD:8,USDCAD:10,USDCHF:8,EURGBP:6,EURJPY:12,GBPJPY:15,AUDJPY:10,EURCHF:6,EURAUD:12,GBPCHF:12,EURCAD:10,XAUUSD:300}, LIM={EURUSD:8,GBPUSD:10,USDJPY:10,AUDUSD:8,NZDUSD:8,USDCAD:10,USDCHF:8,EURGBP:6,EURJPY:12,GBPJPY:15,AUDJPY:10,EURCHF:6,EURAUD:12,GBPCHF:12,EURCAD:10,XAUUSD:300}; // valor do pip aproximado (pares com USD na frente e cruzados variam com a cotação)
+const PT={EURUSD:10.0,GBPUSD:10.0,USDJPY:6.3,AUDUSD:10.0,NZDUSD:10.0,USDCAD:7.2,USDCHF:12.7,EURGBP:13.4,EURJPY:6.3,GBPJPY:6.3,AUDJPY:6.3,EURCHF:12.7,EURAUD:7.0,GBPCHF:12.7,EURCAD:7.2,GBPAUD:7.0,GBPNZD:5.8,GBPCAD:7.2,AUDCAD:7.2,AUDCHF:12.7,AUDNZD:5.8,NZDJPY:6.3,NZDCAD:7.2,NZDCHF:12.7,CADJPY:6.3,CADCHF:12.7,CHFJPY:6.3,EURNZD:5.8,USDMXN:0.55,USDZAR:0.58,USDTRY:0.24,USDSEK:1.1,USDNOK:0.99,USDDKK:1.6,USDSGD:7.7,USDHKD:1.3,USDPLN:2.7,USDCNH:1.4,USDHUF:3.0,USDCZK:0.48,EURNOK:0.99,EURSEK:1.1,EURPLN:2.7,EURTRY:0.24,EURHUF:3.0,EURCZK:0.48,EURDKK:1.6,EURMXN:0.55,EURZAR:0.58,EURSGD:7.7,XAUUSD:1}, STOPDEF={EURUSD:8,GBPUSD:10,USDJPY:10,AUDUSD:8,NZDUSD:8,USDCAD:10,USDCHF:8,EURGBP:6,EURJPY:12,GBPJPY:15,AUDJPY:10,EURCHF:6,EURAUD:12,GBPCHF:12,EURCAD:10,GBPAUD:13,GBPNZD:16,GBPCAD:13,AUDCAD:7,AUDCHF:5,AUDNZD:8,NZDJPY:6,NZDCAD:6,NZDCHF:5,CADJPY:8,CADCHF:5,CHFJPY:14,EURNZD:14,USDMXN:190,USDZAR:180,USDTRY:355,USDSEK:85,USDNOK:90,USDDKK:45,USDSGD:9,USDHKD:5,USDPLN:33,USDCNH:50,USDHUF:33,USDCZK:175,EURNOK:105,EURSEK:100,EURPLN:39,EURTRY:415,EURHUF:38,EURCZK:205,EURDKK:5,EURMXN:225,EURZAR:210,EURSGD:11,XAUUSD:300}, LIM={EURUSD:8,GBPUSD:10,USDJPY:10,AUDUSD:8,NZDUSD:8,USDCAD:10,USDCHF:8,EURGBP:6,EURJPY:12,GBPJPY:15,AUDJPY:10,EURCHF:6,EURAUD:12,GBPCHF:12,EURCAD:10,GBPAUD:13,GBPNZD:16,GBPCAD:13,AUDCAD:7,AUDCHF:5,AUDNZD:8,NZDJPY:6,NZDCAD:6,NZDCHF:5,CADJPY:8,CADCHF:5,CHFJPY:14,EURNZD:14,USDMXN:190,USDZAR:180,USDTRY:355,USDSEK:85,USDNOK:90,USDDKK:45,USDSGD:9,USDHKD:5,USDPLN:33,USDCNH:50,USDHUF:33,USDCZK:175,EURNOK:105,EURSEK:100,EURPLN:39,EURTRY:415,EURHUF:38,EURCZK:205,EURDKK:5,EURMXN:225,EURZAR:210,EURSGD:11,XAUUSD:300}; // valor do pip aproximado (pares com USD na frente e cruzados variam com a cotação)
 const SLS="simuladorFX.v1", DEF={banca:null,ativo:"EURUSD",ct:null,stopPts:8,mult:2,custo:0,dias:5,gain:6,loss:4,modo:"fixo"};
 let sim=Object.assign({},DEF), sref=null;
 try{const r=JSON.parse(localStorage.getItem(SLS)||"null");if(r)sim=Object.assign({},DEF,r)}catch(e){}
@@ -264,6 +266,7 @@ function fillSim(){
   sim.stopPts=simStop();if(document.activeElement!==$("sStopPts"))$("sStopPts").value=sim.stopPts;
   for(const id in F){if(document.activeElement!==$(id))$(id).value=sim[F[id]]??""}
   if(document.activeElement!==$("sAtivo"))$("sAtivo").value=sim.ativo;
+  if(!sim.ct&&document.activeElement!==$("sCt")&&+sim.banca>0)$("sCt").value=calcLote(+sim.banca);
   const m=daMetas(), igual=Math.abs((+sim.banca||0)-m.banca)<.005&&!sim.ct;
   $("sPullTxt").textContent=igual?"✓ Banca das Metas ("+brl2(m.banca)+") e lote da Calculadora.":"Teste à mão (não salva). Nas Metas: banca "+brl2(m.banca)+", lote da Calculadora.";
   $("sPull").hidden=igual;
@@ -316,10 +319,10 @@ try{const t=sessionStorage.getItem("progressoFX.tab");if(t==="sim"||t==="par")do
 /* ---------- Calculadora (lote por par) ----------
    Semana: 2 operações por dia × dias da semana do simulador, alvo 2x o stop e o acerto escolhido.
    Resultado da semana = ops × (2·acerto − erro) × risco  →  risco = meta ÷ (ops × (2·acerto − erro)). Com 10 ops, 60% e 40%: 5% por operação. */
-const LP_PARES=[["EURUSD", "Euro × dólar"], ["GBPUSD", "Libra × dólar"], ["USDJPY", "Dólar × iene"], ["AUDUSD", "Dólar australiano"], ["NZDUSD", "Dólar neozelandês"], ["USDCAD", "Dólar × canadense"], ["USDCHF", "Dólar × franco suíço"], ["EURGBP", "Euro × libra"], ["EURJPY", "Euro × iene"], ["GBPJPY", "Libra × iene"], ["AUDJPY", "Australiano × iene"], ["EURCHF", "Euro × franco suíço"], ["EURAUD", "Euro × australiano"], ["GBPCHF", "Libra × franco suíço"], ["EURCAD", "Euro × canadense"], ["XAUUSD", "Ouro"]];
-const FX_QDEF={EURUSD:1.16,GBPUSD:1.34,AUDUSD:0.70,NZDUSD:0.58,USDJPY:158,USDCAD:1.38,USDCHF:0.79,XAUUSD:4300};
-function fxUSD(c,q){return {USD:1,EUR:q.EURUSD,GBP:q.GBPUSD,AUD:q.AUDUSD,NZD:q.NZDUSD,JPY:1/q.USDJPY,CAD:1/q.USDCAD,CHF:1/q.USDCHF}[c]||1}
-function fxPip(par,q){if(par==="XAUUSD")return 1;const b=par.slice(3);return 100000*(b==="JPY"?0.01:0.0001)*fxUSD(b,q)}
+const LP_PARES=[["EURUSD", "Euro × dólar"], ["GBPUSD", "Libra × dólar"], ["USDJPY", "Dólar × iene"], ["AUDUSD", "Australiano × dólar"], ["NZDUSD", "Neozelandês × dólar"], ["USDCAD", "Dólar × canadense"], ["USDCHF", "Dólar × franco suíço"], ["EURGBP", "Euro × libra"], ["EURJPY", "Euro × iene"], ["GBPJPY", "Libra × iene"], ["AUDJPY", "Australiano × iene"], ["EURCHF", "Euro × franco suíço"], ["EURAUD", "Euro × australiano"], ["GBPCHF", "Libra × franco suíço"], ["EURCAD", "Euro × canadense"], ["GBPAUD", "Libra × australiano"], ["GBPNZD", "Libra × neozelandês"], ["GBPCAD", "Libra × canadense"], ["AUDCAD", "Australiano × canadense"], ["AUDCHF", "Australiano × franco suíço"], ["AUDNZD", "Australiano × neozelandês"], ["NZDJPY", "Neozelandês × iene"], ["NZDCAD", "Neozelandês × canadense"], ["NZDCHF", "Neozelandês × franco suíço"], ["CADJPY", "Canadense × iene"], ["CADCHF", "Canadense × franco suíço"], ["CHFJPY", "Franco suíço × iene"], ["EURNZD", "Euro × neozelandês"], ["USDMXN", "Dólar × peso mexicano"], ["USDZAR", "Dólar × rand"], ["USDTRY", "Dólar × lira turca"], ["USDSEK", "Dólar × coroa sueca"], ["USDNOK", "Dólar × coroa norueguesa"], ["USDDKK", "Dólar × coroa dinamarquesa"], ["USDSGD", "Dólar × dólar de Singapura"], ["USDHKD", "Dólar × dólar de Hong Kong"], ["USDPLN", "Dólar × zloty"], ["USDCNH", "Dólar × iuan"], ["USDHUF", "Dólar × florim"], ["USDCZK", "Dólar × coroa tcheca"], ["EURNOK", "Euro × coroa norueguesa"], ["EURSEK", "Euro × coroa sueca"], ["EURPLN", "Euro × zloty"], ["EURTRY", "Euro × lira turca"], ["EURHUF", "Euro × florim"], ["EURCZK", "Euro × coroa tcheca"], ["EURDKK", "Euro × coroa dinamarquesa"], ["EURMXN", "Euro × peso mexicano"], ["EURZAR", "Euro × rand"], ["EURSGD", "Euro × dólar de Singapura"], ["XAUUSD", "Ouro"]];
+const FX_QDEF={EURUSD:1.16,GBPUSD:1.34,AUDUSD:0.7,NZDUSD:0.58,USDJPY:158,USDCAD:1.38,USDCHF:0.79,XAUUSD:4300,USDMXN:18.3,USDZAR:17.3,USDTRY:42.5,USDSEK:9.5,USDNOK:10.1,USDDKK:6.43,USDSGD:1.3,USDHKD:7.78,USDPLN:3.65,USDCNH:7.12,USDHUF:335,USDCZK:20.9};
+function fxUSD(c,q){if(c==="USD")return 1;if(q[c+"USD"])return q[c+"USD"];if(q["USD"+c])return 1/q["USD"+c];return 1}
+function fxPip(par,q){if(par==="XAUUSD")return 1;const b=par.slice(3);return 100000*(b==="JPY"||b==="HUF"?0.01:0.0001)*fxUSD(b,q)}
 function fxNoc(par,q){if(par==="XAUUSD")return 100*q.XAUUSD;return 100000*fxUSD(par.slice(0,3),q)}
 const LP_QDEF=FX_QDEF;
 const LP_LS="loteParFX.v1";
@@ -351,8 +354,13 @@ function lpCalc(){if(typeof sim!=="undefined"&&!$("tabSim").hidden){fillSim();ca
     const risco=lot*st*pip, marg=lot*lpNoc(par)/(+lp.alav||500);
     const cls=marg>banca?"no":marg>banca*0.5?"av":"ok", txt=marg>banca?"✕ não deixa":marg>banca*0.5?"⚠ aperta":"✓ cabe";
     return "<tr><td><b>"+par+"</b><small class='dk'>"+nome+"</small><small class='mb'>risco −"+brl2(r2(risco))+"<br>margem "+brl2(r2(marg))+"</small></td><td><input type='number' min='1' step='0.5' inputmode='decimal' data-st='"+par+"' value='"+st+"'></td><td class='lt'>"+lot.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+"<small class='dk'>"+(aviso||"≈ US$ "+nf(pip)+"/pip por lote")+"</small><small class='mb'>"+(aviso||"")+"</small></td><td>−"+brl2(r2(risco))+"</td><td>"+brl2(r2(marg))+"</td><td class='"+cls+"'>"+txt+"</td></tr>"}).join("");
+  lpFiltra();
   $("lpQ").innerHTML=Object.keys(LP_QDEF).map(k=>"<label>"+k+"<input type='number' step='any' inputmode='decimal' data-q='"+k+"' value='"+lp.q[k]+"'></label>").join("");
 }
+function lpFiltra(){const t=($("lpBusca").value||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");let n=0;
+  [...$("lpBody").rows].forEach(r=>{const ok=!t||r.cells[0].textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").includes(t);r.hidden=!ok;if(ok)n++});
+  $("lpConta").textContent=t?n+" de "+LP_PARES.length:LP_PARES.length+" pares"}
+$("lpBusca").addEventListener("input",lpFiltra);
 $("lpBanca").addEventListener("input",()=>{const v=parseFloat($("lpBanca").value);lpTeste=isNaN(v)?null:v;lpCalc()});
 $("lpAlav").addEventListener("change",()=>{lp.alav=+$("lpAlav").value;lpSave();lpCalc()});
 $("lpMeta").addEventListener("change",()=>{lp.meta=+$("lpMeta").value||40;lpSave();lpCalc()});
@@ -362,7 +370,7 @@ $("tabPar").addEventListener("change",e=>{const s=e.target.closest("[data-st]"),
   if(q){const v=parseFloat(q.value);if(v>0)lp.q[q.dataset.q]=v;lpSave();lpCalc()}});
 $("lpAtual").addEventListener("click",async()=>{const m=$("lpQmsg");m.textContent="Buscando…";
   try{const r=await fetch("https://open.er-api.com/v6/latest/USD");const j=await r.json();const x=j&&j.rates;if(!x)throw 0;
-    lp.q.EURUSD=+(1/x.EUR).toFixed(5);lp.q.GBPUSD=+(1/x.GBP).toFixed(5);lp.q.AUDUSD=+(1/x.AUD).toFixed(5);lp.q.NZDUSD=+(1/x.NZD).toFixed(5);lp.q.USDJPY=+x.JPY.toFixed(3);lp.q.USDCAD=+x.CAD.toFixed(5);lp.q.USDCHF=+x.CHF.toFixed(5);
+    Object.keys(LP_QDEF).forEach(k=>{if(k==="XAUUSD")return;const c=k.startsWith("USD")?k.slice(3):k.slice(0,3);if(!x[c])return;lp.q[k]=+(k.startsWith("USD")?x[c]:1/x[c]).toFixed(5)});
     lpSave();lpCalc();m.textContent="Moedas atualizadas. O ouro (XAUUSD) confira na plataforma."}
   catch(e){m.textContent="Não deu para buscar daqui. Digite as cotações da plataforma."}});
 
