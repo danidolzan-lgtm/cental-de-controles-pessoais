@@ -284,6 +284,7 @@ function drawCal(){
       if(isWE(ds)){cls+=" we";b.disabled=true}
       else if(respondido(rec)) cls+= ok(rec)?" full":" none";
       else if(ds<t&&ds>="2026-11-20") cls+=" nop";
+      else if(ds<=t&&ds<="2026-11-19") cls+=" semop"; // 19/11/2026: do início até 19/11, dia sem nada = só "não marcado"
       if(ds===t)cls+=" today"; if(ds===sel)cls+=" sel";
       b.className=cls; b.setAttribute("aria-label",fmt(ds));
       if(!isWE(ds)) b.onclick=()=>pick(ds);

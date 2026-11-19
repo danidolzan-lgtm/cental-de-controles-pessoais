@@ -375,10 +375,13 @@
     if (!/^(dopamina|diario|checklist|exercicios)/.test(file)) return;
     var txt = /^exercicios/.test(file) ? "não treinou" : /^checklist/.test(file) ? "não fez" : "não operou";
     var curto = /^exercicios/.test(file) ? "não fez" : /^checklist/.test(file) ? "não fez" : "não op.";
+    var semTxt = /^checklist/.test(file) ? "não marcado" : /^dopamina/.test(file) ? "s/op" : "sem op";
     var st = document.createElement("style");
     st.textContent = ".day.nop{position:relative;background:color-mix(in srgb,var(--muted,#58668A) 16%,var(--surface,#fff))!important;border:1px dashed color-mix(in srgb,var(--muted,#58668A) 55%,transparent)!important;color:var(--muted,#58668A)!important;opacity:1!important}" +
       ".day.nop::after{content:attr(data-nop);position:absolute;left:2px;right:2px;bottom:2px;font:600 .54rem/1 'IBM Plex Sans',system-ui,sans-serif;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0;text-transform:none;color:var(--muted,#58668A)}" +
       ".day.nop[data-nop-s]::after{font-size:.5rem;bottom:3px}" +
+      /* 19/11/2026: do início até 19/11, dia sem operação = "sem op" (neutro, não conta como não operou) */
+      ".day.semop{position:relative}.day.semop::after{content:'" + semTxt + "';position:absolute;left:2px;right:2px;bottom:3px;font:600 .52rem/1 'IBM Plex Sans',system-ui,sans-serif;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0;text-transform:none;color:var(--muted,#58668A);opacity:.85}html[data-page^=dopamina] .day.semop::after{bottom:1px;font-size:.48rem}" +
       ".legend .nop-l i{background:color-mix(in srgb,var(--muted,#58668A) 16%,var(--surface,#fff))!important;border:1px dashed var(--muted,#58668A)!important}" +
       ".nop-nota{font-size:.82rem;color:var(--muted,#58668A);margin:2px 0 0}";
     (document.head || document.documentElement).appendChild(st);
