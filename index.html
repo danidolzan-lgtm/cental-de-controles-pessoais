@@ -18,7 +18,7 @@ h1{font-family:var(--f-display);font-weight:800;font-size:1.8rem;margin:0}
 @keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 /* tela inicial: os 3 módulos no meio */
 .home{min-height:calc(100dvh - 150px);display:grid;align-content:center;gap:22px;text-align:center}
-.mods{display:grid;gap:16px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.mods{display:grid;gap:16px;grid-template-columns:repeat(var(--n,3),minmax(0,1fr))}
 @media (max-width:760px){.mods{grid-template-columns:minmax(0,1fr)}.home{text-align:left;min-height:calc(100dvh - 120px)}}
 .mod{--gc:#2563EB;appearance:none;font:inherit;color:var(--fg);text-align:left;cursor:pointer;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:20px;padding:22px;background:var(--surface);display:grid;gap:14px;box-shadow:0 14px 30px -22px var(--gc);transition:transform .16s ease,box-shadow .16s,border-color .16s;animation:up .35s ease both}
 .mod:nth-child(2){animation-delay:.05s}.mod:nth-child(3){animation-delay:.1s}
@@ -113,31 +113,31 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
 <script>
 (function(){
   const MC=window.__MC||{GROUPS:[],ICO:{},DESC:{}};
-  const SUB={ob:"Operacional, gerenciamento e mentalidade",b3:"Mini índice, mini dólar e Forex",pes:"Rotina, casa e finanças"};
+  const SUB={ob:"Operacional, gerenciamento e mentalidade",b3:"Mini índice e mini dólar · em reais",fx:"Pares de moedas e ouro · em dólar",pes:"Rotina, casa e finanças"};
   /* links viram cards junto com as páginas: [url, título, descrição, chave do link salvo, posição] — posição = depois de qual página ("" = no fim) */
   const IL=(d)=>"<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>"+d+"</svg>";
   const LICO={"Quotex":IL("<path d='M4 19l5-6 4 3 7-9'/><path d='M15 7h5v5'/>"),"Exness":IL("<path d='M4 19l5-6 4 3 7-9'/><path d='M15 7h5v5'/>"),"Notícias":IL("<rect x='3' y='4' width='18' height='16' rx='3'/><path d='M7 9h10M7 13h10M7 17h6'/>"),"Claude":IL("<path d='M4 5h16v11H9l-5 4z'/>")};
   const LINKS={
     ob:[["https://quotex.com/pt/trade","Quotex","Corretora · operar","","checklist-ob"],["https://br.investing.com/economic-calendar","Notícias","Calendário econômico","","checklist-ob"],["analise-ob.html#cfgBox","Claude","Conversa OB · prints e dúvidas","analiseOB.claudeUrl",""]],
     b3:[["https://br.investing.com/economic-calendar","Notícias","Calendário econômico","","checklist-b3"],["analise-b3.html#cfgBox","Claude","Conversa B3 · prints e dúvidas","analiseB3.claudeUrl",""]],
-    fx:[["https://my.exness.com/webtrading/","Exness","Corretora · operar","","checklist-b3"],["https://br.investing.com/economic-calendar","Notícias","Calendário econômico","","checklist-b3"],["analise-fx.html#cfgBox","Claude","Conversa Forex · prints e dúvidas","analiseFX.claudeUrl",""]]};
+    fx:[["https://my.exness.com/webtrading/","Exness","Corretora · operar","","checklist-fx"],["https://br.investing.com/economic-calendar","Notícias","Calendário econômico","","checklist-fx"],["analise-fx.html#cfgBox","Claude","Conversa Forex · prints e dúvidas","analiseFX.claudeUrl",""]]};
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const sigla=g=>g.s==="Pessoal"?"EU":g.k==="b3"?"B3":g.s;
+  const sigla=g=>g.s==="Pessoal"?"EU":g.s;
   const mk=()=>{try{return localStorage.getItem("mc.mercado")==="fx"?"fx":"b3"}catch(e){return "b3"}};
   const hrefPg=id=>window.__mcHref?window.__mcHref(id):id;
   const $=id=>document.getElementById(id);
-  $("mods").innerHTML=MC.GROUPS.map(g=>"<button type='button' class='mod' data-k='"+g.k+"' style='--gc:"+g.c+"'><span class='gi'>"+esc(sigla(g))+"</span><b>"+esc(g.g)+"</b><small>"+esc(SUB[g.k]||"")+"</small><span class='go'>Abrir<i>→</i></span></button>").join("");
+  /* 19/11/2026: o painel mostra só os módulos marcados no Menu */
+  function desenharMods(){const oc=window.__mcVis?window.__mcVis.get():[];const gs=MC.GROUPS.filter(g=>!oc.includes(g.k));$("mods").style.setProperty("--n",Math.max(1,Math.min(gs.length,4)));
+  $("mods").innerHTML=gs.map(g=>"<button type='button' class='mod' data-k='"+g.k+"' style='--gc:"+g.c+"'><span class='gi'>"+esc(sigla(g))+"</span><b>"+esc(g.g)+"</b><small>"+esc(SUB[g.k]||"")+"</small><span class='go'>Abrir<i>→</i></span></button>").join("")}
+  desenharMods();document.addEventListener("mc-mods",desenharMods);
   function abrir(k){
     const g=MC.GROUPS.find(x=>x.k===k);if(org){org=false;if(cur)fixarPers()}
     if(!g){document.documentElement.removeAttribute("data-g");document.documentElement.style.removeProperty("--gc");$("home").hidden=false;$("grupo").hidden=true;try{sessionStorage.removeItem("index.tab")}catch(e){}return}
     document.documentElement.setAttribute("data-g",k);document.documentElement.style.setProperty("--gc",g.c);
     $("home").hidden=true;$("grupo").hidden=false;
-    $("gIc").textContent=k==="b3"&&mk()==="fx"?"FX":sigla(g);$("gTit").textContent=g.g;$("gSub").textContent=k==="b3"?(mk()==="fx"?"Forex · pares de moedas e ouro · em dólar":"B3 · mini índice e mini dólar · em reais"):(SUB[k]||"");
-    /* 17/11/2026: módulo B3 ou Forex: escolhe o mercado aqui; cada um tem as suas páginas e dados */
-    const gm=$("gMk");gm.hidden=k!=="b3";
-    if(k==="b3"){gm.innerHTML=[["b3","B3","R$"],["fx","Forex","US$"]].map(x=>"<button type='button' data-mk='"+x[0]+"' class='"+(mk()===x[0]?"on":"")+"' aria-pressed='"+(mk()===x[0])+"'>"+x[1]+" <small>"+x[2]+"</small></button>").join("");
-      gm.querySelectorAll("button").forEach(b=>b.onclick=()=>{try{localStorage.setItem("mc.mercado",b.dataset.mk)}catch(e){}abrir("b3")})}
-    const L=(k==="b3"&&mk()==="fx"?LINKS.fx:LINKS[k])||[];
+    $("gIc").textContent=sigla(g);$("gTit").textContent=g.g;$("gSub").textContent=SUB[k]||"";
+    $("gMk").hidden=true;
+    const L=LINKS[k]||[];
     const cardPg=it=>{const id=hrefPg(it[0]);return "<a class='tile' href='"+id+".html'><span class='ic'>"+(MC.ICO[it[1]]||"")+"</span><span><b>"+esc(it[1])+"</b><br><small>"+esc(MC.DESC[id]||MC.DESC[it[0]]||"")+"</small></span></a>"};
     const cardLk=l=>{let u=l[0],ext=/^https?:/.test(u),sp=l[2];
       if(l[3]){let s="";try{s=localStorage.getItem(l[3])||""}catch(e){}if(s){u=s;ext=true}else sp="Configure na Análise de entrada"}

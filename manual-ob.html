@@ -564,23 +564,23 @@ function soros(){
 ["sBase","sPay"].forEach(id=>document.getElementById(id).addEventListener("input",soros));
 // 29/10/2026: mão base e payout vêm da escada do Progresso (os mesmos do Diário e do simulador).
 // Mudar a mão aqui é só para testar; o payout, se mudar, vale para todos.
-const PLV=[50,100,150,250,350,500,750,1000,1500,2500,3500,5000,7500,10000], PLS="progressoOB2.v1";
+const PLV=[50,100,150,250,350,500,750,1000,1500,2500,3500,5000,7500,10000], PLS="progressoOB3.v1";
 function sorosLoad(d){if(!d)return;const c=new Set(d.conquistados||[]);let last=-1;PLV.forEach((v,i)=>{if(c.has(i))last=i});const a=document.activeElement;
   if(a!==document.getElementById("sBase"))document.getElementById("sBase").value=(last>=0?PLV[last]:PLV[0])/5;
   const pay=+d.payout>0?+d.payout:(simPay>0?simPay:0);
   if(pay>0&&a!==document.getElementById("sPay"))document.getElementById("sPay").value=pay;soros()}
 /* 16/11/2026: o payout é o mesmo do Progresso (se o Progresso não tiver, usa o do simulador dele, como lá). */
 let simPay=0,progD={};
-try{const r=JSON.parse(localStorage.getItem("simuladorOB.v1")||"null");if(r&&+r.pay>0)simPay=+r.pay}catch(e){}
+try{const r=JSON.parse(localStorage.getItem("simuladorOB2.v1")||"null");if(r&&+r.pay>0)simPay=+r.pay}catch(e){}
 try{progD=JSON.parse(localStorage.getItem(PLS)||"null")||{};sorosLoad(progD)}catch(e){}
 let sorosDb=null;
 document.getElementById("sPay").addEventListener("change",async()=>{const v=parseFloat(document.getElementById("sPay").value)||0;if(!(v>0))return;
   try{const r=JSON.parse(localStorage.getItem(PLS)||"null")||{conquistados:[],banca:null};r.payout=v;localStorage.setItem(PLS,JSON.stringify(r))}catch(e){}
-  if(sorosDb&&sorosDb.app){try{await sorosDb.app("progresso-ob2").doc("estado/progresso").set({payout:v},{merge:true})}catch(e){}}
+  if(sorosDb&&sorosDb.app){try{await sorosDb.app("progresso-ob3").doc("estado/progresso").set({payout:v},{merge:true})}catch(e){}}
   window.ui&&ui.toast("✓ Payout salvo para todos");
 });
 soros();
-(async()=>{try{sorosDb=window.claude?await window.claude.use("db"):null}catch(e){}if(sorosDb&&sorosDb.app){const P=sorosDb.app("progresso-ob2");P.doc("estado/progresso").onSnapshot(d=>{if(d.exists){progD=d.data();sorosLoad(progD)}},()=>{});P.doc("estado/simulador").onSnapshot(d=>{if(d.exists&&+d.data().pay>0){simPay=+d.data().pay;sorosLoad(progD)}},()=>{})}})();
+(async()=>{try{sorosDb=window.claude?await window.claude.use("db"):null}catch(e){}if(sorosDb&&sorosDb.app){const P=sorosDb.app("progresso-ob3");P.doc("estado/progresso").onSnapshot(d=>{if(d.exists){progD=d.data();sorosLoad(progD)}},()=>{});P.doc("estado/simulador").onSnapshot(d=>{if(d.exists&&+d.data().pay>0){simPay=+d.data().pay;sorosLoad(progD)}},()=>{})}})();
 </script>
 <script>
 /* 16/11/2026: marca a seção em que você está e leva o botão dela para a vista */

@@ -67,7 +67,8 @@
     document.documentElement.setAttribute("data-page", file);
     var GROUPS = [
       { g: "Opções binárias", s: "OB", k: "ob", c: "#2563EB", items: [["checklist-ob", "Check-list"], ["diario-ob", "Diário"], ["manual-ob", "Manual"], ["progresso-ob", "Progresso"], ["dopamina", "Dopamina"], ["ir-ob", "IR"], ["analise-ob", "Análise"], ["lucro-ob", "Lucro"]] },
-      { g: "B3 ou Forex", s: "B3 · Forex", k: "b3", c: "#0F766E", items: [["checklist-b3", "Check-list"], ["diario-b3", "Diário"], ["manual-b3", "Manual"], ["progresso-b3", "Progresso"], ["dopamina-b3", "Dopamina"], ["ir-b3", "IR"], ["analise-b3", "Análise"], ["lucro-b3", "Lucro"]] },
+      { g: "B3", s: "B3", k: "b3", c: "#0F766E", items: [["checklist-b3", "Check-list"], ["diario-b3", "Diário"], ["manual-b3", "Manual"], ["progresso-b3", "Progresso"], ["dopamina-b3", "Dopamina"], ["ir-b3", "IR"], ["analise-b3", "Análise"], ["lucro-b3", "Lucro"]] },
+      { g: "Forex", s: "FX", k: "fx", c: "#0369A1", items: [["checklist-fx", "Check-list"], ["diario-fx", "Diário"], ["manual-fx", "Manual"], ["progresso-fx", "Progresso"], ["dopamina-fx", "Dopamina"], ["ir-fx", "IR"], ["analise-fx", "Análise"], ["lucro-fx", "Lucro"]] },
       { g: "Pessoal", s: "Pessoal", k: "pes", c: "#7C3AED", items: [["salario", "Salário"], ["oracao", "Oração"], ["receitas", "Receitas"], ["limpeza", "Limpeza de peças"], ["compras", "Compras"], ["consorcio", "Consórcios"], ["exercicios", "Exercícios"], ["notas", "Notas"]] }
     ];
     var DESC = { "checklist-ob": "Uma vez por dia", "diario-ob": "5 sessões por dia", "manual-ob": "Os 5 operacionais", "progresso-ob": "Escada e simulador", "dopamina": "Acertei ou errei", "ir-ob": "Resultado mensal", "analise-ob": "Print e seta na vela", "lucro-ob": "Excel da Quotex",
@@ -81,6 +82,26 @@
       "Lucro": P("<path d='M3 20h18'/><path d='M4 16l5-5 4 3 7-8'/><path d='M15 6h5v5'/>"), "Salário": P("<rect x='3' y='6' width='18' height='13' rx='3'/><path d='M16 12.5h2M3 10h18'/>"), "Oração": P("<path d='M12 3v18M7 8h10'/>"),
       "Receitas": P("<path d='M6 13a6 6 0 1112 0v6H6z'/><path d='M6 16h12'/>"), "Limpeza de peças": P("<path d='M14 3l7 7-9 9H5v-7z'/><path d='M10 7l7 7'/>"), "Consórcios": P("<circle cx='9' cy='9' r='5'/><circle cx='15' cy='15' r='5'/>"), "Exercícios": P("<path d='M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12'/>"), "Compras": P("<path d='M3 4h2l2.4 11h10.2L20 8H6.2'/><circle cx='9' cy='19.5' r='1.5'/><circle cx='17' cy='19.5' r='1.5'/>"), "Notas": P("<path d='M6 3h9l4 4v14H6z'/><path d='M14 3v5h5M9 12h7M9 16h5'/>") };
     window.__MC = { GROUPS: GROUPS, ICO: ICO, DESC: DESC };
+    /* 19/11/2026: escolher no Menu quais módulos aparecem no painel (fica salvo na conta) */
+    var VIS_LS = "mc.modOcultos";
+    function visGet() { try { var a = JSON.parse(localStorage.getItem(VIS_LS) || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+    function visAvisa() { try { document.dispatchEvent(new CustomEvent("mc-mods")); } catch (e) {} }
+    function visSet(a, local) {
+      try { localStorage.setItem(VIS_LS, JSON.stringify(a)); } catch (e) {}
+      visAvisa();
+      if (!local && window.claude) window.claude.use("db").then(function (d) { if (d && d.app) d.app("geral").doc("config/modulos").set({ ocultos: a, em: new Date().toISOString() }).catch(function () {}); });
+    }
+    window.__mcVis = { get: visGet, set: visSet };
+    setTimeout(function () {
+      if (window.claude) window.claude.use("db").then(function (d) {
+        if (!d || !d.app) return;
+        d.app("geral").doc("config/modulos").onSnapshot(function (x) {
+          if (!x.exists) { if (visGet().length) visSet(visGet()); return; }
+          var r = (x.data() || {}).ocultos || [];
+          if (JSON.stringify(r) !== JSON.stringify(visGet())) visSet(r, true);
+        }, function () {});
+      });
+    }, 0);
     /* 03/11/2026: guarda quando cada página foi aberta ("Usados por último") e usa a ordem escolhida no módulo também no menu */
     if (file !== "index") { try { var us = JSON.parse(localStorage.getItem("mc.usados") || "{}"); us[file] = Date.now(); localStorage.setItem("mc.usados", JSON.stringify(us)); } catch (e) {} }
     function ordemItens(g) {
@@ -91,13 +112,10 @@
       else if (m === "pers" && o.lista) { var pos = function (k) { var i = o.lista.indexOf("p:" + k); return i < 0 ? 999 : i; }; it.sort(function (a, b) { return pos(a.x[0]) - pos(b.x[0]) || a.i - b.i; }); }
       return it.map(function (y) { return y.x; });
     }
-    /* 17/11/2026: módulo "B3 ou Forex". Cada página -b3 tem a gêmea -fx (dados separados). O menu abre o último mercado usado. */
-    var MK = /-(b3|fx)$/.test(file) ? file.slice(-2) : null;
-    if (MK) { try { localStorage.setItem("mc.mercado", MK); } catch (e) {} }
-    var mercado = function () { try { return localStorage.getItem("mc.mercado") === "fx" ? "fx" : "b3"; } catch (e) { return "b3"; } };
-    var mcHref = function (id) { return (/-b3$/.test(id) && mercado() === "fx") ? id.replace(/-b3$/, "-fx") : id; };
+    /* 19/11/2026: B3 e Forex viraram módulos separados (cada um com as suas páginas e dados). */
+    var mcHref = function (id) { return id; };
     window.__mcHref = mcHref;
-    var fileK = MK === "fx" ? file.replace(/-fx$/, "-b3") : file;
+    var fileK = file;
     var cur = null;
     GROUPS.forEach(function (g) { g.items.forEach(function (it) { if (it[0] === fileK) cur = { g: g, it: it }; }); });
     if (cur) { document.documentElement.setAttribute("data-group", cur.g.k); document.documentElement.style.setProperty("--gc", cur.g.c); }
@@ -152,6 +170,13 @@
       ".site-drop{position:absolute;left:0;right:0;top:100%;background:linear-gradient(180deg,var(--surface,#fff),var(--bg,#EEF3FC));border-bottom:1px solid var(--line,#DDE4F2);box-shadow:0 30px 60px -30px rgba(19,32,59,.55);max-height:calc(100dvh - var(--site-h) - env(safe-area-inset-top,0px));overflow:auto;overscroll-behavior:contain;animation:mcDrop .22s cubic-bezier(.2,.8,.2,1)}" +
       "@keyframes mcDrop{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}@keyframes mcFade{from{opacity:0}to{opacity:1}}" +
       ".site-drop-in{max-width:var(--site-max);margin:0 auto;padding:16px var(--site-pad) 26px;display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));align-items:start}" +
+      ".site-vis{flex:1 1 100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,#DDE4F2);background:var(--surface,#fff)}" +
+      ".site-vis .vh{display:grid;line-height:1.2}.site-vis .vh small{font-size:.72rem;color:var(--muted,#58668A)}.site-vis .vh b{font-size:.9rem;white-space:nowrap}" +
+      ".site-vis .vl{display:flex;flex-wrap:wrap;gap:6px}" +
+      ".site-vis .vb{appearance:none;display:inline-flex;align-items:center;gap:7px;font:600 .86rem 'IBM Plex Sans',system-ui,sans-serif;color:var(--muted,#58668A);background:var(--bg,#EEF3FC);border:1px solid var(--line,#DDE4F2);border-radius:999px;padding:6px 12px 6px 7px;cursor:pointer;white-space:nowrap}" +
+      ".site-vis .vb .ck{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:6px;border:1.5px solid var(--line,#C9D3E6);background:var(--surface,#fff);font-style:normal;font-size:.75rem;color:#fff}" +
+      ".site-vis .vb.on{color:var(--fg,#13203B);border-color:var(--gc);background:color-mix(in srgb,var(--gc) 10%,var(--surface,#fff))}" +
+      ".site-vis .vb.on .ck{background:var(--gc);border-color:var(--gc)}" +
       ".site-top{grid-column:1/-1;display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}.site-top .site-acct{flex:1 1 280px;grid-column:auto}" +
       ".site-h .site-drop .site-home{display:flex!important;align-items:center;gap:10px;padding:10px 14px!important;border-radius:12px!important;border:1px solid var(--line,#DDE4F2)!important;background:var(--surface,#fff)!important;color:var(--fg,#13203B);font-weight:600;text-decoration:none;flex:0 0 auto}" +
       ".site-h .site-drop .site-home:hover{border-color:var(--accent,#2563EB)!important;color:var(--accent,#2563EB)}.site-home svg{width:18px;height:18px}" +
@@ -276,6 +301,29 @@
       var acct = el("div", "site-acct"); acct.hidden = true; home.appendChild(acct);
       /* 12/11/2026: "Instalar app" fica dentro do menu (PC e celular), não mais solto na página inicial */
       var inst = el("div", "site-inst"); inst.hidden = true; home.appendChild(inst);
+      /* 19/11/2026: módulos que aparecem no painel */
+      var vis = el("div", "site-vis"); home.appendChild(vis);
+      function visDraw() {
+        var oc = visGet();
+        vis.innerHTML = "<span class='vh'><small>Módulos no painel</small><b>Marque os que quer ver</b></span>";
+        var lista = el("div", "vl");
+        GROUPS.forEach(function (g) {
+          var on = oc.indexOf(g.k) < 0;
+          var b = el("button", "vb" + (on ? " on" : ""), "<i class='ck' aria-hidden='true'>" + (on ? "✓" : "") + "</i>" + esc(g.g));
+          b.type = "button"; b.style.setProperty("--gc", g.c); b.setAttribute("aria-pressed", on ? "true" : "false");
+          b.onclick = function () {
+            var a = visGet(), i = a.indexOf(g.k);
+            if (i >= 0) a.splice(i, 1); else {
+              if (GROUPS.filter(function (x) { return a.indexOf(x.k) < 0; }).length <= 1) { window.ui && ui.toast("Deixe pelo menos um módulo no painel"); return; }
+              a.push(g.k);
+            }
+            visSet(a);
+          };
+          lista.appendChild(b);
+        });
+        vis.appendChild(lista);
+      }
+      visDraw(); document.addEventListener("mc-mods", visDraw);
       window.__siteInst = function (modo, acao) {
         if (!modo) { inst.hidden = true; inst.innerHTML = ""; return; }
         inst.hidden = false;
@@ -308,7 +356,7 @@
       document.addEventListener("click", function (e) {
         if (drop.hidden) return;
         var t = e.target;
-        if (t.closest && t.closest(".site-g, .site-acct, .site-inst, a, button, input, select, textarea, label")) return;
+        if (t.closest && t.closest(".site-g, .site-acct, .site-inst, .site-vis, a, button, input, select, textarea, label")) return;
         setOpen(false);
       });
       document.addEventListener("keydown", function (e) { if (e.key === "Escape") setOpen(false); });
@@ -618,13 +666,13 @@
   }
   /* 16/11/2026: backup — baixa um .json com todos os dados da conta (todos os controles) */
   var BK = {
-    "analise-b3": ["analises2"], "analise-ob": ["analises2"], "checklist-b3n": ["dias"], "checklist-ob3": ["dias"],
-    "compras": ["itens"], "consorcio": ["propostas", "config/propostas"], "diario-b3n": ["dias", "config/geral"], "diario-ob3": ["dias", "config/geral"],
-    "dopamina-b3n": ["dias"], "dopamina-ob3": ["dias"], "exercicios2": ["dias", "config/geral"], "ir-b3n": ["meses"], "ir-ob3": ["meses"],
-    "limpeza": ["lotes"], "lucro-b3": ["dias"], "lucro-ob2": ["meses"], "notas": ["notas", "blocos"], "oracao": ["consagracoes"],
-    "progresso-b3m": ["estado/progresso", "estado/simulador"], "progresso-ob2": ["estado/progresso", "estado/simulador"], "receitas": ["receitas"], "salario": ["meses"],
-    "analise-fx": ["analises2"], "checklist-fx": ["dias"], "diario-fx": ["dias", "config/geral"], "dopamina-fx": ["dias"], "lucro-fx": ["dias"], "ir-fx": ["config/geral"],
-    "progresso-fx": ["estado/progresso", "estado/simulador"]
+    "analise-b3": ["analises3"], "analise-ob": ["analises3"], "checklist-b3p": ["dias"], "checklist-ob4": ["dias"],
+    "compras": ["itens"], "consorcio": ["propostas", "config/propostas"], "diario-b3p": ["dias", "config/geral"], "diario-ob4": ["dias", "config/geral"],
+    "dopamina-b3p": ["dias"], "dopamina-ob4": ["dias"], "exercicios2": ["dias", "config/geral"], "ir-b3p": ["meses"], "ir-ob4": ["meses"],
+    "limpeza": ["lotes"], "lucro-b3p": ["dias"], "lucro-ob3": ["meses"], "notas": ["notas", "blocos"], "oracao": ["consagracoes"],
+    "progresso-b3p": ["estado/progresso", "estado/simulador"], "progresso-ob3": ["estado/progresso", "estado/simulador"], "receitas": ["receitas"], "salario": ["meses"],
+    "analise-fx": ["analises3"], "checklist-fx2": ["dias"], "diario-fx2": ["dias", "config/geral"], "dopamina-fx2": ["dias"], "lucro-fx2": ["dias"], "ir-fx2": ["config/geral"],
+    "progresso-fx2": ["estado/progresso", "estado/simulador"]
   };
   function backup(uid, btn) {
     var txt = btn ? btn.textContent : ""; if (btn) { btn.disabled = true; btn.textContent = "Baixando…"; }
@@ -675,6 +723,7 @@
 /* 17/11/2026: abas B3 | Forex no topo das páginas do módulo "B3 ou Forex" (cada mercado com seus dados). */
 (function () {
   var file = (decodeURIComponent(location.pathname).split("/").pop() || "").replace(/\.html?$/i, "");
+  return; // 19/11/2026: B3 e Forex agora são módulos separados, sem as abas
   var m = file.match(/^(.*)-(b3|fx)$/); if (!m) return;
   var base = m[1], mk = m[2];
   function liga() {

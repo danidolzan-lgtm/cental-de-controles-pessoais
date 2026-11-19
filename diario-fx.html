@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2563EB"><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="firebase-config.js"></script><script src="sync.js" data-app="diario-fx"></script><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{overflow-x:hidden}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.voltar{display:inline-block;margin:12px 16px 0;font:600 14px system-ui,sans-serif;color:inherit;opacity:.7;text-decoration:none}</style></head><body><a class="voltar" href="index.html">← Central de Controles Pessoais</a><title>Diário Forex</title>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2563EB"><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="firebase-config.js"></script><script src="sync.js" data-app="diario-fx2"></script><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{overflow-x:hidden}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.voltar{display:inline-block;margin:12px 16px 0;font:600 14px system-ui,sans-serif;color:inherit;opacity:.7;text-decoration:none}</style></head><body><a class="voltar" href="index.html">← Central de Controles Pessoais</a><title>Diário Forex</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 /* Layout: resumo no topo, ajustes de contrato, calendário seg–sex 29/10–17/12/2026, 11/01–31/03/2027 e 01/04–30/06/2027, tabelas por operacional/ativo. Janela do dia abre ao tocar no calendário. */
@@ -168,7 +168,7 @@ const usDst=ds=>ds<"2026-11-02"||(ds>="2027-03-14"&&ds<"2027-11-07"); // horári
 function perUI(cb){const box=document.getElementById("per");if(box){box.innerHTML=PER.map((p,i)=>"<button type='button' data-i='"+i+"' class='"+(i===PI?"on":"")+"' aria-pressed='"+(i===PI)+"'><b>"+p.y+"</b> · "+p.t.slice(0,13)+"</button>").join("");box.querySelectorAll("button").forEach(b=>b.onclick=()=>{PI=+b.dataset.i;START=PER[PI].a;END=PER[PI].b;try{localStorage.setItem(PKEY,PI)}catch(e){}perUI(cb);cb()})}const s=document.getElementById("perSub");if(s)s.textContent=PER[PI].t+" · segunda a sexta"}
 perUI(()=>{typeof fUI==="function"&&fUI();render()});
 try{}catch(e){} // dados antigos (zerado em 29/10/2026)
-const LS="diarioFX.v1";
+const LS="diarioFX2.v1";
 function pDays(){return Object.keys(days).filter(inPer).map(k=>days[k])} // só o período escolhido
 
 /* 06/11/2026: filtro dos números (cartões e tabelas): período todo, semana (seg–sex), mês ou datas escolhidas. O calendário continua mostrando o período todo; o que fica fora do filtro aparece apagado. */
@@ -268,7 +268,7 @@ function renderCal(){
       if(first){for(let i=0;i<wd;i++){const b=document.createElement("div");b.className="day blank";g.appendChild(b)}first=false}
       if(wd===0||wd===6){const b=document.createElement("button");b.type="button";b.className="day we";b.disabled=true;b.title="Fim de semana: travado";b.innerHTML="<span class='d'>"+d+"</span>";g.appendChild(b);continue}
       const doc=days[ds], ops=doc?doc.ops||[]:[], net=doc?dayNet(doc):0;
-      const b=document.createElement("button");b.type="button";b.className="day"+(FM!=="per"&&!inF(ds)?" fora":"")+(ds===t?" today":"")+(ops.length?(net>0?" pos":net<0?" neg":""):"")+(!ops.length&&ds<t&&!(doc&&Object.keys(doc).some(k=>k!=="date"&&doc[k]&&typeof doc[k]==="object"&&Object.keys(doc[k]).length))?" nop":"");
+      const b=document.createElement("button");b.type="button";b.className="day"+(FM!=="per"&&!inF(ds)?" fora":"")+(ds===t?" today":"")+(ops.length?(net>0?" pos":net<0?" neg":""):"")+(!ops.length&&ds<t&&ds>="2026-11-20"&&!(doc&&Object.keys(doc).some(k=>k!=="date"&&doc[k]&&typeof doc[k]==="object"&&Object.keys(doc[k]).length))?" nop":"");
       let h="<span class='d'>"+d+"</span><span class='dots'>"+ops.map(o=>"<i class='dot "+(opVal(o)>0?"w":opVal(o)<0?"l":"")+"'></i>").join("")+(doc&&doc.status==="nao"?"<i class='dot'></i>":"")+"</span>";
       if(ops.length)h+="<span class='v "+(net>0?"pos":net<0?"neg":"")+"' title='"+n2(net)+"'>"+nCal(net)+"</span>";
       b.innerHTML=h;b.setAttribute("aria-label",dt.toLocaleDateString("pt-BR")+(ops.length?", resultado "+n2(net):""));
@@ -403,14 +403,14 @@ const FX_LV_ANT=[50,100,200,300,500,700,1000,1500,2000,2500,3000,4000,5000,6000,
 function fxMigraC(d,LVN){const c=(d&&d.conquistados)||[];if(!d||d.esc===2)return [...c];return [...new Set(c.map(i=>LVN.indexOf(FX_LV_ANT[i])).filter(i=>i>=0))].sort((a,b)=>a-b)}
 const PLV=[100,200,300,500,700,1000,1500,2000,3000,4000,5000,7000,10000,15000,20000];
 const PCT=[0.06,0.13,0.19,0.31,0.44,0.63,0.94,1.25,1.88,2.5,3.13,4.38,6.25,9.38,12.5];
-const PROG="progresso-fx", PLS="progressoFX.v1";
+const PROG="progresso-fx2", PLS="progressoFX2.v1";
 /* 18/11/2026: lote sugerido na operação: risco = meta da semana ÷ (operações × (2·acerto − erro)), igual à aba "Lote por par" do Progresso */
 const FX_QDEF={EURUSD:1.16,GBPUSD:1.34,AUDUSD:0.7,NZDUSD:0.58,USDJPY:158,USDCAD:1.38,USDCHF:0.79,XAUUSD:4300,USDMXN:18.3,USDZAR:17.3,USDTRY:42.5,USDSEK:9.5,USDNOK:10.1,USDDKK:6.43,USDSGD:1.3,USDHKD:7.78,USDPLN:3.65,USDCNH:7.12,USDHUF:335,USDCZK:20.9};
 function fxUSD(c,q){if(c==="USD")return 1;if(q[c+"USD"])return q[c+"USD"];if(q["USD"+c])return 1/q["USD"+c];return 1}
 function fxPip(par,q){if(par==="XAUUSD")return 1;const b=par.slice(3);return 100000*(b==="JPY"||b==="HUF"?0.01:0.0001)*fxUSD(b,q)}
 function fxNoc(par,q){if(par==="XAUUSD")return 100*q.XAUUSD;return 100000*fxUSD(par.slice(0,3),q)}
 function loteCfg(){let lp={};try{lp=JSON.parse(localStorage.getItem("loteParFX.v1")||"null")||{}}catch(e){}
-  let dias=5;try{const s=JSON.parse(localStorage.getItem("simuladorFX.v1")||"null");if(s&&+s.dias>0)dias=+s.dias}catch(e){}
+  let dias=5;try{const s=JSON.parse(localStorage.getItem("simuladorFX2.v1")||"null");if(s&&+s.dias>0)dias=+s.dias}catch(e){}
   const ac=Math.min(95,Math.max(34,+lp.ac||60))/100, meta=(+lp.meta||40)/100, ops=dias*2, rp=meta/(ops*(2*ac-(1-ac)));
   const pm=window._pm||{}, banca=pm.banca||pm.nivel||PLV[0];
   return {rp,banca,alav:+lp.alav>0?+lp.alav:500,q:Object.assign({},FX_QDEF,lp.q||{})}}
