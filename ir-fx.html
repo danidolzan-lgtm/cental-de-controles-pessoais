@@ -132,12 +132,21 @@ summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:1r
   </details>
 </div>
 <script>
-const YEARS=[2026,2027,2028], CFG="irFX2.v1", LUC="lucroFX2.v1", $=id=>document.getElementById(id);
+
+/* 23/11/2026: IR só considera o período de consulta: de 19/11/2026 às 18h até 30/06/2027 (recesso de 18/12 a 10/01 fica de fora) */
+const IR_INI="2026-11", IR_FIM="2027-06";
+function irDs(d){return d.y+"-"+String(d.m).padStart(2,"0")+"-"+String(d.d).padStart(2,"0")}
+function irFora(ds,txt){
+  if(ds<"2026-11-19"||ds>"2027-06-30"||(ds>="2026-12-18"&&ds<="2027-01-10"))return true;
+  if(ds==="2026-11-19"&&txt){const h=String(txt).match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);if(h&&+h[1]<18)return true}
+  return false;
+}
+const YEARS=[2026,2027], CFG="irFX2.v1", LUC="lucroFX2.v1", $=id=>document.getElementById(id);
 const r2=v=>Math.round(v*100)/100;
 const brl=v=>(v<0?"-":"")+"R$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
 const us=v=>(v<0?"-":"")+"US$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
 const n2=v=>(v<0?"−":v>0?"+":"")+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
-let dias={}, cfg={prejAnt:0}, db=null, year=(new Date().getFullYear()>=2026&&new Date().getFullYear()<=2028)?new Date().getFullYear():2026;
+let dias={}, cfg={prejAnt:0}, db=null, year=new Date().getFullYear()>=2027?2027:2026;
 const liqU=d=>r2((+d.op||0)-Math.abs(+d.cus||0));
 const liqR=d=>+d.ptax>0?r2(liqU(d)*(+d.ptax)):null;
 function lsLoad(){try{const r=JSON.parse(localStorage.getItem(LUC)||"null");if(r)dias=r}catch(e){}try{const c=JSON.parse(localStorage.getItem(CFG)||"null");if(c)cfg=Object.assign(cfg,c)}catch(e){}}
@@ -146,7 +155,7 @@ function setStatus(t){$("status").textContent=t}
 function compute(){
   const out={};let prej=+cfg.prejAnt||0;
   YEARS.forEach(y=>{
-    const ks=Object.keys(dias).filter(k=>k.startsWith(String(y)));
+    const ks=Object.keys(dias).filter(k=>k.startsWith(String(y))&&!irFora(k));
     let rr=0,ru=0,sem=0;const meses={};
     ks.forEach(k=>{const d=dias[k],u=liqU(d),r=liqR(d),m=k.slice(0,7);meses[m]=meses[m]||{n:0,u:0,r:0,sem:0};meses[m].n++;meses[m].u+=u;ru+=u;if(r==null){sem++;meses[m].sem++}else{meses[m].r+=r;rr+=r}});
     rr=r2(rr);const ini=r2(prej);let base=0;
@@ -169,7 +178,7 @@ function render(){
     c.ir>0?"<span class='tag'>Imposto a pagar</span><b>"+brl(c.ir)+"</b><span>15% sobre "+brl(c.base)+", pago "+prazo+"."+(year>=new Date().getFullYear()?" O ano ainda está aberto: o valor muda até 31/12.":"")+"</span>":
     c.rr<0?"<span class='tag'>Ano no prejuízo</span><b>"+brl(-c.rr)+"</b><span>Sem imposto. Declare o prejuízo "+prazo+" para usar nos anos seguintes.</span>":
     "<span class='tag'>Sem imposto</span><b>"+brl(0)+"</b><span>"+(c.rr>0?"O lucro de "+brl(c.rr)+" foi todo abatido pelo prejuízo anterior.":"Resultado zerado.")+"</span>";
-  let ac=0;const ms=[];for(let m=1;m<=12;m++){const k=year+"-"+String(m).padStart(2,"0");ms.push(k)}
+  let ac=0;const ms=[];for(let m=1;m<=12;m++){const k=year+"-"+String(m).padStart(2,"0");if(k>=IR_INI&&k<=IR_FIM)ms.push(k)}
   $("tMes").innerHTML=ms.map(k=>{const x=c.meses[k];const nm=new Date(k+"-15T12:00:00").toLocaleDateString("pt-BR",{month:"long"});
     if(!x)return "<tr><td style='text-transform:capitalize'>"+nm+"</td><td>–</td><td>–</td><td>–</td><td>"+(ac?n2(r2(ac)):"–")+"</td></tr>";
     ac+=x.r;return "<tr><td style='text-transform:capitalize'>"+nm+"</td><td>"+x.n+"</td><td class='"+(x.u>=0?"pos":"neg")+"'>"+n2(r2(x.u))+"</td><td class='"+(x.r>=0?"pos":"neg")+"'>"+n2(r2(x.r))+(x.sem?" <span class='neg'>*</span>":"")+"</td><td class='"+(ac>=0?"pos":"neg")+"'>"+n2(r2(ac))+"</td></tr>"}).join("");

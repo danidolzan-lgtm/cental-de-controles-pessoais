@@ -115,19 +115,28 @@ td.tx{color:var(--warn)}
 </div>
 <script>
 try{localStorage.removeItem("irB3.v1")}catch(e){} // zerado em 29/10/2026
-const YEARS=[2026,2027,2028], FIRST="2026-07", LS="irB3p.v1";
+
+/* 23/11/2026: IR só considera o período de consulta: de 19/11/2026 às 18h até 30/06/2027 (recesso de 18/12 a 10/01 fica de fora) */
+const IR_INI="2026-11", IR_FIM="2027-06";
+function irDs(d){return d.y+"-"+String(d.m).padStart(2,"0")+"-"+String(d.d).padStart(2,"0")}
+function irFora(ds,txt){
+  if(ds<"2026-11-19"||ds>"2027-06-30"||(ds>="2026-12-18"&&ds<="2027-01-10"))return true;
+  if(ds==="2026-11-19"&&txt){const h=String(txt).match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);if(h&&+h[1]<18)return true}
+  return false;
+}
+const YEARS=[2026,2027], FIRST=IR_INI, LS="irB3p.v1";
 const FIELDS=["dt","dtOp","dtTx","dtIrrf","sw","swIrrf"];
 // mês antigo só com "dt": vira operações = dt e taxas = 0
 function opOf(r){return r.dtOp!=null?+r.dtOp:(r.dt!=null?+r.dt:null)}
 function txOf(r){return r.dtTx!=null?+r.dtTx:null}
 function dtOf(r){const o=opOf(r),t=txOf(r);if(o==null&&t==null)return 0;return r2((o||0)-(t||0))}
-let res={}, db=null, year=(new Date().getFullYear()>2026&&new Date().getFullYear()<=2028)?new Date().getFullYear():2026;
+let res={}, db=null, year=new Date().getFullYear()>=2027?2027:2026;
 const $=id=>document.getElementById(id);
 const brl=v=>(v<0?"-":"")+"R$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
 const r2=v=>Math.round(v*100)/100;
 function load(){try{const r=JSON.parse(localStorage.getItem(LS)||"null");if(r)res=r}catch(e){}}
 function lsSave(){try{localStorage.setItem(LS,JSON.stringify(res))}catch(e){}}
-function allMonths(){const a=[];YEARS.forEach(y=>{for(let m=1;m<=12;m++){const k=y+"-"+String(m).padStart(2,"0");if(k>=FIRST)a.push(k)}});return a}
+function allMonths(){const a=[];YEARS.forEach(y=>{for(let m=1;m<=12;m++){const k=y+"-"+String(m).padStart(2,"0");if(k>=FIRST&&k<=IR_FIM)a.push(k)}});return a}
 function venc(k){const [y,m]=k.split("-").map(Number);const d=new Date(y,m+1,0,12);while(d.getDay()===0||d.getDay()===6)d.setDate(d.getDate()-1);return d.toLocaleDateString("pt-BR")}
 const nome=k=>new Date(k+"-15T12:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
 
@@ -427,8 +436,8 @@ function mesNome(k){const t=new Date(k+"-15T12:00:00").toLocaleDateString("pt-BR
 function resumo(){
   const tot={};
   const T=k=>tot[k]=tot[k]||{op:0,tx:0,irrf:0,n:0,dias:[]};
-  if(modo==="notas")notas.forEach(n=>{if(n.res==null)return;const k=keyOf(n.d),t=T(k),op=n.bruto!=null?n.bruto:r2(n.res+n.taxas);t.op+=op;t.tx+=n.taxas;t.irrf+=n.irrf;t.n++;t.dias.push({d:dstr(n.d),op:r2(op),tx:r2(n.taxas),ir:r2(n.irrf)})});
-  else{const c=+$("ibCol").value;linhas.forEach(l=>{const v=l.nums[c];if(v==null)return;const k=keyOf(l.d),t=T(k);t.op+=v;t.n++})}
+  if(modo==="notas")notas.forEach(n=>{if(n.res==null||irFora(irDs(n.d)))return;const k=keyOf(n.d),t=T(k),op=n.bruto!=null?n.bruto:r2(n.res+n.taxas);t.op+=op;t.tx+=n.taxas;t.irrf+=n.irrf;t.n++;t.dias.push({d:dstr(n.d),op:r2(op),tx:r2(n.taxas),ir:r2(n.irrf)})});
+  else{const c=+$("ibCol").value;linhas.forEach(l=>{const v=l.nums[c];if(v==null||irFora(irDs(l.d),l.txt))return;const k=keyOf(l.d),t=T(k);t.op+=v;t.n++})}
   const ks=Object.keys(tot).sort();
   window.__ibTot=tot;
   const sgn=v=>(v>0?"+":v<0?"−":"")+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -437,7 +446,7 @@ function resumo(){
       "<div class='brk'><div class='bx "+(op>=0?"g":"p")+"'><span>"+(op>=0?"Ganho nas operações":"Perda nas operações")+"</span><b>"+sgn(op)+"</b></div>"+
       "<div class='bx t'><span>Taxas e custos</span><b>"+(tx?"−"+tx.toLocaleString("pt-BR",{minimumFractionDigits:2}):"0,00")+"</b></div>"+
       "<div class='bx "+(liq>=0?"g":"p")+" l'><span>"+(liq>=0?"Lucro líquido":"Prejuízo líquido")+"</span><b>"+sgn(liq)+"</b></div></div>"+
-      (k<window.IRB3.FIRST?"<span class='hint'>antes de julho/2026</span>":"<div><button type='button' class='btn' data-lanca='"+k+"'>Lançar em "+mesNome(k).split(" ")[0].toLowerCase()+"</button></div>")+"</div>"}).join("")+
+      (k<window.IRB3.FIRST?"<span class='hint'>fora do período (19/11/2026 a jun/2027)</span>":"<div><button type='button' class='btn' data-lanca='"+k+"'>Lançar em "+mesNome(k).split(" ")[0].toLowerCase()+"</button></div>")+"</div>"}).join("")+
     (ks.length>1?"<div><button type='button' class='btn primary' id='ibTodos'>Lançar todos os meses</button></div>":""):"<p class='hint'>Não achei valores. Me mande o arquivo para eu ajustar a leitura.</p>";
   if(modo==="notas"){
     $("ibPrev").innerHTML="<thead><tr><th>Pregão</th><th>Operações</th><th>Taxas</th><th>Líquido</th><th>IRRF</th></tr></thead><tbody>"+notas.slice().sort((a,b)=>(keyOf(a.d)+String(a.d.d).padStart(2,"0")).localeCompare(keyOf(b.d)+String(b.d.d).padStart(2,"0"))).map(n=>{const op=n.bruto!=null?n.bruto:(n.res!=null?r2(n.res+n.taxas):null);return "<tr><td>"+dstr(n.d)+"</td><td class='"+(op>0?"pos":op<0?"neg":"")+"'>"+(op==null?"–":brl(op))+"</td><td class='tx'>"+(n.taxas?"−"+brl(n.taxas):"0,00")+"</td><td class='"+(n.res>0?"pos":n.res<0?"neg":"")+"'><b>"+(n.res==null?"não lido":brl(n.res))+"</b></td><td>"+(n.irrf?brl(n.irrf):"–")+"</td></tr>"}).join("")+"</tbody>";

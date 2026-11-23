@@ -106,12 +106,21 @@ img,svg{max-width:100%}
 </div>
 <script>
 try{localStorage.removeItem("irOB2.v1")}catch(e){} // zerado em 29/10/2026
-const YEARS=[2025,2026,2027,2028], FIRST="2025-01", LS="irOB4.v1";
-let res={}, db=null, year=Math.min(2028,Math.max(2025,new Date().getFullYear()));
+
+/* 23/11/2026: IR só considera o período de consulta: de 19/11/2026 às 18h até 30/06/2027 (recesso de 18/12 a 10/01 fica de fora) */
+const IR_INI="2026-11", IR_FIM="2027-06";
+function irDs(d){return d.y+"-"+String(d.m).padStart(2,"0")+"-"+String(d.d).padStart(2,"0")}
+function irFora(ds,txt){
+  if(ds<"2026-11-19"||ds>"2027-06-30"||(ds>="2026-12-18"&&ds<="2027-01-10"))return true;
+  if(ds==="2026-11-19"&&txt){const h=String(txt).match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);if(h&&+h[1]<18)return true}
+  return false;
+}
+const YEARS=[2026,2027], FIRST=IR_INI, LS="irOB4.v1";
+let res={}, db=null, year=Math.min(2027,Math.max(2026,new Date().getFullYear()));
 const $=id=>document.getElementById(id);
 const brl=v=>(v<0?"-":"")+"R$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
 function load(){try{const r=JSON.parse(localStorage.getItem(LS)||"null");if(r)res=r}catch(e){}}
-function months(y){const a=[];for(let m=1;m<=12;m++){const k=y+"-"+String(m).padStart(2,"0");if(k>=FIRST)a.push(k)}return a}
+function months(y){const a=[];for(let m=1;m<=12;m++){const k=y+"-"+String(m).padStart(2,"0");if(k>=FIRST&&k<=IR_FIM)a.push(k)}return a}
 function yearSum(y){return months(y).reduce((s,k)=>s+(+res[k]||0),0)}
 function calc(y){
   let carry=0;
@@ -348,7 +357,7 @@ function compute(){
   const tot={},cnt={},gan={},per={},nw={},nl={};
   let used=0;
   const prev=recs.map(r=>{
-    const off=skip&&SKIP.test(r.txt);
+    const off=(skip&&SKIP.test(r.txt))||irFora(irDs(r.d),r.txt);
     let v=r.nums[col];
     if(v!=null&&gross)v=v-(r.nums[inv]||0);
     const ok=!off&&v!=null;
@@ -356,10 +365,10 @@ function compute(){
     return {r,v:ok?v*cot:null,off:!ok};
   });
   const keys=Object.keys(tot).sort();
-  const first=window.IR_FIRST||"2026-10";
+  const first=window.IR_FIRST||"2026-11";
   $("impMonths").innerHTML=keys.length?keys.map(k=>{
     const t=Math.round(tot[k]*100)/100, fora=k<first;
-    return "<div><span><span>"+mesNome(k)+"</span> · "+cnt[k]+(cnt[k]===1?" operação":" operações")+" · <b class='pos'>"+(nw[k]||0)+"W</b> <b class='neg'>"+(nl[k]||0)+"L</b> · acerto "+((nw[k]||0)+(nl[k]||0)?Math.round((nw[k]||0)/((nw[k]||0)+(nl[k]||0))*100)+"%":"–")+"<br>Ganhos <b class='pos'>"+fmt(Math.round((gan[k]||0)*100)/100)+"</b> · Perdas <b class='neg'>"+fmt(Math.round((per[k]||0)*100)/100)+"</b><br>"+(t>=0?"Lucro":"Prejuízo")+" do mês <b class='"+(t>0?"pos":t<0?"neg":"")+"' style='font-size:1.1rem'>"+fmt(t)+"</b></span>"+(fora?"<span class='msg'>antes de 2025, fora da tabela</span>":"<button type='button' class='btn sm' data-put='"+k+"' data-v='"+t+"'>Lançar em "+mesNome(k).split(" ")[0]+"</button>")+"</div>";
+    return "<div><span><span>"+mesNome(k)+"</span> · "+cnt[k]+(cnt[k]===1?" operação":" operações")+" · <b class='pos'>"+(nw[k]||0)+"W</b> <b class='neg'>"+(nl[k]||0)+"L</b> · acerto "+((nw[k]||0)+(nl[k]||0)?Math.round((nw[k]||0)/((nw[k]||0)+(nl[k]||0))*100)+"%":"–")+"<br>Ganhos <b class='pos'>"+fmt(Math.round((gan[k]||0)*100)/100)+"</b> · Perdas <b class='neg'>"+fmt(Math.round((per[k]||0)*100)/100)+"</b><br>"+(t>=0?"Lucro":"Prejuízo")+" do mês <b class='"+(t>0?"pos":t<0?"neg":"")+"' style='font-size:1.1rem'>"+fmt(t)+"</b></span>"+(fora?"<span class='msg'>fora do período (19/11/2026 18h a jun/2027)</span>":"<button type='button' class='btn sm' data-put='"+k+"' data-v='"+t+"'>Lançar em "+mesNome(k).split(" ")[0]+"</button>")+"</div>";
   }).join("")+(keys.filter(k=>k>=first).length>1?"<div style='border:0;padding:0'><button type='button' class='btn' id='impTodos'>Lançar todos os meses</button></div>":""):"<p class='msg'>Nenhum valor nessa coluna. Troque a coluna do resultado.</p>";
   $("impPrev").innerHTML="<thead><tr><th>Data</th><th>Valor</th><th>Linha lida</th></tr></thead><tbody>"+prev.slice(0,300).map(p=>"<tr><td>"+String(p.r.d.d).padStart(2,"0")+"/"+String(p.r.d.m).padStart(2,"0")+"/"+p.r.d.y+"</td><td class='"+(p.off?"off":p.v>0?"pos":p.v<0?"neg":"")+"'>"+(p.v==null?"–":fmt(p.v))+"</td><td style='text-align:left;white-space:normal;font-family:var(--f-body);max-width:28rem'>"+p.r.txt.slice(0,140).replace(/</g,"&lt;")+"</td></tr>").join("")+"</tbody>";
   $("impMsg").className="msg";

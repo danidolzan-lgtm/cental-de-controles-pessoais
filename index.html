@@ -127,7 +127,7 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
   const hrefPg=id=>window.__mcHref?window.__mcHref(id):id;
   const $=id=>document.getElementById(id);
   /* 19/11/2026: o painel mostra só os módulos marcados no Menu */
-  function desenharMods(){const oc=window.__mcVis?window.__mcVis.get():[];const gs=MC.GROUPS.filter(g=>!oc.includes(g.k));$("mods").style.setProperty("--n",Math.max(1,Math.min(gs.length,4)));
+  function desenharMods(){const oc=window.__mcVis?window.__mcVis.get():[];const gs=(window.__mcVis&&window.__mcVis.grupos?window.__mcVis.grupos():MC.GROUPS).filter(g=>!oc.includes(g.k));$("mods").style.setProperty("--n",Math.max(1,Math.min(gs.length,4)));
   $("mods").innerHTML=gs.map(g=>"<button type='button' class='mod' data-k='"+g.k+"' style='--gc:"+g.c+"'><span class='gi'>"+esc(sigla(g))+"</span><b>"+esc(g.g)+"</b><small>"+esc(SUB[g.k]||"")+"</small><span class='go'>Abrir<i>→</i></span></button>").join("")}
   desenharMods();document.addEventListener("mc-mods",desenharMods);
   function abrir(k){
