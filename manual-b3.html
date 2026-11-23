@@ -100,6 +100,7 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 
   <nav class="tabs" aria-label="Seções">
     <a href="#base">Base</a>
+    <a href="#regras">Regras gerais</a>
     <a href="#respiro">Respiro</a>
     <a href="#virada">Virada</a>
     <a href="#muralha">Muralha</a>
@@ -130,6 +131,13 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       <span><i style="background:var(--muted);height:8px;width:6px"></i>Volume</span>
     </div>
     <div class="note">A lógica dos setups é a mesma da OB. O que muda é a saída: em vez de expiração, toda entrada já vai com <b>ordem de stop e de alvo</b> junto (OCO). Nunca entre sem stop.</div>
+        <div class="note"><b>WIN × WDO, um contra o outro.</b> Índice e dólar costumam andar em sentidos opostos. Antes de comprar WIN, olhe o WDO no M2: dólar caindo ou de lado confirma; dólar subindo forte, fique de fora. Vale o mesmo para venda de WIN e para entradas no WDO. É filtro, não sinal de entrada: em dia de notícia de juros ou fluxo estrangeiro os dois podem andar juntos.</div>
+  </section>
+
+  <!-- REGRAS GERAIS -->
+  <section class="panel" id="regras">
+    <h2>Regras gerais</h2>
+    <p class="hint" style="margin:0">Valem para os 5 operacionais: Respiro, Virada, Muralha, Giro e Armadilha.</p>
     <div class="box no">
       <h3>Não opera em nenhum setup quando</h3>
       <ul>
@@ -142,7 +150,17 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
         <li><b>Um contra o outro:</b> o outro ativo está indo forte no mesmo sentido da sua entrada (compra no WIN com o WDO subindo forte, ou o contrário).</li>
       </ul>
     </div>
-    <div class="note"><b>WIN × WDO, um contra o outro.</b> Índice e dólar costumam andar em sentidos opostos. Antes de comprar WIN, olhe o WDO no M2: dólar caindo ou de lado confirma; dólar subindo forte, fique de fora. Vale o mesmo para venda de WIN e para entradas no WDO. É filtro, não sinal de entrada: em dia de notícia de juros ou fluxo estrangeiro os dois podem andar juntos.</div>
+    <div class="box">
+      <h3>Quando começa uma nova tendência</h3>
+      <p><b>A dúvida:</b> depois de um recuo, a tendência ainda é a mesma ou já começou outra? Isso decide se a contagem continua ou recomeça do zero.</p>
+      <p><b>A regra (em teste):</b> a contagem só zera quando acontecem as duas coisas juntas:</p>
+      <ol>
+        <li>a 9 cruza a 21 contra a tendência, e</li>
+        <li>enquanto a 9 cruza a 21, pelo menos uma vela fecha além da 21, do lado contrário à tendência.</li>
+      </ol>
+      <p>Isso mostra que o recuo foi mais fundo que a zona normal entre a 9 e a 21, ou seja, começou outra tendência.</p>
+      <p>Se a 9 cruzou a 21 mas nenhuma vela fechou além da 21, é o <b>mesmo recuo</b>: a contagem continua.</p>
+    </div>
   </section>
 
   <!-- RESPIRO -->
