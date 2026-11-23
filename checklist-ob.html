@@ -114,7 +114,7 @@ img,svg{max-width:100%}
 <style>.per{display:flex;gap:6px;flex-wrap:wrap}.per button{appearance:none;font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap}.per button b{font-weight:700}.per button.on{background:var(--accent);border-color:var(--accent);color:#fff}</style>
 <script>
 // 29/10/2026: tudo zerado. Três períodos: 29/10 a 17/12/2026, 11/01 a 31/03/2027 e 01/04 a 30/06/2027 (botões em cima do calendário).
-const PER=[{y:"2026",a:"2026-10-29",b:"2026-12-17",t:"29/10 a 17/12/2026"},{y:"jan–mar/27",a:"2027-01-11",b:"2027-03-31",t:"11/01 a 31/03/2027"},{y:"abr–jun/27",a:"2027-04-01",b:"2027-06-30",t:"01/04 a 30/06/2027"}];
+const PER=[{y:"2026",a:"2026-11-19",b:"2026-12-17",t:"19/11 a 17/12/2026"},{y:"jan–mar/27",a:"2027-01-11",b:"2027-03-31",t:"11/01 a 31/03/2027"},{y:"abr–jun/27",a:"2027-04-01",b:"2027-06-30",t:"01/04 a 30/06/2027"}];
 const _hj=(()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")})();
 let PI=PER.findIndex(p=>_hj<=p.b);if(PI<0)PI=PER.length-1;
 /* 19/11/2026: lembra o período escolhido mesmo depois de fechar o site/app */
@@ -272,13 +272,12 @@ function drawCal(){
     const box=document.createElement("div");box.className="month";
     box.innerHTML="<h3>"+cur.toLocaleDateString("pt-BR",{month:"long",year:"numeric"})+"</h3><div class='dow'><span>dom</span><span>seg</span><span>ter</span><span>qua</span><span>qui</span><span>sex</span><span>sáb</span></div>";
     const g=document.createElement("div");g.className="grid";
-    const sd=new Date(START+"T12:00:00"), d0=(y===sd.getFullYear()&&m===sd.getMonth())?sd.getDate():1;
+    const sd=new Date(START+"T12:00:00"), d0=1;
     for(let i=0;i<new Date(y,m,d0).getDay();i++){const b=document.createElement("div");b.className="day blank";g.appendChild(b)}
     for(let d=d0;d<=new Date(y,m+1,0).getDate();d++){
       const ds=y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
       const b=document.createElement("button");b.type="button";b.textContent=d;
-      if(ds>END)break;
-      if(ds<START){b.className="day blank";g.appendChild(b);continue}
+      if(ds<START||ds>END){b.className="day bloq";b.disabled=true;b.title="Bloqueado: fora do período";g.appendChild(b);continue}
       const rec=data[ds];
       let cls="day";
       if(isWE(ds)){cls+=" we";b.disabled=true}

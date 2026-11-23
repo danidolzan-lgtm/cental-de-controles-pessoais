@@ -69,7 +69,7 @@ details.manual[open] summary{margin-bottom:12px}
       <label for="q">O que você quer fazer?<input id="q" type="search" placeholder="Ex.: escondidinho de carne seca" autocomplete="off" enterkeyhint="search"></label>
       <button class="btn" type="submit" id="bBusca">Buscar</button>
     </div>
-    <p class="hint" id="bMsg">A busca é feita no TudoGostoso. Toque numa receita para ver e salvar.</p>
+    <p class="hint" id="bMsg">A busca procura no Google, Bing, DuckDuckGo e TudoGostoso ao mesmo tempo. Toque numa receita para ver e salvar.</p>
     <div class="results" id="results"></div>
   </form>
 
@@ -124,7 +124,7 @@ async function getPage(url,html){
     return await r.text();
   }finally{clearTimeout(t)}
 }
-function parseResults(md,q){
+function parseResults(md,q,solto){
   const seen=new Set(), out=[];
   for(const m of md.matchAll(/\[((?:!\[[^\]]*\]\([^)]*\)\s*)*[^\[\]]{3,160})\]\((https:\/\/www\.tudogostoso\.com\.br\/receita\/[^)\s]+\.html)/g)){
     const nome=fixAcento(m[1].replace(/!\[[^\]]*\]\([^)]*\)/g,"").replace(/[*_#]/g,"")).trim(), url=m[2];
@@ -133,7 +133,53 @@ function parseResults(md,q){
   const words=norm(q).split(/[^a-z0-9]+/).filter(w=>w.length>=3&&!["com","para","sem","que","das","dos"].includes(w));
   const score=r=>{const h=norm(r.nome+" "+r.url);return words.filter(w=>h.includes(w)).length};
   const hits=out.map(r=>({...r,s:score(r)})).filter(r=>r.s>0).sort((a,b)=>b.s-a.s);
-  return (hits.length?hits:[]).slice(0,12);
+  return (hits.length?hits:(solto?out:[])).slice(0,12);
+}
+/* 23/11/2026: além do TudoGostoso, procura no Google, Bing e DuckDuckGo e aceita receita de qualquer site */
+const BUSCADORES=/(^|\.)(google\.|bing\.com|duckduckgo\.com|jina\.ai|microsoft\.com|msn\.com|youtube\.com|youtu\.be|facebook\.com|instagram\.com|tiktok\.com|pinterest\.|twitter\.com|x\.com|wikipedia\.org|gstatic\.com|googleusercontent\.com|shopping\.)/i;
+function urlReal(u){
+  try{
+    let x=new URL(u.replace(/^\/\//,"https://"),"https://www.google.com");
+    const h=x.hostname;
+    if(/duckduckgo\.com$/.test(h)&&x.searchParams.get("uddg"))return decodeURIComponent(x.searchParams.get("uddg"));
+    if(/google\./.test(h)&&x.pathname==="/url")return x.searchParams.get("q")||x.searchParams.get("url")||"";
+    if(/bing\.com$/.test(h)&&x.searchParams.get("u")){const a=x.searchParams.get("u");if(/^a1/.test(a)){try{return atob(a.slice(2).replace(/-/g,"+").replace(/_/g,"/"))}catch(e){}}}
+    return x.href;
+  }catch(e){return ""}
+}
+const SITES=/(tudogostoso|panelinha|receitasnestle|cybercook|anamariabrogui|receitas\.globo|guiadacozinha|receitaria|comidaereceitas|receiteria|minhasreceitas|mundoreceitas|tastemade|receitasdeminuto|sabornamesa|receitasagora|ninadecomer|tempero|receita|recipe|cozinha|culinaria|gastronomia)/i;
+function parseBusca(md,fonte){
+  const out=[],seen=new Set();
+  for(const m of md.matchAll(/\[([^\[\]]{4,200})\]\(([^)\s]+)\)/g)){
+    const u=urlReal(m[2]);if(!/^https?:\/\//.test(u))continue;
+    let h;try{h=new URL(u).hostname}catch(e){continue}
+    if(BUSCADORES.test(h))continue;
+    if(!SITES.test(h+new URL(u).pathname))continue;
+    const p=new URL(u).pathname;if(p.length<8||/\/(busca|search|categoria|tag|tags|autor|author)\b/i.test(p))continue;
+    const nome=fixAcento(m[1].replace(/!\[[^\]]*\]\([^)]*\)/g,"").replace(/[*_#]/g,"").replace(/\s+/g," ")).trim().replace(/\s*[|·–-]\s*[^|·–-]{2,40}$/,"");
+    const k=u.split("#")[0].replace(/\/$/,"");if(!nome||seen.has(k))continue;seen.add(k);
+    out.push({nome,url:u,fonte:fonte,site:h.replace(/^www\./,"")});
+  }
+  return out;
+}
+function palavras(q){return norm(q).split(/[^a-z0-9]+/).filter(w=>w.length>=3&&!["com","para","sem","que","das","dos","receita","receitas","como","fazer"].includes(w))}
+function nota(r,ws){const h=norm(r.nome+" "+r.url);return ws.filter(w=>h.includes(w)||h.includes(w.slice(0,Math.max(4,w.length-2)))).length}
+async function buscarTudo(q){
+  const qq=encodeURIComponent(q+" receita");
+  const fontes=[
+    ["TudoGostoso","https://www.tudogostoso.com.br/busca?q="+encodeURIComponent(q),md=>parseResults(md,q,true).map(r=>({...r,site:"tudogostoso.com.br"}))],
+    ["Google","https://www.google.com/search?hl=pt-BR&gl=br&q="+qq,md=>parseBusca(md,"Google")],
+    ["Bing","https://www.bing.com/search?setlang=pt-BR&cc=BR&q="+qq,md=>parseBusca(md,"Bing")],
+    ["DuckDuckGo","https://html.duckduckgo.com/html/?kl=br-pt&q="+qq,md=>parseBusca(md,"DuckDuckGo")]
+  ];
+  const rs=await Promise.allSettled(fontes.map(([n,u,fn])=>getPage(u,false).then(fn)));
+  const ws=palavras(q),todos=[],seen=new Set();let ok=0;
+  rs.forEach((r,i)=>{if(r.status!=="fulfilled")return;ok++;r.value.forEach((x,j)=>{const k=x.url.split("#")[0].replace(/\/$/,"");if(seen.has(k))return;seen.add(k);todos.push({...x,ord:j,src:i})})});
+  if(!ok)throw new Error("sem resposta");
+  todos.forEach(x=>x.s=nota(x,ws));
+  const comNota=todos.filter(x=>x.s>0);
+  const lista=(comNota.length?comNota:todos).sort((a,b)=>b.s-a.s||a.ord-b.ord||a.src-b.src);
+  return lista.slice(0,18);
 }
 function findRecipe(o){
   if(!o||typeof o!=="object")return null;
@@ -164,7 +210,7 @@ function fromMarkdown(md){
   const L=md.split(/\r?\n/);
   const isHead=l=>/^\s*(#{1,6}\s|[A-ZÁÉÍÓÚÂÊÔÃÕÇ][^.!?]{2,40}\n?$)/.test(l)&&!/^\s*[-*+]\s/.test(l);
   const iI=L.findIndex(l=>/^\s*#{0,6}\s*ingredientes\s*:?\s*$/i.test(l.replace(/[*_]/g,"")));
-  const iP=L.findIndex((l,i)=>i>iI&&/^\s*#{0,6}\s*(modo de preparo|preparo|como fazer)\s*:?\s*$/i.test(l.replace(/[*_]/g,"")));
+  const iP=L.findIndex((l,i)=>i>iI&&/^\s*#{0,6}\s*(modo de preparo|modo de fazer|preparo|como fazer|como preparar|instru[cç][oõ]es)\s*:?\s*$/i.test(l.replace(/[*_]/g,"")));
   if(iI<0||iP<0)return null;
   const isItem=l=>/^\s*(?:[-*+]|\d+[.)])\s+\S/.test(l);
   const ing=L.slice(iI+1,iP).filter(l=>isItem(l)||(l.trim()&&!/^\s*#/.test(l)&&l.trim().length<120)).map(cleanMd).filter(l=>l&&!/^ingredientes:?$/i.test(l));
@@ -186,11 +232,10 @@ $("fBusca").addEventListener("submit",async e=>{
   const q=$("q").value.trim(); if(!q){$("q").focus();return}
   $("results").innerHTML="";$("bMsg").className="hint";$("bMsg").textContent="Buscando receitas…";busy($("bBusca"),true,"Buscando");
   try{
-    const md=await getPage("https://www.tudogostoso.com.br/busca?q="+encodeURIComponent(q),false);
-    const res=parseResults(md,q);
+    const res=await buscarTudo(q);
     if(!res.length){$("bMsg").textContent="Não achei receitas com esse nome. Tente escrever de outro jeito (ex.: só o nome do prato).";return}
     $("bMsg").textContent=res.length+" receitas encontradas. Toque numa para ver.";
-    $("results").innerHTML=res.map((r,i)=>"<button type='button' class='res' data-i='"+i+"'><b>"+esc(r.nome)+"</b><span>TudoGostoso</span></button>").join("");
+    $("results").innerHTML=res.map((r,i)=>"<button type='button' class='res' data-i='"+i+"'><b>"+esc(r.nome)+"</b><span>"+esc(r.site||"TudoGostoso")+"</span></button>").join("");
     $("results")._res=res;
   }catch(err){$("bMsg").className="hint err";$("bMsg").textContent="A busca não respondeu agora. Confira a internet e tente de novo em 1 minuto."}
   finally{busy($("bBusca"),false)}

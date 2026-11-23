@@ -135,7 +135,7 @@ img,svg{max-width:100%}
 <style>.per{display:flex;gap:6px;flex-wrap:wrap}.per button{appearance:none;font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap}.per button b{font-weight:700}.per button.on{background:var(--accent);border-color:var(--accent);color:#fff}</style>
 <script>
 // 29/10/2026: tudo zerado. Três períodos: 29/10 a 17/12/2026, 11/01 a 31/03/2027 e 01/04 a 30/06/2027 (botões em cima do calendário).
-const PER=[{y:"2026",a:"2026-10-29",b:"2026-12-17",t:"29/10 a 17/12/2026"},{y:"jan–mar/27",a:"2027-01-11",b:"2027-03-31",t:"11/01 a 31/03/2027"},{y:"abr–jun/27",a:"2027-04-01",b:"2027-06-30",t:"01/04 a 30/06/2027"}];
+const PER=[{y:"2026",a:"2026-11-19",b:"2026-12-17",t:"19/11 a 17/12/2026"},{y:"jan–mar/27",a:"2027-01-11",b:"2027-03-31",t:"11/01 a 31/03/2027"},{y:"abr–jun/27",a:"2027-04-01",b:"2027-06-30",t:"01/04 a 30/06/2027"}];
 const _hj=(()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")})();
 let PI=PER.findIndex(p=>_hj<=p.b);if(PI<0)PI=PER.length-1;
 /* 19/11/2026: lembra o período escolhido mesmo depois de fechar o site/app */
@@ -194,17 +194,17 @@ function drawCal(){
     const mk=String(y)+"-"+String(m+1).padStart(2,"0");let mw=0,ml=0;Object.keys(marks).forEach(k=>{if(k.startsWith(mk)&&isWd(k)&&k>=START&&k<=END){marks[k]==="w"?mw++:ml++}});
     box.innerHTML="<h3><span>"+cur.toLocaleDateString("pt-BR",{month:"long",year:"numeric"})+"</span><small>"+mw+" ✓ · "+ml+" ✗</small></h3><div class='dow'><span>dom</span><span>seg</span><span>ter</span><span>qua</span><span>qui</span><span>sex</span><span>sáb</span></div>";
     const g=document.createElement("div");g.className="grid";
-    const sd=new Date(START+"T12:00:00"), d0=(y===sd.getFullYear()&&m===sd.getMonth())?sd.getDate():1;
+    const sd=new Date(START+"T12:00:00"), d0=1;
     let lead=false;
     const last=new Date(y,m+1,0).getDate();
     for(let d=d0;d<=last;d++){
       const ds=y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
       const b=document.createElement("button");b.type="button";b.textContent=d;
-      if(ds>END)break;
       const wd=new Date(y,m,d).getDay();
       if(!lead){for(let i=0;i<wd;i++){const bk=document.createElement("div");bk.className="day blank";g.appendChild(bk)}lead=true}
+      if(ds<START||ds>END){b.className="day bloq";b.disabled=true;b.title="Bloqueado: fora do período";g.appendChild(b);continue}
       if(wd===0||wd===6){b.className="day we";b.disabled=true;b.title="Fim de semana: travado";g.appendChild(b);continue}
-      if(ds<START){b.className="day blank";g.appendChild(b);continue}
+      
       b.className="day"+(marks[ds]==="w"?" w":marks[ds]==="l"?" l":"")+(ds===t?" today":"")+(ds===sel?" sel":"")+(ds<t&&!marks[ds]?(ds>="2026-11-20"?" past nop":" past semop"):"")+(ds===t&&ds<="2026-11-19"&&!marks[ds]?" semop":"");
       if(ds>t) b.disabled=true;
       b.setAttribute("aria-label",fmt(ds)+(marks[ds]?(marks[ds]==="w"?", acertei":", errei"):""));

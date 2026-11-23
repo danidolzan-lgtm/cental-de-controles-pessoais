@@ -233,7 +233,7 @@ try{localStorage.removeItem("lucroOB.v1")}catch(e){} // zerado em 29/10/2026
 (function(){
 const $=id=>document.getElementById(id);
 const LS="lucroOB3.v1", LSF="lucroOB.filtro";
-const DESDE="2026-11-20"; // 19/11/2026: tudo zerado; o lucro OB só conta de 20/11/2026 em diante (antes disso é desconsiderado)
+const DESDE="2026-11-19 18:00"; // 23/11/2026: o lucro OB conta a partir de 19/11/2026 às 18h (antes disso é desconsiderado)
 const brl=v=>(v<0?"-":"")+"R$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
 const sbrl=v=>(v>0?"+":"")+brl(v);
 const kbrl=v=>{const a=Math.abs(v);const s=v<0?"-":"";return a>=1000?s+"R$ "+(a/1000).toLocaleString("pt-BR",{maximumFractionDigits:1})+" mil":s+"R$ "+Math.round(a)};
@@ -378,8 +378,8 @@ function applySnap(q){
 }
 
 /* ---------- filtros ---------- */
-const PER=[["hoje","Hoje"],["semana","Esta semana"],["7d","7 dias"],["mes","Este mês"],["mesant","Mês passado"],["30d","30 dias"],["ano","Este ano"],["p1","20/11 a 17/12"],["p2","jan–mar/27"],["p3","abr–jun/27"],["tudo","Tudo"],["custom","Período…"]];
-const PERS={p1:["2026-11-20","2026-12-17"],p2:["2027-01-11","2027-03-31"],p3:["2027-04-01","2027-06-30"]};
+const PER=[["hoje","Hoje"],["semana","Esta semana"],["7d","7 dias"],["mes","Este mês"],["mesant","Mês passado"],["30d","30 dias"],["ano","Este ano"],["p1","19/11 a 17/12"],["p2","jan–mar/27"],["p3","abr–jun/27"],["tudo","Tudo"],["custom","Período…"]];
+const PERS={p1:["2026-11-19","2026-12-17"],p2:["2027-01-11","2027-03-31"],p3:["2027-04-01","2027-06-30"]};
 // 4 sessões fixas (pelo horário de abertura da operação); o que abriu fora delas cai em "Fora do horário"
 const SES=[["all","Todas as sessões"],["s1","Sessão 1 · 08:00"],["manha","Sessão 2 · 09:45"],["tarde","Sessão 3 · 13:30"],["s4","Sessão 4 · 15:00"],["s5","Sessão 5 · OTC 19:30"],["fora","Fora do horário"]];
 const SJ={s1:[480,540],manha:[585,625],tarde:[810,870],s4:[900,960],s5:[1170,1230]};

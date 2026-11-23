@@ -463,5 +463,21 @@ lsLoad();garantirGeral();render();st("Conectando…");
     if(edId){const a=notas.find(x=>x.id===edId);notas=r.filter(x=>x.id!==edId);if(a)notas.push(a)}else notas=r;
     lsSave();if(!edId&&!D)render();st("Sincronizado")},()=>st("Sem conexão com o salvamento"));
 })();
+
+/* 23/11/2026: letra maiúscula automática no começo de cada frase (título, texto e itens de lista) */
+(function(){
+  const campo=t=>t&&(t.tagName==="TEXTAREA"||(t.tagName==="INPUT"&&(t.type==="text"||t.type==="")))&&t.id!=="q";
+  document.addEventListener("focusin",e=>{const t=e.target;if(campo(t))t.setAttribute("autocapitalize","sentences")},true);
+  document.addEventListener("input",e=>{
+    const t=e.target;if(!campo(t)||e.isComposing)return;
+    if(e.inputType&&e.inputType!=="insertText")return;
+    const p=t.selectionStart;if(p==null||p<1||p!==t.selectionEnd)return;
+    const v=t.value,c=v.charAt(p-1),C=c.toLocaleUpperCase("pt-BR");
+    if(C===c||c.toLocaleLowerCase("pt-BR")!==c)return; // não é letra minúscula
+    const antes=v.slice(0,p-1);
+    if(!/(^|[.!?…]\s+|\n)\s*([-*•]\s+|\d+[.)]\s+)?$/.test(antes))return;
+    t.value=antes+C+v.slice(p);t.setSelectionRange(p,p);
+  },true);
+})();
 </script>
 </body></html>

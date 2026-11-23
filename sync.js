@@ -255,7 +255,10 @@
         "html[data-page=limpeza] #lotes{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:16px;align-items:start}" +
       "}" +
       /* oração: texto longo fica confortável de ler */
-      "html[data-page=oracao] .wrap{max-width:1100px!important}";
+      "html[data-page=oracao] .wrap{max-width:1100px!important}" +
+      /* 23/11/2026: nas páginas, sem o nome comprido do site no topo; só o nome da página */
+      "html[data-page]:not([data-page=index]) .site-brand .t{display:none!important}" +
+      "html[data-page]:not([data-page=index]) .site-crumb{overflow:visible}html[data-page]:not([data-page=index]) .site-crumb b{overflow:visible;font-size:1rem;font-weight:700}";
     var st2 = document.createElement("style"); st2.textContent = css;
     (document.head || document.documentElement).appendChild(st2);
 
@@ -274,7 +277,8 @@
       }
       inn.appendChild(el("a", "site-brand", "<span class='site-logo' aria-hidden='true'><svg viewBox='0 0 32 32' fill='none' stroke='#fff' stroke-linecap='round' stroke-linejoin='round'><circle cx='16' cy='16' r='10' stroke-opacity='.3' stroke-width='2.6'/><circle cx='16' cy='16' r='10' stroke-width='2.6' stroke-dasharray='46 63' transform='rotate(-90 16 16)'/><path d='M11.6 16.4l3 2.9 5.8-6.3' stroke-width='2.8'/><circle cx='25.6' cy='6.6' r='1.3' fill='#fff' stroke='none'/></svg></span><span class='t'>Central de Controles Pessoais</span>")).href = "index.html";
       var crumb = el("div", "site-crumb");
-      if (cur) crumb.innerHTML = "<span class='sep'>/</span><a class='tag' href='index.html' data-k='" + cur.g.k + "' style='color:inherit;text-decoration:none'><i style='background:" + cur.g.c + "'></i>" + esc(cur.g.s) + "</a><span class='sep'>/</span><b>" + esc(cur.it[1]) + "</b>";
+      /* 23/11/2026: ao lado do Voltar fica só o nome da página onde você está */
+      if (cur) crumb.innerHTML = "<b>" + esc(cur.it[1]) + "</b>";
       inn.appendChild(crumb);
       if (cur) {
         var q = el("nav", "site-quick"); q.setAttribute("aria-label", cur.g.g); q.style.setProperty("--gc", cur.g.c);
@@ -752,3 +756,68 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", liga); else liga();
 })();
 
+/* ===== 23/11/2026: dias bloqueados e legenda em todos os calendários =====
+   Os calendários mostram o mês inteiro. Dias fora do período (antes de 19/11/2026, de 18/12 até o início de janeiro etc.)
+   ficam travados como "bloqueado". Todo calendário tem legenda (fim de semana, bloqueado e o resto da página). */
+(function () {
+  var file = (decodeURIComponent(location.pathname).split("/").pop() || "").replace(/\.html?$/i, "");
+  window.mcInicio = "2026-11-19"; window.mcInicioHora = "18:00";
+  window.mcBloqueado = function (ds) { return ds < "2026-11-19" || (ds >= "2026-12-18" && ds <= "2027-01-10") || ds > "2027-06-30"; };
+  var st = document.createElement("style");
+  st.textContent =
+    ".day.bloq,.legend i.bloq-i{background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--loss,#C2410C) 16%,transparent) 0 2px,transparent 2px 7px),color-mix(in srgb,var(--muted,#58668A) 8%,var(--surface,#fff))!important;border:1px dotted color-mix(in srgb,var(--muted,#58668A) 60%,transparent)!important;color:color-mix(in srgb,var(--muted,#58668A) 75%,transparent)!important}" +
+    ".day.bloq{opacity:.6!important;cursor:not-allowed!important;box-shadow:none!important;outline:none!important;transform:none!important}" +
+    ".day.bloq .d{opacity:.8}" +
+    ".legend i.we-i{background:var(--bg,#F4F6FB);background-image:repeating-linear-gradient(135deg,transparent 0 5px,rgba(120,135,170,.22) 5px 6.5px)!important}" +
+    ".legend.mc-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:.78rem;color:var(--muted,#58668A);margin:0 0 4px}" +
+    ".legend.mc-leg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1px solid var(--line,#DDE4F2)}" +
+    ".mc-leg .pos-i{background:var(--win-soft,#DCFCE7)}.mc-leg .neg-i{background:var(--loss-soft,#FEE2E2)}.mc-leg .hj-i{border:2px solid var(--accent,#2563EB)!important;background:var(--surface,#fff)}" +
+    ".mc-leg .ex-f{background:var(--win,#16A34A)}.mc-leg .ex-p{background:var(--part-soft,#FEF3C7);border-color:var(--part,#D97706)!important}.mc-leg .ck-h{background:var(--part-soft,#FEF3C7);border-color:var(--part,#D97706)!important}";
+  (document.head || document.documentElement).appendChild(st);
+  if (!/^(dopamina|diario|checklist|exercicios)/.test(file)) { datas(); return; }
+  function sp(cls, i, t) { var s = document.createElement("span"); s.className = cls; s.innerHTML = "<i class='" + i + "'></i>" + t; return s; }
+  function legendas() {
+    var cal = document.getElementById("cal"); if (!cal) return;
+    var lgs = document.querySelectorAll(".legend");
+    if (!lgs.length) {
+      var lg = document.createElement("div"); lg.className = "legend mc-leg"; lg.setAttribute("aria-label", "Legenda do calendário");
+      if (/^diario/.test(file)) { lg.appendChild(sp("", "pos-i", "dia no lucro")); lg.appendChild(sp("", "neg-i", "dia no prejuízo")); }
+      lg.appendChild(sp("", "hj-i", "hoje"));
+      cal.parentNode.insertBefore(lg, cal); lgs = [lg];
+    }
+    Array.prototype.forEach.call(lgs, function (lg) {
+      var f0 = (lg.textContent || "").trim().charAt(0), up = f0 && f0 === f0.toUpperCase() && f0 !== f0.toLowerCase();
+      function sp(c, i, t) { var s = document.createElement("span"); s.className = c; s.innerHTML = "<i class='" + i + "'></i>" + (up ? t.charAt(0).toUpperCase() + t.slice(1) : t); return s; }
+      if (/^exercicios/.test(file) && !lg.querySelector(".ex-p")) { var p = sp("", "ex-p", "treino parcial"); lg.appendChild(p); }
+      if (/^checklist/.test(file) && !lg.querySelector(".ck-h") && document.querySelector(".day.half")) { lg.appendChild(sp("", "ck-h", "metade")); }
+      if (!lg.querySelector("i.we") && !lg.querySelector(".we-l")) lg.appendChild(sp("we-l", "we-i", "fim de semana (travado)"));
+      if (!lg.querySelector(".bloq-l")) lg.appendChild(sp("bloq-l", "bloq-i", "bloqueado (fora do período)"));
+      var n = lg.querySelector(".nop-l"); if (n) lg.appendChild(n); // "não operou" sempre por último
+    });
+  }
+  var pend = false;
+  function ag() { if (!pend) { pend = true; requestAnimationFrame(function () { pend = false; legendas(); }); } }
+  function ligar() { new MutationObserver(ag).observe(document.body, { childList: true, subtree: true }); ag(); datas(); }
+  if (document.body) ligar(); else document.addEventListener("DOMContentLoaded", ligar);
+
+  /* campos de data (lançar dia no Lucro etc.): não deixa escolher dia bloqueado */
+  function datas() {
+    if (!/^(lucro|diario)/.test(file)) return;
+    function prep() {
+      document.querySelectorAll("input[type=date]").forEach(function (inp) {
+        if (inp.dataset.mcBloq) return; inp.dataset.mcBloq = "1";
+        if (!inp.min || inp.min < "2026-11-19") inp.min = "2026-11-19";
+        var lanc = /^(mD|dData)$/.test(inp.id);
+        if (!lanc) return;
+        inp.addEventListener("change", function () {
+          var v = inp.value; if (!v || !window.mcBloqueado(v)) return;
+          inp.value = "";
+          var m = "Dia bloqueado: fora do período (conta de 19/11/2026 às 18h até 17/12, e volta em 11/01)";
+          if (window.ui && ui.toast) ui.toast(m); else alert(m);
+        }, true);
+      });
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", prep); else prep();
+    setTimeout(prep, 1500);
+  }
+})();

@@ -17,7 +17,7 @@ h1{font-family:var(--f-display);font-weight:800;font-size:1.8rem;margin:0}
 .sub{color:var(--muted);font-size:.9rem;margin:4px 0 0}
 @keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 /* tela inicial: os 3 módulos no meio */
-.home{min-height:calc(100dvh - 150px);display:grid;align-content:center;gap:22px;text-align:center}
+.home{min-height:calc(100dvh - 150px);display:grid;align-content:start;padding-top:clamp(8px,3vh,32px);gap:22px;text-align:center} /* 23/11/2026: título fica sempre no topo; escondendo módulos, os outros sobem */
 .mods{display:grid;gap:16px;grid-template-columns:repeat(var(--n,3),minmax(0,1fr))}
 @media (max-width:760px){.mods{grid-template-columns:minmax(0,1fr)}.home{text-align:left;min-height:calc(100dvh - 120px)}}
 .mod{--gc:#2563EB;appearance:none;font:inherit;color:var(--fg);text-align:left;cursor:pointer;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:20px;padding:22px;background:var(--surface);display:grid;gap:14px;box-shadow:0 14px 30px -22px var(--gc);transition:transform .16s ease,box-shadow .16s,border-color .16s;animation:up .35s ease both}
