@@ -209,7 +209,7 @@ tr.day td.num{font-family:var(--f-num);text-transform:none;text-align:right}
 </div>
 
 <script>
-try{localStorage.removeItem("lucroB3.filtro")}catch(e){} // filtro volta ao padrão ao abrir o app
+/* 23/11/2026: o filtro não volta mais ao padrão; abre no último que você clicou */
 (function(){
 const $=id=>document.getElementById(id);
 const LS="lucroB3p.v1", LSF="lucroB3.filtro";
@@ -404,7 +404,7 @@ async function save(ks){
 
 /* ---------- filtros ---------- */
 const PERS=[["p1","2026 · 19/11 a 17/12","2026-11-19","2026-12-17"],["p2","jan–mar/27","2027-01-11","2027-03-31"],["p3","abr–jun/27","2027-04-01","2027-06-30"]];
-const CH=[["hoje","Hoje"],["semana","Esta semana"],["7d","7 dias"],["mes","Este mês"],["mesant","Mês passado"],["30d","30 dias"],["ano","Este ano"]].concat(PERS.map(p=>[p[0],p[0]==="p1"?"29/10 a 17/12":p[1]]),[["tudo","Tudo"],["custom","Período…"]]);
+const CH=[["hoje","Hoje"],["semana","Esta semana"],["7d","7 dias"],["mes","Este mês"],["mesant","Mês passado"],["30d","30 dias"],["ano","Este ano"]].concat(PERS.map(p=>[p[0],p[0]==="p1"?"19/11 a 17/12":p[1]]),[["tudo","Tudo"],["custom","Período…"]]);
 const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const hoje=ymd(new Date());
 let F={per:"mes",de:"",ate:""};

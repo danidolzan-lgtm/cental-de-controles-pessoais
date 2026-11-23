@@ -596,7 +596,7 @@
   (function () {
     if (!/Android/i.test(navigator.userAgent)) return;
     function fix() {
-      document.querySelectorAll('a[href*="quotex.com"],a[href*="exness.com"]').forEach(function (a) {
+      document.querySelectorAll('a[href*="quotex.com"],a[href*="exness.com"],a[href*="santandercorretora.com.br"]').forEach(function (a) {
         if (a.dataset.chrome) return; a.dataset.chrome = "1";
         var u = a.href;
         a.href = "intent://" + u.replace(/^https?:\/\//, "") + "#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=" + encodeURIComponent(u) + ";end";

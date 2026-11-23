@@ -228,7 +228,7 @@ tr.day td.num{font-family:var(--f-num);text-transform:none;text-align:right}
 </div>
 
 <script>
-try{localStorage.removeItem("lucroOB.filtro")}catch(e){} // filtro volta ao padrão ao abrir o app
+/* 23/11/2026: o filtro não volta mais ao padrão; abre no último que você clicou */
 try{localStorage.removeItem("lucroOB.v1")}catch(e){} // zerado em 29/10/2026
 (function(){
 const $=id=>document.getElementById(id);
