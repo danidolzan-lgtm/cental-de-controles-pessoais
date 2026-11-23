@@ -853,3 +853,53 @@
     setTimeout(prep, 1500);
   }
 })();
+
+/* ===== 23/11/2026: cada página abre onde você clicou por último (período, filtro, mês, ano)
+   e essa escolha vai junto para a conta, então vale no PC e no celular ===== */
+(function () {
+  var file = (decodeURIComponent(location.pathname).split("/").pop() || "index").replace(/\.html?$/i, "") || "index";
+  var RX = /^(mc\.per\.|filtro_|lucroOB\.filtro$|lucroB3\.filtro$|lucroFX\.mes$|mc\.irAno\.|mc\.mercado$)/;
+  var TK = "mc.prefT", orig = Storage.prototype.setItem, aplicando = false, pend = {}, timer = null;
+  var LS; try { LS = window.localStorage; } catch (e) { return; }
+  function tget() { try { return JSON.parse(LS.getItem(TK) || "{}") || {}; } catch (e) { return {}; } }
+  function enc(k) { return k.replace(/\./g, "~"); }
+  function dec(k) { return k.replace(/~/g, "."); }
+  function enviar() {
+    var p = pend; pend = {}; if (!Object.keys(p).length || !window.claude) return;
+    window.claude.use("db").then(function (d) { if (!d || !d.app) return; var o = {}; Object.keys(p).forEach(function (k) { o[enc(k)] = p[k]; }); d.app("geral").doc("config/preferencias").set({ p: o }, { merge: true }).catch(function () {}); });
+  }
+  Storage.prototype.setItem = function (k, v) {
+    var ant = null; if (this === LS && RX.test(k)) { try { ant = this.getItem(k); } catch (e) {} }
+    orig.call(this, k, v);
+    if (this !== LS || aplicando || !RX.test(k) || ant === String(v)) return;
+    var t = tget(); t[k] = Date.now(); orig.call(this, TK, JSON.stringify(t));
+    pend[k] = { v: String(v), t: t[k] }; clearTimeout(timer); timer = setTimeout(enviar, 700);
+  };
+  function daPagina(k) {
+    return k.indexOf(file) >= 0 || (file === "lucro-ob" && k === "lucroOB.filtro") || (file === "lucro-b3" && k === "lucroB3.filtro") ||
+      (file === "lucro-fx" && k === "lucroFX.mes") || (/^diario/.test(file) && /^filtro_/.test(k)) || (file === "index" && k === "mc.mercado");
+  }
+  setTimeout(function () {
+    if (!window.claude) return;
+    window.claude.use("db").then(function (d) {
+      if (!d || !d.app) return;
+      d.app("geral").doc("config/preferencias").get().then(function (x) {
+        var nuvem = (x.exists && (x.data() || {}).p) || {}, t = tget(), mudou = false, subir = {};
+        Object.keys(nuvem).forEach(function (ek) {
+          var k = dec(ek), c = nuvem[ek] || {}; if (!RX.test(k) || c.v == null) return;
+          if ((+c.t || 0) > (+t[k] || 0) && LS.getItem(k) !== c.v) {
+            aplicando = true; try { orig.call(LS, k, c.v); } catch (e) {} aplicando = false;
+            t[k] = +c.t; if (daPagina(k)) mudou = true;
+          }
+        });
+        orig.call(LS, TK, JSON.stringify(t));
+        /* o que só existe neste aparelho (ou é mais novo aqui) sobe para a conta */
+        Object.keys(t).forEach(function (k) { var c = nuvem[enc(k)]; if (RX.test(k) && LS.getItem(k) != null && (!c || (+c.t || 0) < t[k])) subir[k] = { v: LS.getItem(k), t: t[k] }; });
+        if (Object.keys(subir).length) { pend = Object.assign(subir, pend); enviar(); }
+        /* a escolha mais nova veio do outro aparelho: abre a página de novo já nela (uma vez só) */
+        var g = "mc.prefRl." + file;
+        if (mudou && !sessionStorage.getItem(g)) { try { sessionStorage.setItem(g, "1"); } catch (e) {} location.reload(); }
+      }).catch(function () {});
+    });
+  }, 0);
+})();

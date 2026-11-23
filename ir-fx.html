@@ -24,6 +24,7 @@ h2{font-family:var(--f-display);font-size:1rem;margin:0}
 .lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .big{font-family:var(--f-num);font-weight:600;font-size:1.35rem;font-variant-numeric:tabular-nums}
 .pos{color:var(--win)} .neg{color:var(--loss)}
+.years .ysel{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--muted)}.years select{appearance:auto;font:inherit;font-family:var(--f-num);font-weight:600;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 12px;min-width:110px;cursor:pointer}
 .years{display:flex;gap:6px}
 .years button{appearance:none;font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;padding:6px 12px;cursor:pointer;font-family:var(--f-num)}
 .years button.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
@@ -133,20 +134,22 @@ summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:1r
 </div>
 <script>
 
-/* 23/11/2026: IR só considera o período de consulta: de 19/11/2026 às 18h até 30/06/2027 (recesso de 18/12 a 10/01 fica de fora) */
-const IR_INI="2026-11", IR_FIM="2027-06";
+/* 23/11/2026: IR só considera de 19/11/2026 às 18h em diante (recesso de 18/12 a 10/01 fica de fora) */
+const IR_INI="2026-11", IR_FIM="9999-12";
 function irDs(d){return d.y+"-"+String(d.m).padStart(2,"0")+"-"+String(d.d).padStart(2,"0")}
 function irFora(ds,txt){
-  if(ds<"2026-11-19"||ds>"2027-06-30"||(ds>="2026-12-18"&&ds<="2027-01-10"))return true;
+  if(ds<"2026-11-19"||(ds>="2026-12-18"&&ds<="2027-01-10"))return true;
   if(ds==="2026-11-19"&&txt){const h=String(txt).match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);if(h&&+h[1]<18)return true}
   return false;
 }
-const YEARS=[2026,2027], CFG="irFX2.v1", LUC="lucroFX2.v1", $=id=>document.getElementById(id);
+/* 23/11/2026: anos aparecem só quando chegam (2026 até o ano atual), escolhidos numa lista */
+const YEARS=(()=>{const a=[],f=Math.max(2026,new Date().getFullYear());for(let y=2026;y<=f;y++)a.push(y);return a})();
+const CFG="irFX2.v1", LUC="lucroFX2.v1", $=id=>document.getElementById(id);
 const r2=v=>Math.round(v*100)/100;
 const brl=v=>(v<0?"-":"")+"R$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
 const us=v=>(v<0?"-":"")+"US$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
 const n2=v=>(v<0?"−":v>0?"+":"")+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
-let dias={}, cfg={prejAnt:0}, db=null, year=new Date().getFullYear()>=2027?2027:2026;
+let dias={}, cfg={prejAnt:0}, db=null, year=(()=>{try{const y=+localStorage.getItem("mc.irAno."+"ir-fx");if(YEARS.includes(y))return y}catch(e){}return YEARS[YEARS.length-1]})(); // 23/11/2026: abre no último ano escolhido
 const liqU=d=>r2((+d.op||0)-Math.abs(+d.cus||0));
 const liqR=d=>+d.ptax>0?r2(liqU(d)*(+d.ptax)):null;
 function lsLoad(){try{const r=JSON.parse(localStorage.getItem(LUC)||"null");if(r)dias=r}catch(e){}try{const c=JSON.parse(localStorage.getItem(CFG)||"null");if(c)cfg=Object.assign(cfg,c)}catch(e){}}
@@ -166,7 +169,7 @@ function compute(){
 }
 function render(){
   $("years").innerHTML="";
-  YEARS.forEach(y=>{const b=document.createElement("button");b.type="button";b.textContent=y;b.className=y===year?"on":"";b.onclick=()=>{year=y;render()};$("years").appendChild(b)});
+  $("years").innerHTML="<label class='ysel'><span>Ano</span><select aria-label='Escolha o ano'>"+YEARS.map(y=>"<option value='"+y+"'"+(y===year?" selected":"")+">"+y+"</option>").join("")+"</select></label>";$("years").querySelector("select").onchange=e=>{year=+e.target.value;try{localStorage.setItem("mc.irAno.ir-fx",String(year))}catch(x){}render()};
   const c=compute()[year];
   $("kRes").textContent=brl(c.rr);$("kRes").className="big "+(c.rr>0?"pos":c.rr<0?"neg":"");$("kResU").textContent="em dólar: "+us(c.ru);
   $("kPrej").textContent=brl(c.prejIni);$("kIR").textContent=brl(c.ir);$("kIR").className="big "+(c.ir>0?"neg":"");

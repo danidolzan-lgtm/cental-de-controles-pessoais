@@ -132,13 +132,13 @@ const us=v=>(v<0?"-":"")+"US$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFract
 const brl=v=>(v<0?"-":"")+"R$ "+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
 const n2=v=>(v<0?"−":v>0?"+":"")+Math.abs(v).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
 const hoje=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
-let dias={}, db=null, mes=hoje().slice(0,7);
+let dias={}, db=null, mes=(()=>{try{const m=localStorage.getItem("lucroFX.mes");if(/^\d{4}-\d{2}$/.test(m||""))return m}catch(e){}return hoje().slice(0,7)})(); // 23/11/2026: abre no último mês escolhido
 const liqU=d=>r2((+d.op||0)-Math.abs(+d.cus||0));
 const liqR=d=>+d.ptax>0?r2(liqU(d)*(+d.ptax)):null;
 function lsLoad(){try{const r=JSON.parse(localStorage.getItem(LS)||"null");if(r)dias=r}catch(e){}}
 function lsSave(){try{localStorage.setItem(LS,JSON.stringify(dias))}catch(e){}}
 function setStatus(t){$("status").textContent=t}
-function render(){
+function render(){try{localStorage.setItem("lucroFX.mes",mes)}catch(e){}
   $("mLbl").textContent=new Date(mes+"-15T12:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
   const ks=Object.keys(dias).filter(k=>k.startsWith(mes)).sort();
   let tu=0,tr=0,to=0,tc=0,semPtax=0;
