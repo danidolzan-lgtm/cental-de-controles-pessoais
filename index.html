@@ -147,7 +147,7 @@ a.tile.arr{opacity:.92;transform:scale(1.04) rotate(-1deg)!important;box-shadow:
     L.filter(l=>!l[4]).forEach(l=>h.push({k:"l:"+l[1],n:l[1],u:"l:"+l[1],h:cardLk(l)}));
     cur=k;itens=h;desenhar();
     $("links").innerHTML="";
-    try{sessionStorage.setItem("index.tab",k)}catch(e){}
+    try{sessionStorage.setItem("index.tab",k);sessionStorage.setItem("mc.lastGroup",k)}catch(e){} // 23/11/2026: o módulo aberto vira o "último"; senão, ao fechar a janela de ordenar, voltava para o módulo da última página visitada (ex.: OB)
     window.scrollTo({top:0});
   }
   /* ---------- organizar os atalhos de cada módulo ---------- */
