@@ -118,7 +118,7 @@ td.tx{color:var(--warn)}
 try{localStorage.removeItem("irB3.v1")}catch(e){} // zerado em 29/10/2026
 
 /* 24/11/2026: IR liberado, conta tudo desde 29/10/2026 (sem o limite de 19/11 18h) */
-const IR_INI="2026-10", IR_FIM="9999-12";
+const IR_INI="2025-01", IR_FIM="9999-12"; // 24/11/2026: conta todo o ano de 2026 e também 2025 se tiver dados
 function irDs(d){return d.y+"-"+String(d.m).padStart(2,"0")+"-"+String(d.d).padStart(2,"0")}
 function irFora(ds,txt){
   return false;
@@ -185,7 +185,7 @@ function cardHTML(k){
     "<div class='calc' data-out='calc'></div>"+
     "<div><button type='button' class='btn' data-zero='"+k+"'>Zerar mês</button></div></div>";
 }
-function render(){
+function render(){if(!YEARS.includes(2025)&&Object.keys(res).some(k=>String(k).startsWith("2025"))){YEARS.unshift(2025)} /* 24/11/2026: 2025 aparece só quando tiver dados */
   $("years").innerHTML="";
   $("years").innerHTML="<label class='ysel'><span>Ano</span><select aria-label='Escolha o ano'>"+YEARS.map(y=>"<option value='"+y+"'"+(y===year?" selected":"")+">"+y+"</option>").join("")+"</select></label>";$("years").querySelector("select").onchange=e=>{year=+e.target.value;try{localStorage.setItem("mc.irAno.ir-b3",String(year))}catch(x){}render()};
   $("meses").innerHTML=allMonths().filter(k=>+k.slice(0,4)===year).map(cardHTML).join("");

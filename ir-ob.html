@@ -109,7 +109,7 @@ img,svg{max-width:100%}
 try{localStorage.removeItem("irOB2.v1")}catch(e){} // zerado em 29/10/2026
 
 /* 24/11/2026: IR liberado, conta tudo desde 29/10/2026 (sem o limite de 19/11 18h) */
-const IR_INI="2026-10", IR_FIM="9999-12";
+const IR_INI="2025-01", IR_FIM="9999-12"; // 24/11/2026: conta todo o ano de 2026 e também 2025 se tiver dados
 function irDs(d){return d.y+"-"+String(d.m).padStart(2,"0")+"-"+String(d.d).padStart(2,"0")}
 function irFora(ds,txt){
   return false;
@@ -132,7 +132,7 @@ function calc(y){
     carry=Math.max(0,carry-Math.max(0,sum)) + Math.max(0,-sum);
   }
 }
-function render(){
+function render(){if(!YEARS.includes(2025)&&Object.keys(res).some(k=>String(k).startsWith("2025"))){YEARS.unshift(2025)} /* 24/11/2026: 2025 aparece só quando tiver dados */
   $("years").innerHTML="";
   $("years").innerHTML="<label class='ysel'><span>Ano</span><select aria-label='Escolha o ano'>"+YEARS.map(y=>"<option value='"+y+"'"+(y===year?" selected":"")+">"+y+"</option>").join("")+"</select></label>";$("years").querySelector("select").onchange=e=>{year=+e.target.value;try{localStorage.setItem("mc.irAno.ir-ob",String(year))}catch(x){}render()};
   const c=calc(year);
@@ -366,7 +366,7 @@ function compute(){
     return {r,v:ok?v*cot:null,off:!ok};
   });
   const keys=Object.keys(tot).sort();
-  const first=window.IR_FIRST||"2026-11";
+  const first=window.IR_FIRST||"2025-01";
   $("impMonths").innerHTML=keys.length?keys.map(k=>{
     const t=Math.round(tot[k]*100)/100, fora=k<first;
     return "<div><span><span>"+mesNome(k)+"</span> · "+cnt[k]+(cnt[k]===1?" operação":" operações")+" · <b class='pos'>"+(nw[k]||0)+"W</b> <b class='neg'>"+(nl[k]||0)+"L</b> · acerto "+((nw[k]||0)+(nl[k]||0)?Math.round((nw[k]||0)/((nw[k]||0)+(nl[k]||0))*100)+"%":"–")+"<br>Ganhos <b class='pos'>"+fmt(Math.round((gan[k]||0)*100)/100)+"</b> · Perdas <b class='neg'>"+fmt(Math.round((per[k]||0)*100)/100)+"</b><br>"+(t>=0?"Lucro":"Prejuízo")+" do mês <b class='"+(t>0?"pos":t<0?"neg":"")+"' style='font-size:1.1rem'>"+fmt(t)+"</b></span>"+(fora?"<span class='msg'>fora do período</span>":"<button type='button' class='btn sm' data-put='"+k+"' data-v='"+t+"'>Lançar em "+mesNome(k).split(" ")[0]+"</button>")+"</div>";

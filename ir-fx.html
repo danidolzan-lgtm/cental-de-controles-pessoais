@@ -135,7 +135,7 @@ summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:1r
 <script>
 
 /* 24/11/2026: IR liberado, conta tudo desde 29/10/2026 (sem o limite de 19/11 18h) */
-const IR_INI="2026-10", IR_FIM="9999-12";
+const IR_INI="2025-01", IR_FIM="9999-12"; // 24/11/2026: conta todo o ano de 2026 e também 2025 se tiver dados
 function irDs(d){return d.y+"-"+String(d.m).padStart(2,"0")+"-"+String(d.d).padStart(2,"0")}
 function irFora(ds,txt){
   return false;
@@ -165,7 +165,7 @@ function compute(){
   });
   return out;
 }
-function render(){
+function render(){if(!YEARS.includes(2025)&&Object.keys(dias).some(k=>String(k).startsWith("2025"))){YEARS.unshift(2025)} /* 24/11/2026: 2025 aparece só quando tiver dados */
   $("years").innerHTML="";
   $("years").innerHTML="<label class='ysel'><span>Ano</span><select aria-label='Escolha o ano'>"+YEARS.map(y=>"<option value='"+y+"'"+(y===year?" selected":"")+">"+y+"</option>").join("")+"</select></label>";$("years").querySelector("select").onchange=e=>{year=+e.target.value;try{localStorage.setItem("mc.irAno.ir-fx",String(year))}catch(x){}render()};
   const c=compute()[year];
