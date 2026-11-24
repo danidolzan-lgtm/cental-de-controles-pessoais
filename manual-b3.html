@@ -668,10 +668,10 @@ function rDoProg(){
   const h=$("rProg");if(h)h.textContent=(pgSt||pgSim)?"Puxa do Progresso B3: "+$("rAtivo").value+", "+$("rCt").value+" contrato(s), stop "+num(+$("rStop").value||0)+" pts, alvo "+num(+$("rMult").value||0)+"x. Mudar aqui é só teste (não salva).":"";
   risco();
 }
-try{pgSt=JSON.parse(localStorage.getItem("progressoB3p.v1")||"null")}catch(e){}
-try{pgSim=JSON.parse(localStorage.getItem("simuladorB3p.v1")||"null")}catch(e){}
+try{pgSt=JSON.parse(localStorage.getItem("progressoB3m.v1")||"null")}catch(e){}
+try{pgSim=JSON.parse(localStorage.getItem("simuladorB3.v1")||"null")}catch(e){}
 rDoProg();
-(async()=>{let d=null;try{d=window.claude?await window.claude.use("db"):null}catch(e){}if(!d||!d.app)return;const P=d.app("progresso-b3p");
+(async()=>{let d=null;try{d=window.claude?await window.claude.use("db"):null}catch(e){}if(!d||!d.app)return;const P=d.app("progresso-b3m");
   P.doc("estado/progresso").onSnapshot(x=>{pgSt=x.exists?x.data():pgSt;rDoProg()},()=>{});
   P.doc("estado/simulador").onSnapshot(x=>{pgSim=x.exists?x.data():pgSim;rDoProg()},()=>{});})();
 $("rAtivo").addEventListener("change",()=>{$("rStop").value=DEF[$("rAtivo").value];risco()});

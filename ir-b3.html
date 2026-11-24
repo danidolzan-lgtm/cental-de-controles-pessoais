@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2563EB"><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="firebase-config.js"></script><script src="sync.js" data-app="ir-b3p"></script><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{overflow-x:hidden}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.voltar{display:inline-block;margin:12px 16px 0;font:600 14px system-ui,sans-serif;color:inherit;opacity:.7;text-decoration:none}</style></head><body><a class="voltar" href="index.html">← Central de Controles Pessoais</a><title>IR B3</title>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2563EB"><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="firebase-config.js"></script><script src="sync.js" data-app="ir-b3n"></script><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{overflow-x:hidden}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.voltar{display:inline-block;margin:12px 16px 0;font:600 14px system-ui,sans-serif;color:inherit;opacity:.7;text-decoration:none}</style></head><body><a class="voltar" href="index.html">← Central de Controles Pessoais</a><title>IR B3</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 /* Layout: seletor de ano, resumo (IR do ano, prejuízos a compensar), um cartão por mês com os lançamentos e o DARF calculado, regras no fim. */
@@ -117,17 +117,15 @@ td.tx{color:var(--warn)}
 <script>
 try{localStorage.removeItem("irB3.v1")}catch(e){} // zerado em 29/10/2026
 
-/* 23/11/2026: IR só considera de 19/11/2026 às 18h em diante (recesso de 18/12 a 10/01 fica de fora) */
-const IR_INI="2026-11", IR_FIM="9999-12";
+/* 24/11/2026: IR liberado, conta tudo desde 29/10/2026 (sem o limite de 19/11 18h) */
+const IR_INI="2026-10", IR_FIM="9999-12";
 function irDs(d){return d.y+"-"+String(d.m).padStart(2,"0")+"-"+String(d.d).padStart(2,"0")}
 function irFora(ds,txt){
-  if(ds<"2026-11-19"||(ds>="2026-12-18"&&ds<="2027-01-10"))return true;
-  if(ds==="2026-11-19"&&txt){const h=String(txt).match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);if(h&&+h[1]<18)return true}
   return false;
 }
 /* 23/11/2026: anos aparecem só quando chegam (2026 até o ano atual), escolhidos numa lista */
 const YEARS=(()=>{const a=[],f=Math.max(2026,new Date().getFullYear());for(let y=2026;y<=f;y++)a.push(y);return a})();
-const FIRST=IR_INI, LS="irB3p.v1";
+const FIRST=IR_INI, LS="irB3n.v1";
 const FIELDS=["dt","dtOp","dtTx","dtIrrf","sw","swIrrf"];
 // mês antigo só com "dt": vira operações = dt e taxas = 0
 function opOf(r){return r.dtOp!=null?+r.dtOp:(r.dt!=null?+r.dt:null)}
@@ -449,7 +447,7 @@ function resumo(){
       "<div class='brk'><div class='bx "+(op>=0?"g":"p")+"'><span>"+(op>=0?"Ganho nas operações":"Perda nas operações")+"</span><b>"+sgn(op)+"</b></div>"+
       "<div class='bx t'><span>Taxas e custos</span><b>"+(tx?"−"+tx.toLocaleString("pt-BR",{minimumFractionDigits:2}):"0,00")+"</b></div>"+
       "<div class='bx "+(liq>=0?"g":"p")+" l'><span>"+(liq>=0?"Lucro líquido":"Prejuízo líquido")+"</span><b>"+sgn(liq)+"</b></div></div>"+
-      (k<window.IRB3.FIRST?"<span class='hint'>fora do período (antes de 19/11/2026)</span>":"<div><button type='button' class='btn' data-lanca='"+k+"'>Lançar em "+mesNome(k).split(" ")[0].toLowerCase()+"</button></div>")+"</div>"}).join("")+
+      (k<window.IRB3.FIRST?"<span class='hint'>fora do período</span>":"<div><button type='button' class='btn' data-lanca='"+k+"'>Lançar em "+mesNome(k).split(" ")[0].toLowerCase()+"</button></div>")+"</div>"}).join("")+
     (ks.length>1?"<div><button type='button' class='btn primary' id='ibTodos'>Lançar todos os meses</button></div>":""):"<p class='hint'>Não achei valores. Me mande o arquivo para eu ajustar a leitura.</p>";
   if(modo==="notas"){
     $("ibPrev").innerHTML="<thead><tr><th>Pregão</th><th>Operações</th><th>Taxas</th><th>Líquido</th><th>IRRF</th></tr></thead><tbody>"+notas.slice().sort((a,b)=>(keyOf(a.d)+String(a.d.d).padStart(2,"0")).localeCompare(keyOf(b.d)+String(b.d.d).padStart(2,"0"))).map(n=>{const op=n.bruto!=null?n.bruto:(n.res!=null?r2(n.res+n.taxas):null);return "<tr><td>"+dstr(n.d)+"</td><td class='"+(op>0?"pos":op<0?"neg":"")+"'>"+(op==null?"–":brl(op))+"</td><td class='tx'>"+(n.taxas?"−"+brl(n.taxas):"0,00")+"</td><td class='"+(n.res>0?"pos":n.res<0?"neg":"")+"'><b>"+(n.res==null?"não lido":brl(n.res))+"</b></td><td>"+(n.irrf?brl(n.irrf):"–")+"</td></tr>"}).join("")+"</tbody>";

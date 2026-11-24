@@ -127,7 +127,7 @@ details summary{cursor:pointer;font-weight:600}
 
 <script>
 // 29/10/2026: zerado. Começa em 03/11/2026; períodos iguais aos outros controles (botões em cima do calendário).
-const PER=[{y:"2026",a:"2026-11-19",b:"2026-12-17",t:"19/11 a 17/12/2026"},{y:"jan–mar/27",a:"2027-01-11",b:"2027-03-31",t:"11/01 a 31/03/2027"},{y:"abr–jun/27",a:"2027-04-01",b:"2027-06-30",t:"01/04 a 30/06/2027"}];
+const PER=[{y:"2026",a:"2026-11-03",b:"2026-12-17",t:"03/11 a 17/12/2026"},{y:"jan–mar/27",a:"2027-01-11",b:"2027-03-31",t:"11/01 a 31/03/2027"},{y:"abr–jun/27",a:"2027-04-01",b:"2027-06-30",t:"01/04 a 30/06/2027"}];
 const _hj=(()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")})();
 let PI=PER.findIndex(p=>_hj<=p.b);if(PI<0)PI=PER.length-1;
 /* 19/11/2026: lembra o período escolhido mesmo depois de fechar o site/app */

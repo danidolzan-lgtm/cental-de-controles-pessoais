@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2563EB"><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="firebase-config.js"></script><script src="sync.js" data-app="diario-ob4"></script><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{overflow-x:hidden}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.voltar{display:inline-block;margin:12px 16px 0;font:600 14px system-ui,sans-serif;color:inherit;opacity:.7;text-decoration:none}</style></head><body><a class="voltar" href="index.html">← Central de Controles Pessoais</a><title>Diário OB</title>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2563EB"><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="firebase-config.js"></script><script src="sync.js" data-app="diario-ob3"></script><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{overflow-x:hidden}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.voltar{display:inline-block;margin:12px 16px 0;font:600 14px system-ui,sans-serif;color:inherit;opacity:.7;text-decoration:none}</style></head><body><a class="voltar" href="index.html">← Central de Controles Pessoais</a><title>Diário OB</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 /* Layout: resumo, mão base/payout, calendário seg–sex 29/10–17/12/2026, 11/01–31/03/2027 e 01/04–30/06/2027, tabelas. Janela do dia com 6 sessões de 40 min (08:00, 09:45, 13:30, 15:00, 19:30 e 20:30 OTC seg–qui); cada sessão tem no máximo 2 entradas (mão base + Soros) e para no 1º loss. */
@@ -159,7 +159,7 @@ td:first-child{font-family:var(--f-body);white-space:normal}
 <style>.per{display:flex;gap:6px;flex-wrap:wrap}.per button{appearance:none;font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap}.per button b{font-weight:700}.per button.on{background:var(--accent);border-color:var(--accent);color:#fff}</style>
 <script>
 // 29/10/2026: tudo zerado. Três períodos: 29/10 a 17/12/2026, 11/01 a 31/03/2027 e 01/04 a 30/06/2027 (botões em cima do calendário).
-const PER=[{y:"2026",a:"2026-11-19",b:"2026-12-17",t:"19/11 a 17/12/2026"},{y:"jan–mar/27",a:"2027-01-11",b:"2027-03-31",t:"11/01 a 31/03/2027"},{y:"abr–jun/27",a:"2027-04-01",b:"2027-06-30",t:"01/04 a 30/06/2027"}];
+const PER=[{y:"2026",a:"2026-10-29",b:"2026-12-17",t:"29/10 a 17/12/2026"},{y:"jan–mar/27",a:"2027-01-11",b:"2027-03-31",t:"11/01 a 31/03/2027"},{y:"abr–jun/27",a:"2027-04-01",b:"2027-06-30",t:"01/04 a 30/06/2027"}];
 const _hj=(()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")})();
 let PI=PER.findIndex(p=>_hj<=p.b);if(PI<0)PI=PER.length-1;
 /* 19/11/2026: lembra o período escolhido mesmo depois de fechar o site/app */
@@ -170,7 +170,7 @@ const usDst=ds=>ds<"2026-11-02"||(ds>="2027-03-14"&&ds<"2027-11-07"); // horári
 function perUI(cb){const box=document.getElementById("per");if(box){box.innerHTML=PER.map((p,i)=>"<button type='button' data-i='"+i+"' class='"+(i===PI?"on":"")+"' aria-pressed='"+(i===PI)+"'><b>"+p.y+"</b> · "+p.t.slice(0,13)+"</button>").join("");box.querySelectorAll("button").forEach(b=>b.onclick=()=>{PI=+b.dataset.i;START=PER[PI].a;END=PER[PI].b;try{localStorage.setItem(PKEY,PI)}catch(e){}perUI(cb);cb()})}const s=document.getElementById("perSub");if(s)s.textContent=PER[PI].t+" · segunda a sexta"}
 perUI(()=>{typeof fUI==="function"&&fUI();render()});
 try{}catch(e){} // dados antigos (zerado em 29/10/2026)
-const LS="diarioOB4.v1";
+const LS="diarioOB3.v1";
 function pDays(){return Object.keys(days).filter(inPer).map(k=>days[k])} // só o período escolhido
 
 /* 06/11/2026: filtro dos números (cartões e tabelas): período todo, semana (seg–sex), mês ou datas escolhidas. O calendário continua mostrando o período todo; o que fica fora do filtro aparece apagado. */
@@ -300,7 +300,7 @@ function renderCal(){
       if(ds<START||ds>END){const b=document.createElement("button");b.type="button";b.className="day bloq";b.disabled=true;b.title="Bloqueado: fora do período";b.innerHTML="<span class='d'>"+d+"</span>";g.appendChild(b);continue}
       if(wd===0||wd===6){const b=document.createElement("button");b.type="button";b.className="day we";b.disabled=true;b.title="Fim de semana: travado";b.innerHTML="<span class='d'>"+d+"</span>";g.appendChild(b);continue}
       const doc=days[ds], ops=doc?dayOps(doc).filter(o=>o.res):[], net=doc?dayNet(doc):0;
-      const b=document.createElement("button");b.type="button";b.className="day"+(FM!=="per"&&!inF(ds)?" fora":"")+(ds===t?" today":"")+(ops.length?(net>0?" pos":net<0?" neg":""):"")+(!ops.length&&ds<=t&&ds<="2026-11-19"?" semop":"")+(!ops.length&&ds<t&&ds>="2026-11-20"&&!(doc&&Object.keys(doc).some(k=>k!=="date"&&doc[k]&&typeof doc[k]==="object"&&Object.keys(doc[k]).length))?" nop":"");
+      const b=document.createElement("button");b.type="button";b.className="day"+(FM!=="per"&&!inF(ds)?" fora":"")+(ds===t?" today":"")+(ops.length?(net>0?" pos":net<0?" neg":""):"")+(!ops.length&&ds<=t&&ds<="2026-10-28"?" semop":"")+(!ops.length&&ds<t&&ds>="2026-10-29"&&!(doc&&Object.keys(doc).some(k=>k!=="date"&&doc[k]&&typeof doc[k]==="object"&&Object.keys(doc[k]).length))?" nop":"");
       let h="<span class='d'>"+d+"</span><span class='dots'>"+ops.map(o=>"<i class='dot "+(o.res==="win"?"w":"l")+"'></i>").join("")+(doc&&!ops.length&&SESS.some(x=>doc[x.id]&&doc[x.id].status==="nao")?"<i class='dot'></i>":"")+"</span>";
       if(ops.length)h+="<span class='v "+(net>0?"pos":net<0?"neg":"")+"' title='"+n2(net)+"'>"+nCal(net)+"</span>";
       b.innerHTML=h;b.setAttribute("aria-label",dt.toLocaleDateString("pt-BR")+(ops.length?", resultado "+n2(net):""));
@@ -427,7 +427,7 @@ lsLoad();$("cBase").value=cfg.base;$("cPay").value=cfg.payout;render();setStatus
 /* 29/10/2026: a mão base vem SEMPRE da escada (degrau ÷ 5), a mesma do Progresso, do simulador e do Manual.
    Trocar o degrau aqui grava no Progresso e todos se adaptam (PC e celular). O payout também é um só. */
 const PLV=[50,100,150,250,350,500,750,1000,1500,2500,3500,5000,7500,10000];
-const PROG="progresso-ob3", PLS="progressoOB3.v1";
+const PROG="progresso-ob2", PLS="progressoOB2.v1";
 const brl0=v=>"R$ "+v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
 function maoDoProg(d){const c=new Set((d&&d.conquistados)||[]);let last=-1;PLV.forEach((v,i)=>{if(c.has(i))last=i});return {idx:last,mao:(last>=0?PLV[last]:PLV[0])/5,nivel:last>=0?PLV[last]:null,payout:d&&+d.payout>0?+d.payout:null}}
 $("cNivel").innerHTML="<option value='-1'>Início · mão "+brl0(PLV[0]/5)+"</option>"+PLV.map((v,i)=>"<option value='"+i+"'>"+String(i+1).padStart(2,"0")+" · R$ "+v.toLocaleString("pt-BR")+" · mão "+brl0(v/5)+"</option>").join("");

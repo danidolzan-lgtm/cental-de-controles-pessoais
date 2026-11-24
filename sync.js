@@ -705,13 +705,13 @@
   }
   /* 16/11/2026: backup — baixa um .json com todos os dados da conta (todos os controles) */
   var BK = {
-    "analise-b3": ["analises3"], "analise-ob": ["analises3"], "checklist-b3p": ["dias"], "checklist-ob4": ["dias"],
-    "compras": ["itens"], "consorcio": ["propostas", "config/propostas"], "diario-b3p": ["dias", "config/geral"], "diario-ob4": ["dias", "config/geral"],
-    "dopamina-b3p": ["dias"], "dopamina-ob4": ["dias"], "exercicios2": ["dias", "config/geral"], "ir-b3p": ["meses"], "ir-ob4": ["meses"],
-    "limpeza": ["lotes"], "lucro-b3p": ["dias"], "lucro-ob3": ["meses"], "notas": ["notas", "blocos"], "oracao": ["consagracoes"],
-    "progresso-b3p": ["estado/progresso", "estado/simulador"], "progresso-ob3": ["estado/progresso", "estado/simulador"], "receitas": ["receitas"], "salario": ["meses"],
-    "analise-fx": ["analises3"], "checklist-fx2": ["dias"], "diario-fx2": ["dias", "config/geral"], "dopamina-fx2": ["dias"], "lucro-fx2": ["dias"], "ir-fx2": ["config/geral"],
-    "progresso-fx2": ["estado/progresso", "estado/simulador"]
+    "analise-b3": ["analises2"], "analise-ob": ["analises2"], "checklist-b3n": ["dias"], "checklist-ob3": ["dias"],
+    "compras": ["itens"], "consorcio": ["propostas", "config/propostas"], "diario-b3n": ["dias", "config/geral"], "diario-ob3": ["dias", "config/geral"],
+    "dopamina-b3n": ["dias"], "dopamina-ob3": ["dias"], "exercicios2": ["dias", "config/geral"], "ir-b3n": ["meses"], "ir-ob3": ["meses"],
+    "limpeza": ["lotes"], "lucro-b3": ["dias"], "lucro-ob2": ["meses"], "notas": ["notas", "blocos"], "oracao": ["consagracoes"],
+    "progresso-b3m": ["estado/progresso", "estado/simulador"], "progresso-ob2": ["estado/progresso", "estado/simulador"], "receitas": ["receitas"], "salario": ["meses"],
+    "analise-fx": ["analises2"], "checklist-fx": ["dias"], "diario-fx": ["dias", "config/geral"], "dopamina-fx": ["dias"], "lucro-fx": ["dias"], "ir-fx": ["config/geral"],
+    "progresso-fx": ["estado/progresso", "estado/simulador"]
   };
   function backup(uid, btn) {
     var txt = btn ? btn.textContent : ""; if (btn) { btn.disabled = true; btn.textContent = "Baixando…"; }
@@ -789,12 +789,14 @@
 })();
 
 /* ===== 23/11/2026: dias bloqueados e legenda em todos os calendários =====
-   Os calendários mostram o mês inteiro. Dias fora do período (antes de 19/11/2026, de 18/12 até o início de janeiro etc.)
+   Os calendários mostram o mês inteiro. Dias fora do período (antes de 29/10/2026, de 18/12 até o início de janeiro etc.)
    ficam travados como "bloqueado". Todo calendário tem legenda (fim de semana, bloqueado e o resto da página). */
 (function () {
   var file = (decodeURIComponent(location.pathname).split("/").pop() || "").replace(/\.html?$/i, "");
-  window.mcInicio = "2026-11-19"; window.mcInicioHora = "18:00";
-  window.mcBloqueado = function (ds) { return ds < "2026-11-19" || (ds >= "2026-12-18" && ds <= "2027-01-10") || ds > "2027-06-30"; };
+  /* 24/11/2026: limite de 19/11 retirado; os controles do trade voltam a contar desde 29/10/2026 (Exercícios volta a 03/11, como era) */
+  var INI = /^exercicios/.test(file) ? "2026-11-03" : "2026-10-29";
+  window.mcInicio = INI; window.mcInicioHora = "00:00";
+  window.mcBloqueado = function (ds) { return ds < INI || (ds >= "2026-12-18" && ds <= "2027-01-10") || ds > "2027-06-30"; };
   var st = document.createElement("style");
   st.textContent =
     ".day.bloq,.legend i.bloq-i{background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--loss,#C2410C) 16%,transparent) 0 2px,transparent 2px 7px),color-mix(in srgb,var(--muted,#58668A) 8%,var(--surface,#fff))!important;border:1px dotted color-mix(in srgb,var(--muted,#58668A) 60%,transparent)!important;color:color-mix(in srgb,var(--muted,#58668A) 75%,transparent)!important}" +
@@ -834,17 +836,17 @@
 
   /* campos de data (lançar dia no Lucro etc.): não deixa escolher dia bloqueado */
   function datas() {
-    if (!/^(lucro|diario)/.test(file)) return;
+    if (!/^diario/.test(file)) return; // 24/11/2026: no Lucro não tem mais trava de data
     function prep() {
       document.querySelectorAll("input[type=date]").forEach(function (inp) {
         if (inp.dataset.mcBloq) return; inp.dataset.mcBloq = "1";
-        if (!inp.min || inp.min < "2026-11-19") inp.min = "2026-11-19";
+        if (!inp.min || inp.min < INI) inp.min = INI;
         var lanc = /^(mD|dData)$/.test(inp.id);
         if (!lanc) return;
         inp.addEventListener("change", function () {
           var v = inp.value; if (!v || !window.mcBloqueado(v)) return;
           inp.value = "";
-          var m = "Dia bloqueado: fora do período (conta de 19/11/2026 às 18h até 17/12, e volta em 11/01)";
+          var m = "Dia bloqueado: fora do período (conta de 29/10/2026 até 17/12, e volta em 11/01)";
           if (window.ui && ui.toast) ui.toast(m); else alert(m);
         }, true);
       });
@@ -902,4 +904,80 @@
       }).catch(function () {});
     });
   }, 0);
+})();
+
+
+/* ===== 24/11/2026: dados de volta desde 29/10 =====
+   Em 19/11 tudo tinha sido zerado (OB, B3 e Forex passaram a gravar em outro lugar da conta).
+   Agora as páginas voltaram a usar os dados antigos (desde 29/10) e, uma vez só, o que foi lançado
+   depois do zeramento (19/11 à noite em diante) é copiado para junto deles. Nada é apagado. */
+(function () {
+  var MAPA = [
+    ["checklist-ob4", "checklist-ob3", ["dias"]], ["checklist-b3p", "checklist-b3n", ["dias"]], ["checklist-fx2", "checklist-fx", ["dias"]],
+    ["diario-ob4", "diario-ob3", ["dias", "config/geral"]], ["diario-b3p", "diario-b3n", ["dias", "config/geral"]], ["diario-fx2", "diario-fx", ["dias", "config/geral"]],
+    ["dopamina-ob4", "dopamina-ob3", ["dias"]], ["dopamina-b3p", "dopamina-b3n", ["dias"]], ["dopamina-fx2", "dopamina-fx", ["dias"]],
+    ["ir-ob4", "ir-ob3", ["meses"]], ["ir-b3p", "ir-b3n", ["meses"]], ["ir-fx2", "ir-fx", ["config/geral"]],
+    ["lucro-ob3", "lucro-ob2", ["#lucroOB"]], ["lucro-b3p", "lucro-b3", ["dias"]], ["lucro-fx2", "lucro-fx", ["dias"]],
+    ["progresso-ob3", "progresso-ob2", ["estado/progresso", "estado/simulador"]], ["progresso-b3p", "progresso-b3m", ["estado/progresso", "estado/simulador"]],
+    ["progresso-fx2", "progresso-fx", ["estado/progresso", "estado/simulador", "estado/lotepar"]],
+    ["analise-ob", "analise-ob", ["analises3>analises2"]], ["analise-b3", "analise-b3", ["analises3>analises2"]], ["analise-fx", "analise-fx", ["analises3>analises2"]]
+  ];
+  var FLAG = "config/restaura20261124";
+  function plain(o) { return JSON.parse(JSON.stringify(o, function (k, v) { return v && typeof v.toDate === "function" ? v.toDate().toISOString() : v; })); }
+  function juntaDoc(velho, novo) {
+    var r = Object.assign({}, velho || {}, novo || {});
+    if (velho && novo && Array.isArray(velho.conquistados) && Array.isArray(novo.conquistados)) {
+      var a = velho.conquistados.slice(); novo.conquistados.forEach(function (x) { if (a.indexOf(x) < 0) a.push(x); }); r.conquistados = a;
+    }
+    if (novo && (novo.banca == null || novo.banca === "") && velho && velho.banca != null) r.banca = velho.banca;
+    return r;
+  }
+  function lucroOB(d, de, para) {
+    var A = d.app(de).collection("meses"), B = d.app(para).collection("meses");
+    return Promise.all([A.get(), B.get()]).then(function (rr) {
+      if (!rr[0].size) return;
+      var map = new Map();
+      [rr[1], rr[0]].forEach(function (q) { q.forEach(function (x) { try { JSON.parse(x.data().ops || "[]").forEach(function (a) { map.set(a[0], a); }); } catch (e) {} }); });
+      var porMes = {}; map.forEach(function (a) { var m = String(a[3] || "").slice(0, 7); if (m) (porMes[m] = porMes[m] || []).push(a); });
+      var jobs = [];
+      Object.keys(porMes).forEach(function (m) {
+        var l = porMes[m].sort(function (x, y) { return x[3] < y[3] ? -1 : x[3] > y[3] ? 1 : 0; });
+        for (var i = 0; i < l.length; i += 2500) jobs.push(B.doc(i ? m + "_" + (i / 2500 + 1) : m).set({ ops: JSON.stringify(l.slice(i, i + 2500)) }));
+      });
+      return Promise.all(jobs);
+    });
+  }
+  function copia(d, de, para, p) {
+    if (p === "#lucroOB") return lucroOB(d, de, para);
+    var pp = p.split(">"), pDe = pp[0], pPara = pp[1] || pp[0];
+    if (pDe.split("/").length % 2 === 0) {
+      return Promise.all([d.app(de).doc(pDe).get(), d.app(para).doc(pPara).get()]).then(function (r) {
+        if (!r[0].exists) return;
+        return d.app(para).doc(pPara).set(plain(juntaDoc(r[1].exists ? r[1].data() : null, r[0].data())));
+      });
+    }
+    return d.app(de).collection(pDe).get().then(function (q) {
+      var jobs = []; q.forEach(function (x) { jobs.push(d.app(para).doc(pPara + "/" + x.id).set(plain(x.data()), { merge: true })); });
+      return Promise.all(jobs);
+    });
+  }
+  setTimeout(function () {
+    if (!window.claude) return;
+    window.claude.use("db").then(function (d) {
+      if (!d || !d.app) return;
+      var g = d.app("geral").doc(FLAG);
+      g.get().then(function (x) {
+        if (x.exists && x.data().feito) return;
+        var erros = 0, jobs = [];
+        MAPA.forEach(function (m) { m[2].forEach(function (p) { jobs.push(copia(d, m[0], m[1], p).catch(function (e) { erros++; console.warn("restaura", m[0], p, e); })); }); });
+        return Promise.all(jobs).then(function () {
+          if (erros) { if (window.ui && ui.toast) ui.toast("Não terminou de juntar os dados de 19/11 em diante. Abra de novo com internet.", 1); return; }
+          return g.set({ feito: true, em: new Date().toISOString() }).then(function () {
+            if (window.ui && ui.toast) ui.toast("✓ Dados desde 29/10 de volta, com o que foi lançado depois de 19/11");
+            setTimeout(function () { location.reload(); }, 1600);
+          });
+        });
+      }).catch(function () {});
+    });
+  }, 800);
 })();
