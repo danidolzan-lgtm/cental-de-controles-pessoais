@@ -130,7 +130,7 @@ input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offs
         <li>As três médias estão emboladas, sem espaço entre elas (mercado lateral).</li>
         <li>Faltam 5 minutos ou menos para uma notícia de impacto, ou ela saiu há menos de 15 minutos.</li>
         <li>A vela de sinal é maior que 2x o tamanho médio das últimas 10 velas.</li>
-        <li>O ativo está em OTC nas sessões 1 a 4. OTC só na sessão 5, à noite (seg–qui); nela, o contrário: só OTC.</li>
+        <li>O ativo está em OTC nas sessões 1 a 4. OTC só nas sessões 5 e 6, à noite (seg–qui); nelas, o contrário: só OTC.</li>
       </ul>
     </div>
     <div class="box">
@@ -360,8 +360,8 @@ input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offs
   <!-- HORÁRIOS -->
   <section class="panel" id="horarios">
     <h2>Horários (Brasília)</h2>
-    <p><b>5 sessões, horário fixo</b>: duas de manhã e duas à tarde em mercado aberto (a sessão 2 tem 40 min) e <b>uma à noite em OTC, só de segunda a quinta</b>. As de mercado aberto foram escolhidas para <b>não ter nenhuma notícia fixa dentro delas</b>, nem antes nem depois de 01/11 (quando os EUA trocam o relógio). O check-list é feito <b>uma vez por dia</b>, de manhã, antes da sessão 1, e já avisa se alguma sessão deve ser pulada.</p>
-    <div class="ses-list"><div class="ses"><div class="hd"><b>Sessão 1</b><span>08:00–09:00</span></div><p>Londres a todo vapor, as notícias da Europa já saíram e os EUA ainda não soltaram dados. Tendência limpa: bom para Respiro e Virada.</p></div><div class="ses"><div class="hd"><b>Sessão 2</b><span>09:45–10:25</span></div><p>Londres e EUA juntos. Só 40 min: é o único trecho limpo da manhã, entre os dados das 09:30 e as 10:25.</p></div><div class="ses"><div class="hd"><b>Sessão 3</b><span>13:30–14:30</span></div><p>Londres já fechou, Nova York sozinha e sem notícia. Mais calmo: bom para Respiro e Muralha.</p></div><div class="ses"><div class="hd"><b>Sessão 4</b><span>15:00–16:00</span></div><p>Tarde de Nova York, sem notícia fixa. Volume caindo: só com médias bem espaçadas. Na sexta, pula.</p></div><div class="ses"><div class="hd"><b>Sessão 5 · OTC</b><span>19:30–20:30 · seg–qui</span></div><p>Mercado aberto já fechou: opera os pares OTC da Quotex, com os mesmos 5 operacionais, as mesmas médias e o mesmo stop. O OTC não segue notícia, então o calendário econômico não vale aqui, mas os filtros do gráfico (médias emboladas, vela gigante) valem igual. Escolha o par OTC com payout mais alto e médias espaçadas. Sexta não tem.</p></div></div>
+    <p><b>6 sessões de 40 min, horário fixo</b>: duas de manhã e duas à tarde em mercado aberto e <b>duas à noite em OTC, só de segunda a quinta</b>. 40 min é tempo suficiente para pegar as 2 entradas (mão base + Soros). As de mercado aberto foram escolhidas para <b>não ter nenhuma notícia fixa dentro delas</b>, nem antes nem depois de 01/11 (quando os EUA trocam o relógio). O check-list é feito <b>uma vez por dia</b>, de manhã, antes da sessão 1, e já avisa se alguma sessão deve ser pulada.</p>
+    <div class="ses-list"><div class="ses"><div class="hd"><b>Sessão 1</b><span>08:00–08:40</span></div><p>Londres a todo vapor, as notícias da Europa já saíram e os EUA ainda não soltaram dados. Tendência limpa: bom para Respiro e Virada.</p></div><div class="ses"><div class="hd"><b>Sessão 2</b><span>09:45–10:25</span></div><p>Londres e EUA juntos. É o trecho limpo da manhã, entre os dados das 09:30 e as 10:25.</p></div><div class="ses"><div class="hd"><b>Sessão 3</b><span>13:30–14:10</span></div><p>Londres já fechou, Nova York sozinha e sem notícia. Mais calmo: bom para Respiro e Muralha.</p></div><div class="ses"><div class="hd"><b>Sessão 4</b><span>15:00–15:40</span></div><p>Tarde de Nova York, sem notícia fixa. Volume caindo: só com médias bem espaçadas. Na sexta, pula.</p></div><div class="ses"><div class="hd"><b>Sessão 5 · OTC</b><span>19:30–20:10 · seg–qui</span></div><p>Mercado aberto já fechou: opera os pares OTC da Quotex, com os mesmos 5 operacionais, as mesmas médias e o mesmo stop. O OTC não segue notícia, então o calendário econômico não vale aqui, mas os filtros do gráfico (médias emboladas, vela gigante) valem igual. Escolha o par OTC com payout mais alto e médias espaçadas. Sexta não tem.</p></div><div class="ses"><div class="hd"><b>Sessão 6 · OTC</b><span>20:30–21:10 · seg–qui</span></div><p>Mesma regra da sessão 5: só pares OTC, os mesmos 5 operacionais, médias e stop. Começa do zero com a mão base, mesmo que a 5 tenha dado stop. Sexta não tem.</p></div></div>
     <div class="box no">
       <h3>⛔ Notícias relevantes (alto impacto)</h3>
       <p>No Investing.com, filtre <b>alto impacto (3 touros)</b> · EUA, Zona do Euro e Reino Unido. Regra: <b>nada de 5 min antes até 15 min depois</b>.</p>
@@ -369,8 +369,8 @@ input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offs
         <div class="nw-h">Caem nas sessões: dias de pular</div>
         <div class="nw"><div class="o"><b>FOMC</b><small>juros dos EUA + coletiva do Fed</small></div><div class="t">28/10 15:00 · 09/12 16:00</div><div class="a skip">Pula a sessão 4</div></div>
         <div class="nw"><div class="o"><b>BCE</b><small>juros da Zona do Euro + coletiva</small></div><div class="t">29/10 e 17/12 · 10:15</div><div class="a skip">Pula a sessão 2</div></div>
-        <div class="nw"><div class="o"><b>BoE</b><small>juros da Inglaterra</small></div><div class="t">05/11 e 17/12 · 09:00</div><div class="a skip">Sessão 1 para às 08:50</div></div>
-        <div class="nw"><div class="o"><b>Feriado nos EUA</b><small>Ação de Graças</small></div><div class="t">26/11 e 27/11</div><div class="a skip">26/11 só a sessão 5 (OTC) · 27/11 só de manhã + sessão 5</div></div>
+        <div class="nw"><div class="o"><b>BoE</b><small>juros da Inglaterra</small></div><div class="t">05/11 e 17/12 · 09:00</div><div class="a">Fora das sessões (a 1 acaba 08:40)</div></div>
+        <div class="nw"><div class="o"><b>Feriado nos EUA</b><small>Ação de Graças</small></div><div class="t">26/11 e 27/11</div><div class="a skip">26/11 só as sessões 5 e 6 (OTC) · 27/11 só de manhã + sessões 5 e 6</div></div>
         <div class="nw-h">Fixas, fora das sessões · horário até 01/11 → a partir de 02/11</div>
         <div class="nw"><div class="o"><b>EUA</b><small>Payroll, CPI, PPI, varejo, PIB, PCE, seguro-desemprego</small></div><div class="t">09:30 → 10:30</div><div class="a">Fora das sessões</div></div>
         <div class="nw"><div class="o"><b>Abertura de Nova York</b></div><div class="t">10:30 → 11:30</div><div class="a">Fora das sessões</div></div>
@@ -384,11 +384,11 @@ input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offs
       <h3>Evite também</h3>
       <ul>
         <li>Os intervalos entre as sessões, principalmente o almoço, quando o mercado fica lateral.</li>
-        <li>A sexta-feira depois das 15:00 (na sexta, pule a sessão 4 e não tem sessão 5).</li>
+        <li>A sexta-feira depois das 15:00 (na sexta, pule a sessão 4 e não tem as sessões 5 e 6).</li>
         <li>Mercado aberto à noite e OTC durante o dia: cada sessão tem o seu mercado.</li>
       </ul>
     </div>
-    <p class="hint">Prefira os pares principais com dólar (EUR/USD, GBP/USD, USD/JPY). Depois de algumas semanas, veja no Lucro OB qual sessão rende mais e qual dá mais stop (a sessão 5 aparece separada, para comparar OTC com mercado aberto).</p>
+    <p class="hint">Prefira os pares principais com dólar (EUR/USD, GBP/USD, USD/JPY). Depois de algumas semanas, veja no Lucro OB qual sessão rende mais e qual dá mais stop (as sessões 5 e 6 aparece separada, para comparar OTC com mercado aberto).</p>
   </section>
 
   <!-- SOROS -->
@@ -415,7 +415,7 @@ input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offs
         <li>No máximo <b>2 entradas por sessão</b>: a mão base e o Soros.</li>
         <li>Deu <b>loss na 1ª</b>: sessão encerrada, sem 2ª entrada.</li>
         <li>Fez a 2ª (Soros), ganhando ou perdendo: sessão encerrada.</li>
-        <li>Cada uma das <b>5 sessões</b> começa do zero, sempre com a <b>mão base</b>. Stop numa sessão não se recupera na seguinte com mão maior.</li>
+        <li>Cada uma das <b>6 sessões</b> começa do zero, sempre com a <b>mão base</b>. Stop numa sessão não se recupera na seguinte com mão maior.</li>
         <li>Nunca aumente a mão base para recuperar um loss.</li>
       </ul>
     </div>
@@ -433,7 +433,7 @@ input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offs
     <p class="hint">Semana na meta = semana cheia (23 sessões) batendo a meta. Usa a mão base e o payout do Progresso, os mesmos da calculadora do Soros, acima.</p>
     <h3>Como validar</h3>
     <ol>
-      <li>Volte no gráfico e anote <b>100 sinais de cada setup</b> nos horários das sessões, sem pular nenhum. Faça o OTC (sessão 5) separado do mercado aberto.</li>
+      <li>Volte no gráfico e anote <b>100 sinais de cada setup</b> nos horários das sessões, sem pular nenhum. Faça o OTC (sessões 5 e 6) separado do mercado aberto.</li>
       <li>Simule a sessão inteira: conte a 1ª entrada no fechamento da 5ª vela e, se der win, o próximo sinal como Soros.</li>
       <li>Fique só com o setup que passar de <b>75% de assertividade e 50% de aproveitamento</b> no papel; ao vivo ele costuma cair alguns pontos.</li>
       <li>Depois, opere 2 semanas com a mão mínima e confira no Diário OB: <b>assertividade ≥ 71,4%</b> e <b>aproveitamento ≥ 50%</b>. Só então sobe a mão.</li>
