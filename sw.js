@@ -1,37 +1,22 @@
-/* Service worker da Central de Controles Pessoais.
-   Sempre busca a versão nova no servidor (GitHub) primeiro; o cache só é usado sem internet.
-   Assim, cada vez que você atualiza o git, o app no celular já abre com a versão nova. */
-const CACHE = "meus-controles-v11";
-
-self.addEventListener("install", e => { self.skipWaiting(); });
-self.addEventListener("activate", e => {
-  e.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)));
-    await self.clients.claim();
-  })());
-});
-
+/* Central de Estudos: funciona offline e atualiza sozinho quando há internet */
+const CACHE = "central-estudos-v12";
+const BASE = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png"];
+self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(BASE)).then(() => self.skipWaiting())); });
+self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener("fetch", e => {
-  const req = e.request;
-  if (req.method !== "GET") return;
-  const url = new URL(req.url);
-  // login e banco de dados do Firebase: nunca passam pelo cache
-  if (/googleapis\.com|firebaseio|identitytoolkit|securetoken|firebaseapp\.com/.test(url.hostname)) return;
-  const mesmo = url.origin === self.location.origin;
-  const lib = /gstatic\.com|fonts\.googleapis\.com|fonts\.gstatic\.com/.test(url.hostname);
-  if (!mesmo && !lib) return;
-  e.respondWith((async () => {
-    const cache = await caches.open(CACHE);
-    try {
-      const res = await fetch(req, mesmo ? { cache: "no-cache" } : undefined);
-      if (res && (res.ok || res.type === "opaque")) cache.put(req, res.clone());
-      return res;
-    } catch (err) {
-      const hit = await cache.match(req, { ignoreSearch: true });
-      if (hit) return hit;
-      if (req.mode === "navigate") { const home = await cache.match("index.html"); if (home) return home; }
-      throw err;
-    }
-  })());
+  const r = e.request; if (r.method !== "GET") return;
+  const u = new URL(r.url);
+  const local = u.origin === location.origin;
+  const fonte = /fonts\.(googleapis|gstatic)\.com$/.test(u.hostname) || /gstatic\.com$/.test(u.hostname) && u.pathname.includes("/firebasejs/");
+  if (!local && !fonte) return; // Firebase (login e progresso) vai direto para a rede
+  if (local && (r.mode === "navigate" || u.pathname.endsWith(".html") || u.pathname.endsWith("/"))) {
+    // página: tenta a versão nova; sem internet, usa a guardada
+    e.respondWith(fetch(r).then(res => { const c = res.clone(); caches.open(CACHE).then(k => k.put("./index.html", c)); return res; })
+      .catch(() => caches.match("./index.html")));
+    return;
+  }
+  e.respondWith(caches.match(r).then(hit => {
+    const rede = fetch(r).then(res => { if (res.ok || res.type === "opaque") { const c = res.clone(); caches.open(CACHE).then(k => k.put(r, c)); } return res; }).catch(() => hit);
+    return hit || rede;
+  }));
 });
