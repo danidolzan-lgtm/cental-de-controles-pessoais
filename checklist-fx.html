@@ -138,7 +138,7 @@ function pulos(ds){const o={};(EVT[ds]||[]).forEach(e=>Object.assign(o,e.pula||{
 const pausasTxt=ds=>pausas(ds).map(p=>p.de+"–"+p.ate+" ("+p.n+")").join(" e ");
 const sessTxt=()=>SESS.map(s=>s.nome+" "+JAN[s.id].join("–")).join(" · ");
 const QS=[
-  {id:"hor",k:"Horários e notícias",t:ds=>{const pl=pulos(ds),k=Object.keys(pl);return "Vou operar só nas sessões ("+sessTxt()+"), respeitando a pausa das "+pausasTxt(ds)+(k.length?", vou PULAR "+k.map(x=>SESS.find(s=>s.id===x).nome+" ("+pl[x]+")").join(", "):"")+" e, em dia de Payroll, CPI ou decisão de juros do BCE ou do Banco da Inglaterra, só começo 30 min depois da notícia?"}},
+  {id:"hor",k:"Horários",t:ds=>{const pl=pulos(ds),op=SESS.filter(s=>!pl[s.id]);return op.length?"Hoje vou operar só nas sessões "+op.map(s=>s.nome+" ("+JAN[s.id].join("–")+")").join(", ")+(pausasTxt(ds)?", respeitando a pausa das "+pausasTxt(ds):"")+"?":"Hoje não tem sessão para operar — vou ficar fora do mercado?"}},
   {id:"op",k:"Operacional",t:"Vou entrar só em Respiro, Virada, Muralha, Giro ou Armadilha no M2, com médias 9, 21 e 50 espaçadas, volume da vela de sinal acima da média, stop técnico dentro do limite do par (tabela do Manual), spread normal, o DXY (índice do dólar) não indo forte contra a entrada nos pares com dólar e no ouro, e todos os filtros do manual conferidos?"},
   {id:"ger",k:"Gerenciamento",t:"Lote do meu degrau no Progresso, ordem com stop e alvo de 2x o stop junto, no máximo 2 operações em cada sessão (manhã e tarde), uma aberta por vez (nunca dois pares ao mesmo tempo), e encerro a sessão no 1º loss?"},
   {id:"men",k:"Mentalidade",t:"Estou calmo, sem vontade de recuperar nada, e aceito o stop se ele vier?"}

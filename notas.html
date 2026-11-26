@@ -136,6 +136,29 @@ select.ord{background:var(--surface);padding:8px 10px;font-size:.86rem}
 .undo{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:95;background:#13203B;color:#fff;border-radius:12px;padding:8px 8px 8px 14px;display:flex;gap:12px;align-items:center;font-size:.9rem;box-shadow:0 10px 26px rgba(0,0,0,.3);animation:up .2s ease;max-width:calc(100% - 32px)}
 .undo button{appearance:none;font:inherit;font-weight:700;border:0;border-radius:8px;background:rgba(255,255,255,.14);color:#fff;padding:6px 12px;cursor:pointer}
 mark{background:color-mix(in srgb,#FACC15 55%,transparent);color:inherit;border-radius:3px;padding:0 1px}
+
+/* 26/11/2026: BLOCOS = cartões tipo post-it (grandes, faixa de cor no topo, mais texto);
+   LISTA = linhas corridas numa folha só (uma nota por linha, título + 1 linha de texto, bloco e data à direita) */
+.notes.grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:14px;align-items:stretch}
+.notes.grid .nt{min-height:150px;align-content:start;grid-template-rows:auto 1fr auto;border-radius:6px 6px 16px 6px;padding:16px 14px 10px;border-top:5px solid color-mix(in srgb,var(--accent) 70%,var(--nc))}
+.notes.grid .nt[data-c=am]{border-top-color:#EAB308}.notes.grid .nt[data-c=vd]{border-top-color:#22C55E}.notes.grid .nt[data-c=az]{border-top-color:#3B82F6}.notes.grid .nt[data-c=rx]{border-top-color:#8B5CF6}.notes.grid .nt[data-c=rs]{border-top-color:#EC4899}.notes.grid .nt[data-c=lj]{border-top-color:#F97316}.notes.grid .nt[data-c=cz]{border-top-color:#64748B}
+.notes.grid .nt .tt{font-size:1.06rem;line-height:1.25}
+.notes.grid .nt .pv{-webkit-line-clamp:9;line-height:1.45}
+.notes.grid .nt .ft{border-top:1px dashed color-mix(in srgb,var(--fg) 14%,transparent);padding-top:7px;margin-top:2px}
+.notes.list{display:block;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;gap:0}
+.notes.list .nt{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"hd ft" "pv ft";column-gap:12px;row-gap:1px;align-items:center;border:0;border-bottom:1px solid var(--line);border-radius:0;box-shadow:inset 4px 0 0 color-mix(in srgb,var(--accent) 55%,transparent);padding:10px 12px 10px 16px;min-height:0;background:var(--nc)}
+.notes.list .nt:last-child{border-bottom:0}
+.notes.list .nt:hover{transform:none;background:color-mix(in srgb,var(--accent) 7%,var(--nc))}
+.notes.list .nt[data-c=am]{box-shadow:inset 4px 0 0 #EAB308}.notes.list .nt[data-c=vd]{box-shadow:inset 4px 0 0 #22C55E}.notes.list .nt[data-c=az]{box-shadow:inset 4px 0 0 #3B82F6}.notes.list .nt[data-c=rx]{box-shadow:inset 4px 0 0 #8B5CF6}.notes.list .nt[data-c=rs]{box-shadow:inset 4px 0 0 #EC4899}.notes.list .nt[data-c=lj]{box-shadow:inset 4px 0 0 #F97316}.notes.list .nt[data-c=cz]{box-shadow:inset 4px 0 0 #64748B}
+.notes.list .nt .hd{grid-area:hd;align-items:center}
+.notes.list .nt .tt{font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.notes.list .nt .pv,.notes.list .nt .ck{grid-area:pv}
+.notes.list .nt .pv{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.82rem;opacity:.7}
+.notes.list .nt .ck{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.82rem;opacity:.75}
+.notes.list .nt .ck label{display:inline-flex;margin-right:12px;vertical-align:middle}.notes.list .nt .ck .mais{display:none}
+.notes.list .nt .ft{grid-area:ft;flex-direction:column;align-items:flex-end;gap:3px;white-space:nowrap}
+.notes.list .nt.dragging{transform:none;box-shadow:0 10px 30px -10px rgba(19,32,59,.5)}
+@media (max-width:520px){.notes.list .nt{grid-template-areas:"hd hd" "pv ft"}.notes.list .nt .ft{flex-direction:row}}
 @media (prefers-reduced-motion:reduce){.nt,.bk,.ed,.veil,.dlg,.undo{animation:none!important;transition:none!important}}
 </style>
 
@@ -370,11 +393,11 @@ function abrir(id,novaNota){
     if(b.dataset.rm){n.itens.splice(k,1)}else{const d=+b.dataset.mv,ab=n.itens.filter(x=>!x.ok),p=ab.indexOf(n.itens[k]),q=ab[p+d];if(!q)return;const j=n.itens.indexOf(q);[n.itens[k],n.itens[j]]=[n.itens[j],n.itens[k]]}
     salvar();corpo()});
   $("eCorpo").addEventListener("keydown",e=>{
-    if(e.target.id==="eNovo"&&e.key==="Enter"){e.preventDefault();const t=e.target.value.trim();if(!t)return;e.target.value="";n.itens.push({id:uid(),t,ok:false});salvar();corpo();$("eNovo").focus()}
+    if(e.target.id==="eNovo"&&e.key==="Enter"){e.preventDefault();const t=e.target.value.trim();if(!t)return;e.target.value="";n.itens.push({id:uid(),t:(window.maiuscFrase?maiuscFrase(t):t),ok:false});salvar();corpo();$("eNovo").focus()}
     else if(e.key==="Enter"&&e.target.closest(".li")&&e.target.type==="text"){e.preventDefault();$("eNovo")&&$("eNovo").focus()}
     else if(e.key==="Backspace"&&e.target.closest(".li")&&e.target.type==="text"&&!e.target.value){e.preventDefault();const r=e.target.closest(".li");n.itens=n.itens.filter(i=>i.id!==r.dataset.it);salvar();corpo();$("eNovo")&&$("eNovo").focus()}
   });
-  $("eCorpo").addEventListener("focusout",e=>{if(e.target.id==="eNovo"){const t=e.target.value.trim();if(t){e.target.value="";n.itens.push({id:uid(),t,ok:false});salvar();setTimeout(corpo,0)}}});
+  $("eCorpo").addEventListener("focusout",e=>{if(e.target.id==="eNovo"){const t=e.target.value.trim();if(t){e.target.value="";n.itens.push({id:uid(),t:(window.maiuscFrase?maiuscFrase(t):t),ok:false});salvar();setTimeout(corpo,0)}}});
   $("eTit").oninput=e=>{n.titulo=e.target.value;salvar()};
   $("eBk").onchange=e=>{n.bloco=e.target.value;salvar();window.ui&&ui.toast("✓ Movida para "+bloco(n.bloco).nome)};
   $("ePin").onclick=()=>{n.fixa=!n.fixa;$("ePin").classList.toggle("on",n.fixa);salvar();window.ui&&ui.toast(n.fixa?"📌 Fixada no topo":"Desafixada")};
@@ -464,20 +487,27 @@ lsLoad();garantirGeral();render();st("Conectando…");
     lsSave();if(!edId&&!D)render();st("Sincronizado")},()=>st("Sem conexão com o salvamento"));
 })();
 
-/* 23/11/2026: letra maiúscula automática no começo de cada frase (título, texto e itens de lista) */
+/* 26/11/2026: letra maiúscula automática no começo de cada frase — PC e celular (título, texto, itens de lista e blocos).
+   No celular o teclado (Gboard/Samsung) escreve "compondo" a palavra; por isso a correção roda também no fim da composição e ao sair do campo. */
 (function(){
-  const campo=t=>t&&(t.tagName==="TEXTAREA"||(t.tagName==="INPUT"&&(t.type==="text"||t.type==="")))&&t.id!=="q";
-  document.addEventListener("focusin",e=>{const t=e.target;if(campo(t))t.setAttribute("autocapitalize","sentences")},true);
-  document.addEventListener("input",e=>{
-    const t=e.target;if(!campo(t)||e.isComposing)return;
-    if(e.inputType&&e.inputType!=="insertText")return;
-    const p=t.selectionStart;if(p==null||p<1||p!==t.selectionEnd)return;
-    const v=t.value,c=v.charAt(p-1),C=c.toLocaleUpperCase("pt-BR");
-    if(C===c||c.toLocaleLowerCase("pt-BR")!==c)return; // não é letra minúscula
-    const antes=v.slice(0,p-1);
-    if(!/(^|[.!?…]\s+|\n)\s*([-*•]\s+|\d+[.)]\s+)?$/.test(antes))return;
-    t.value=antes+C+v.slice(p);t.setSelectionRange(p,p);
-  },true);
+  const campo=t=>t&&(t.tagName==="TEXTAREA"||(t.tagName==="INPUT"&&(t.type==="text"||t.type===""||t.type==="search")))&&t.id!=="q";
+  const RX=/(^|[.!?…]\s+|\n\s*)((?:[-*•]\s+|\d+[.)]\s+|\[[xX ]\]\s*)?)(\p{Ll})/gu;
+  const maiusc=v=>String(v||"").replace(RX,(m,a,b,c)=>a+b+c.toLocaleUpperCase("pt-BR"));
+  function corrige(t){
+    if(!campo(t))return;const v=t.value,nv=maiusc(v);if(nv===v||nv.length!==v.length)return;
+    const a=t.selectionStart,b=t.selectionEnd;t.value=nv;try{t.setSelectionRange(a,b)}catch(e){}
+    t.dispatchEvent(new Event("input",{bubbles:true}));
+  }
+  const marca=r=>(r.querySelectorAll?r.querySelectorAll("textarea,input[type=text],input:not([type])"):[]).forEach(t=>{if(t.id!=="q"){t.setAttribute("autocapitalize","sentences");t.setAttribute("autocorrect","on");t.spellcheck=true}});
+  marca(document);new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(n=>n.nodeType===1&&(campo(n)?marca(n.parentNode||n):marca(n))))).observe(document.body,{childList:true,subtree:true});
+  document.addEventListener("focusin",e=>{if(campo(e.target))e.target.setAttribute("autocapitalize","sentences")},true);
+  let comp=false;
+  document.addEventListener("compositionstart",()=>{comp=true},true);
+  document.addEventListener("compositionend",e=>{comp=false;setTimeout(()=>corrige(e.target),0)},true);
+  document.addEventListener("input",e=>{if(e.isComposing||comp||e.isTrusted===false)return;corrige(e.target)},true);
+  document.addEventListener("focusout",e=>{comp=false;corrige(e.target)},true);
+  document.addEventListener("keyup",e=>{if(e.key===" "||e.key==="Enter"||e.key==="Unidentified"||e.keyCode===229)setTimeout(()=>{if(!comp)corrige(e.target)},0)},true);
+  window.maiuscFrase=maiusc;
 })();
 </script>
 </body></html>

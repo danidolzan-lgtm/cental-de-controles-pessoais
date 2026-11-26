@@ -151,15 +151,29 @@ select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
       </ul>
     </div>
     <div class="box">
-      <h3>Quando começa uma nova tendência</h3>
-      <p><b>A dúvida:</b> depois de um recuo, a tendência ainda é a mesma ou já começou outra? Isso decide se a contagem continua ou recomeça do zero.</p>
-      <p><b>A regra (em teste):</b> a contagem só zera quando acontecem as duas coisas juntas:</p>
+      <h3>Tendência: quando começa, quando continua e quando recomeça</h3>
+      <p>É o que decide a <b>contagem dos recuos</b>. A contagem é usada no filtro do Respiro: no 3º recuo seguido da mesma tendência, não entra. <b>Recuo</b> é cada vez que o preço volta até a zona entre a 9 e a 21.</p>
+      <p><b>Começa:</b> a tendência existe quando as três médias estão alinhadas e com espaço entre elas.</p>
+      <ul>
+        <li><b>Alta:</b> 9 acima da 21, 21 acima da 50, e a 50 subindo.</li>
+        <li><b>Baixa:</b> 9 abaixo da 21, 21 abaixo da 50, e a 50 caindo.</li>
+        <li>Se as médias estão emboladas, não é tendência, é lateral (primeira regra acima). Nenhum setup até elas se alinharem.</li>
+      </ul>
+      <p><b>Continua (mesmo recuo):</b> o preço volta à zona 9–21 e retoma. Mesmo que a 9 cruze a 21, se <b>nenhuma vela fechar além da 21</b> do lado contrário, é a mesma tendência. A contagem segue (1º, 2º, 3º recuo…).</p>
+      <p><b>Recomeça (contagem zera):</b> precisa das duas coisas juntas:</p>
       <ol>
         <li>a 9 cruza a 21 contra a tendência, e</li>
-        <li>enquanto a 9 cruza a 21, pelo menos uma vela fecha além da 21, do lado contrário à tendência.</li>
+        <li>enquanto ela cruza, pelo menos uma vela fecha além da 21, do lado contrário.</li>
       </ol>
-      <p>Isso mostra que o recuo foi mais fundo que a zona normal entre a 9 e a 21, ou seja, começou outra tendência.</p>
-      <p>Se a 9 cruzou a 21 mas nenhuma vela fechou além da 21, é o <b>mesmo recuo</b>: a contagem continua.</p>
+      <p>O recuo foi mais fundo que a zona normal, então a tendência anterior acabou. Quando as médias se alinharem de novo, é uma <b>tendência nova</b>: no mesmo sentido de antes ou no sentido contrário (virou). O próximo recuo é o <b>1º</b>.</p>
+      <p><b>Acaba sem recomeçar:</b> se o preço fura a 50 ou as médias embolam, a tendência terminou. Fica fora até as médias se alinharem de novo, e aí a contagem começa do 1.</p>
+      <h3 style="margin-top:6px">Exemplos</h3>
+      <ul>
+        <li><b>Mesmo recuo:</b> alta, o preço desce até a 21 e a 9 chega a cruzar a 21 por 2 velas, mas todas fecham acima da 21. É o 1º recuo dessa alta. O próximo será o 2º.</li>
+        <li><b>Recomeço no mesmo sentido:</b> alta já no 3º recuo (Respiro bloqueado). A 9 cruza a 21 para baixo e uma vela fecha abaixo da 21: a contagem zera. Depois a 9 volta acima da 21 com as médias alinhadas para cima: alta nova. O próximo recuo é o 1º e o Respiro volta a valer.</li>
+        <li><b>Virou:</b> alta, a 9 cruza a 21 para baixo com vela fechando abaixo da 21, e depois a 21 também cruza a 50 para baixo com a 50 virando para baixo. Começou uma baixa. Os recuos agora são subidas até a zona 9–21, contando do 1º.</li>
+        <li><b>Na baixa é o espelho:</b> o recuo é a subida até a 21. Se a 9 cruza a 21 para cima mas nenhuma vela fecha acima da 21, é o mesmo recuo. Se uma vela fecha acima da 21 no cruzamento, a contagem zera.</li>
+      </ul>
     </div>
   </section>
 

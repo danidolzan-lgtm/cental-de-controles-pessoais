@@ -662,7 +662,7 @@
   try { fs.enablePersistence({ synchronizeTabs: true }).catch(function () {}); } catch (e) {}
 
   var lastErr = "";
-  auth.getRedirectResult().catch(function (e) { lastErr = explain(e); if (bar && bar._err) bar._err.textContent = lastErr; });
+  auth.getRedirectResult().catch(function (e) { lastErr = explain(e); if (bar && bar._err) bar._err.textContent = lastErr; var le = lgV && lgV.querySelector('.lg-erro'); if (le) le.textContent = lastErr; });
 
   function adapter(uid) {
     var base = "users/" + uid + "/apps/" + APP + "/";
@@ -671,20 +671,41 @@
       app: function (name) { var b2 = "users/" + uid + "/apps/" + name + "/"; return { doc: function (p) { return fs.doc(b2 + p); }, collection: function (p) { return fs.collection(b2 + p); } }; } };
   }
 
+  /* 26/11/2026: tela de login no mesmo modelo da Central de Estudos (tela cheia, cartão no meio, botão "Entrar com Google") */
+  var lgV = null;
+  function lgCss() {
+    if (document.getElementById("lgCss")) return;
+    var st = document.createElement("style"); st.id = "lgCss";
+    st.textContent =
+      ".cc-login{--lbg:#f2f5fa;--lsf:#fff;--lln:#dbe2ee;--lfg:#101c33;--lmu:#5b6a83;--lnv:#1d4ed8;position:fixed;inset:0;z-index:99999;background:var(--lbg);color:var(--lfg);display:grid;place-items:center;padding:16px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));overflow:auto;font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif}" +
+      "@media (prefers-color-scheme:dark){.cc-login{--lbg:#0a1220;--lsf:#111b2e;--lln:#26344d;--lfg:#e8eefa;--lmu:#9caccb;--lnv:#9cc3f7}}" +
+      ":root[data-theme=dark] .cc-login{--lbg:#0a1220;--lsf:#111b2e;--lln:#26344d;--lfg:#e8eefa;--lmu:#9caccb;--lnv:#9cc3f7}:root[data-theme=light] .cc-login{--lbg:#f2f5fa;--lsf:#fff;--lln:#dbe2ee;--lfg:#101c33;--lmu:#5b6a83;--lnv:#1d4ed8}" +
+      ".cc-login .lg-card{width:min(400px,100%);box-sizing:border-box;background:var(--lsf);border:1px solid var(--lln);border-radius:18px;padding:32px 24px;display:grid;gap:16px;justify-items:center;text-align:center;box-shadow:0 12px 40px rgba(10,25,50,.12)}" +
+      ".cc-login img{width:56px;height:56px;border-radius:14px}" +
+      ".cc-login h1{font-family:'Space Grotesk',system-ui,sans-serif;color:var(--lnv);font-size:1.5rem;margin:0;line-height:1.2}" +
+      ".cc-login p{margin:0;color:var(--lmu);font-size:.92rem}" +
+      ".cc-login .gbtn{display:flex;gap:10px;align-items:center;justify-content:center;width:100%;box-sizing:border-box;border:1px solid var(--lln);background:var(--lsf);color:var(--lfg);border-radius:10px;padding:12px 16px;font:600 .95rem inherit;font-family:inherit;cursor:pointer}" +
+      ".cc-login .gbtn:hover{border-color:var(--lnv)}" +
+      ".cc-login details{width:100%;text-align:left;font-size:.88rem;color:var(--lmu)}.cc-login summary{cursor:pointer;text-align:center;list-style:none}.cc-login summary::-webkit-details-marker{display:none}" +
+      ".cc-login form{display:grid;gap:8px;margin-top:10px}.cc-login input{font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid var(--lln);background:transparent;color:var(--lfg);min-width:0}" +
+      ".cc-login .lg-row{display:flex;gap:8px}.cc-login .lg-row button{flex:1;font:600 .9rem inherit;font-family:inherit;padding:10px;border-radius:10px;cursor:pointer;border:1px solid var(--lln);background:transparent;color:var(--lfg)}.cc-login .lg-row button[type=submit]{background:var(--lnv);border-color:var(--lnv);color:var(--lsf)}" +
+      ".cc-login .lg-erro{color:#E11D48;font-size:.85rem;margin:0}.cc-login .lg-erro:empty{display:none}";
+    (document.head || document.documentElement).appendChild(st);
+  }
+  var GSVG = '<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.5 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 2.9-2.2 5.4-4.7 7.1l7.6 5.9c4.4-4.1 6.9-10.1 6.9-17.5z"/><path fill="#FBBC05" d="M10.6 28.6A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.1.8-4.6l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.7l8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.2 0-11.5-4-13.4-9.9l-8 6.1C6.6 42.6 14.6 48 24 48z"/></svg>';
   function showLogin() {
-    var b = ensureBar(); b.innerHTML = ""; b.hidden = false;
-    var t = document.createElement("div"); t.textContent = "Entre para sincronizar seus dados entre celular e PC."; b.appendChild(t);
-    var g = document.createElement("button"); g.type = "button"; g.textContent = "Entrar com Google";
-    g.style.cssText = css + "border:0;background:#2563EB;color:#fff;justify-self:start";
-    b.appendChild(g);
-    var det = document.createElement("details");
-    det.innerHTML = "<summary style='cursor:pointer'>Entrar com e-mail e senha</summary>";
-    var f = document.createElement("form"); f.style.cssText = "display:grid;gap:8px;margin-top:8px";
-    f.innerHTML = "<input type='email' autocomplete='email' placeholder='E-mail' required style='font:inherit;padding:9px 10px;border-radius:7px;border:1px solid rgba(127,140,136,.6);background:transparent;color:inherit;min-width:0'>" +
-      "<input type='password' autocomplete='current-password' placeholder='Senha (mín. 6)' required minlength='6' style='font:inherit;padding:9px 10px;border-radius:7px;border:1px solid rgba(127,140,136,.6);background:transparent;color:inherit;min-width:0'>" +
-      "<div style='display:flex;gap:8px;flex-wrap:wrap'><button type='submit' style='" + css + "border:0;background:#2563EB;color:#fff'>Entrar</button><button type='button' data-new style='" + css + "border:1px solid rgba(127,140,136,.6);background:transparent;color:inherit'>Criar conta</button></div>";
-    det.appendChild(f); b.appendChild(det);
-    var err = errBox(b); b._err = err; err.textContent = lastErr;
+    lgCss(); if (bar) bar.hidden = true;
+    if (lgV) lgV.remove();
+    lgV = document.createElement("div"); lgV.className = "cc-login"; lgV.setAttribute("role", "dialog"); lgV.setAttribute("aria-label", "Entrar");
+    lgV.innerHTML = "<div class='lg-card'><img src='icon-192.png?v=2' alt=''><h1>Central de Controles Pessoais</h1><p>Entre para sincronizar seus dados entre celular e PC.</p>" +
+      "<button type='button' class='gbtn' data-g>" + GSVG + "Entrar com Google</button>" +
+      "<details><summary>Entrar com e-mail e senha</summary><form><input type='email' autocomplete='email' placeholder='E-mail' required>" +
+      "<input type='password' autocomplete='current-password' placeholder='Senha (mín. 6)' required minlength='6'>" +
+      "<div class='lg-row'><button type='button' data-new>Criar conta</button><button type='submit'>Entrar</button></div></form></details>" +
+      "<p class='lg-erro' role='alert'></p></div>";
+    document.body.appendChild(lgV); document.documentElement.style.overflow = "hidden";
+    var err = lgV.querySelector(".lg-erro"), f = lgV.querySelector("form"), g = lgV.querySelector("[data-g]");
+    err.textContent = lastErr;
     g.onclick = function () {
       err.textContent = "";
       var prov = new firebase.auth.GoogleAuthProvider();
@@ -736,6 +757,7 @@
   }
   function showUser(u) {
     if (bar) bar.hidden = true;
+    if (lgV) { lgV.remove(); lgV = null; document.documentElement.style.overflow = ""; }
     window.__siteBackup = function (btn) { return backup(u.uid, btn); };
     var sair = function () { auth.signOut().then(function () { location.reload(); }); };
     if (window.__siteAcct) window.__siteAcct(u, sair); else window.__siteAcctPend = [u, sair];
