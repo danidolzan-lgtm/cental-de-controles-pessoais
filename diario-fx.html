@@ -306,7 +306,7 @@ function drawModal(){
   if(ro)h+="<div class='lock'>Dia encerrado. Só visualização.</div>";
   h+="<div class='seg'><button type='button' data-a='status' data-v='op' class='"+(draft.status==="op"?"on":"")+"'>Operei</button><button type='button' data-a='status' data-v='nao' class='"+(draft.status==="nao"?"on":"")+"'>Não operei</button></div>";
   if(draft.status==="op"){
-    h+="<div class='stabs'>"+SESS.map(x=>{const o=sOps(draft,x.id),n=o.reduce((a,b)=>a+opVal(b),0);return "<button type='button' data-a='sess' data-v='"+x.id+"' class='"+(cs===x.id?"on":"")+"'>"+x.nome+"<small>"+x.h+(o.length?" · "+n2(n):"")+"</small></button>"}).join("")+"</div>";
+    h+="<div class='stabs'>"+SESS.map(x=>{const o=sOps(draft,x.id),n=o.reduce((a,b)=>a+opVal(b),0);const pb=pulDe(draft.date,x.id)&&!o.length;return "<button type='button' data-a='sess' data-v='"+x.id+"' class='"+(cs===x.id?"on":"")+"'"+(pb?" style='opacity:.55'":"")+">"+(pb?"🔒 ":"")+x.nome+"<small>"+x.h+(o.length?" · "+n2(n):"")+"</small></button>"}).join("")+"</div>";
     draft.ops.forEach((o,i)=>{
       if(sessOf(o)!==cs)return;
       const k=curOps().indexOf(o);
@@ -326,9 +326,16 @@ function drawModal(){
   h+="<div class='err' id='mErr'></div><div class='actions'>"+(ro?"<button type='button' class='btn' data-a='close'>Fechar</button>":"<button type='button' class='btn' data-a='close'>Fechar sem salvar</button><button type='button' class='btn primary' data-a='save'>Salvar</button>")+"</div>";
   m.innerHTML=h;
 }
+/* 27/11/2026: sessões bloqueadas no check-list (notícia, feriado, sexta, OTC seg–qui) ficam bloqueadas aqui também para registro.
+   Lê a mesma agenda do checklist-fx.html para não precisar manter duas listas. */
+let PUL=()=>({});
+fetch("checklist-fx.html",{cache:"no-cache"}).then(r=>r.text()).then(t=>{const e=t.match(/const EVT=\{[\s\S]*?\n\};/),p=t.match(/function pulos\(ds\)\{[^\n]*\}/);if(e&&p){PUL=new Function(e[0]+"\n"+p[0]+"\nreturn pulos;")();if(draft&&!$("ov").hidden)drawModal()}}).catch(()=>{});
+const pulDe=(ds,id)=>{try{return PUL(ds)[id]||""}catch(e){return ""}};
+const lockPul=m=>"<div class='lock'>🔒 Sessão bloqueada hoje para operar ("+m+"). Não tem registro neste horário.</div>";
 let lastNx="";
 function nextHTML(){
   const so=curOps(), o1=so[0], o2=so[1], nm=cs==="manha"?"manhã":"tarde";
+  const PB=pulDe(draft.date,cs);if(PB&&!so.length)return lockPul(PB);
   if(!so.length) return "<div class='seg'><button type='button' data-a='add'>Registrar 1ª operação da "+nm+"</button></div>";
   if(o2) return "<div class='lock'>Limite de 2 operações da "+nm+" atingido. Sessão encerrada.</div>";
   if(o1.resultado==null) return "";

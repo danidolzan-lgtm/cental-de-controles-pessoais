@@ -338,13 +338,21 @@ function nextHTML(){
   const isSoros=lastOp&&I.k[I.ops.length-1]==="base"&&lastOp.res==="win";
   return "<div class='seg big2'><button type='button' data-a='add'>+ "+(I.ops.length?"2ª entrada · Soros":"1ª entrada · mão base")+"</button>"+(I.ops.length?"<button type='button' data-a='parei'>Parei no 1º win</button>":"")+"</div>";
 }
+/* 27/11/2026: sessões bloqueadas no check-list (notícia, feriado, sexta, OTC seg–qui) ficam bloqueadas aqui também para registro.
+   Lê a mesma agenda do checklist-ob.html para não precisar manter duas listas. */
+let PUL=()=>({});
+fetch("checklist-ob.html",{cache:"no-cache"}).then(r=>r.text()).then(t=>{const e=t.match(/const EVT=\{[\s\S]*?\n\};/),p=t.match(/function pulos\(ds\)\{[^\n]*\}/);if(e&&p){PUL=new Function(e[0]+"\n"+p[0]+"\nreturn pulos;")();if(draft&&!$("ov").hidden)drawModal()}}).catch(()=>{});
+const pulDe=(ds,id)=>{try{return PUL(ds)[id]||""}catch(e){return ""}};
+const lockPul=m=>"<div class='lock'>🔒 Sessão bloqueada hoje para operar ("+m+"). Não tem registro neste horário.</div>";
 let lastNx="";
 function drawModal(){
   const m=$("modal");m.className="modal"+(ro?" ro":"");
   const net=dayNet(draft), dt=new Date(draft.date+"T12:00:00"), J=janelas(draft.date), s=draft[cs], I=sessInfo(s);
   let h="<div class='mhead'><h2 id='mTitle'>"+dt.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit"})+"</h2><span id='mNet' class='num "+(net>0?"pos":net<0?"neg":"")+"'>"+n2(net)+"</span></div>";
   if(ro)h+="<div class='lock'>Dia encerrado. Só visualização.</div>";
-  h+="<div class='stabs'>"+SESS.map(x=>{const n=sessInfo(draft[x.id]).net,c=(draft[x.id].ops||[]).length;return "<button type='button' data-a='sess' data-v='"+x.id+"' class='"+(cs===x.id?"on":"")+"'>"+x.nome+"<small>"+J[x.id]+(c?" · "+n2(n):"")+"</small></button>"}).join("")+"</div>";
+  h+="<div class='stabs'>"+SESS.map(x=>{const n=sessInfo(draft[x.id]).net,c=(draft[x.id].ops||[]).length;const pb=pulDe(draft.date,x.id)&&!c;return "<button type='button' data-a='sess' data-v='"+x.id+"' class='"+(cs===x.id?"on":"")+"'"+(pb?" style='opacity:.55'":"")+">"+(pb?"🔒 ":"")+x.nome+"<small>"+J[x.id]+(c?" · "+n2(n):"")+"</small></button>"}).join("")+"</div>";
+  const PB=pulDe(draft.date,cs);
+  if(PB&&!(s.ops||[]).length){h+=lockPul(PB);s.status=""}else{
   h+="<div class='seg'><button type='button' data-a='status' data-v='op' class='"+(s.status==="op"?"on":"")+"'>Operei</button><button type='button' data-a='status' data-v='nao' class='"+(s.status==="nao"?"on":"")+"'>Não operei</button></div>";
   if(s.status==="op"&&I.ops.length)h+="<div class='sinfo'><span>Entradas <b>"+I.ops.length+"/2</b></span><span>Sessão <b class='"+(I.net>0?"pos":I.net<0?"neg":"")+"' id='sNet'>"+n2(I.net)+"</b></span></div>";
   if(s.status==="op"){
@@ -360,6 +368,7 @@ function drawModal(){
     });
     lastNx=nextHTML();h+="<div id='nx' style='display:grid;gap:8px'>"+lastNx+"</div>";
     if(I.ops.length&&!ro)h+="<div class='seg'><button type='button' data-a='rm'>Apagar a última entrada</button></div>";
+  }
   }
   h+="<div class='err' id='mErr'></div><div class='actions'>"+(ro?"<button type='button' class='btn' data-a='close'>Fechar</button>":"<button type='button' class='btn' data-a='close'>Fechar sem salvar</button><button type='button' class='btn primary' data-a='save'>Salvar</button>")+"</div>";
   m.innerHTML=h;
